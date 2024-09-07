@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+"""
+Module 6-bars
+
+This module contains a function to plot a stacked bar graph showing the number
+of different types of fruits various people possess.
+The bars are stacked, representing apples, bananas, oranges, and peaches.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 
