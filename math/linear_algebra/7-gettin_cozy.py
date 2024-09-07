@@ -23,7 +23,6 @@ def cat_matrices2D(mat1, mat2, axis=0):
         if len(mat1[0]) != len(mat2[0]):
             return None
         return [row[:] for row in mat1] + [row[:] for row in mat2]
-    
     elif axis == 1:
         # Check if the number of rows match
         if len(mat1) != len(mat2):
