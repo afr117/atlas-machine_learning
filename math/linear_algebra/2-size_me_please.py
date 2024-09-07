@@ -5,10 +5,12 @@ This module contains a function that calculates
 the shape of a matrix.
 """
 
+
 def matrix_shape(matrix):
+
     """
     Calculates the shape of a matrix.
-    
+
     Args:
         matrix: A list of lists representing the matrix.
 
