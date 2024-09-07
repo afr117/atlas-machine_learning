@@ -9,6 +9,7 @@ The x-axis represents grades, and the y-axis represents the number of students.
 import numpy as np
 import matplotlib.pyplot as plt
 
+
 def frequency():
     """Plots a histogram of student grades for Project A."""
     np.random.seed(5)
