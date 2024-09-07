@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
 Module 13-cats_got_your_tongue
-This module contains a function that concatenates two NumPy arrays along a specific axis.
+This module contains a function that concatenates two NumPy arrays
+along a specific axis.
 """
 
-
 import numpy as np
-
 
 def np_cat(mat1, mat2, axis=0):
     """
