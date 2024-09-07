@@ -4,6 +4,7 @@ This module contains the function `summation_i_squared`
 which calculates the sum of squares of integers from 1 to n.
 """
 
+
 def summation_i_squared(n):
     """
     Calculates the sum of squares of integers from 1 to n.
