@@ -1,7 +1,13 @@
 #!/usr/bin/env python3
+"""
+Module 0-line
+
+This module contains a function to plot y = x^3 as a solid red line
+with the x-axis ranging from 0 to 10.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
-
 
 def line():
     """Plots y = x^3 as a solid red line from x = 0 to 10."""
