@@ -3,7 +3,7 @@
 Module 1-scatter
 
 This module contains a function to plot a scatter plot of men's height
-vs weight. The x-axis represents height (in inches), and the y-axis 
+vs weight. The x-axis represents height (in inches), and the y-axis
 represents weight (lbs).
 """
 
