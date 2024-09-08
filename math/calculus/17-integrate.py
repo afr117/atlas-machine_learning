@@ -22,10 +22,15 @@ def poly_integral(poly, C=0):
         >>> poly_integral([5, 3, 0, 1])
         [0, 5, 1.5, 0, 0.25]
     """
+    # Validate input
     if not isinstance(poly, list) or not all(isinstance(coef, (int, float)) for coef in poly):
         return None
     if not isinstance(C, int):
         return None
+
+    # If poly is an empty list or [0], return just the constant C
+    if len(poly) == 0 or poly == [0]:
+        return [C]
 
     # Start with the constant of integration C
     integral = [C]
