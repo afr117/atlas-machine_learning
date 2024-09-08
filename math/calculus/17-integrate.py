@@ -22,9 +22,10 @@ def poly_integral(poly, C=0):
         >>> poly_integral([5, 3, 0, 1])
         [0, 5, 1.5, 0, 0.25]
     """
-    # Validate input
+    # Validate input for poly (must be a list of integers or floats)
     if not isinstance(poly, list) or not all(isinstance(coef, (int, float)) for coef in poly):
         return None
+    # Validate that C is an integer
     if not isinstance(C, int):
         return None
 
