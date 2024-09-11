@@ -27,9 +27,17 @@ class Binomial:
                 raise TypeError("data must be a list")
             if len(data) < 2:
                 raise ValueError("data must contain multiple values")
+
+            # Calculate p as the average of the data
             self.p = sum(data) / len(data)
+
+            # Calculate the variance from the data
             variance = sum([(x - self.p) ** 2 for x in data]) / len(data)
-            self.n = round(self.p / variance)
+
+            # Estimate n using variance formula
+            self.n = round(self.p * (1 - self.p) / variance)
+
+            # Recalculate p using the estimated n
             self.p = sum(data) / (self.n * len(data))
 
     def factorial(self, num):
