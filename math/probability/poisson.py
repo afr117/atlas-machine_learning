@@ -3,6 +3,7 @@
 Poisson Distribution class
 """
 
+
 class Poisson:
     """Represents a Poisson distribution"""
 
