@@ -40,6 +40,6 @@ class Poisson:
         factorial = 1
         for i in range(1, k + 1):
             factorial *= i
-        
+
         pmf_value = (self.lambtha ** k) * (e ** -self.lambtha) / factorial
         return pmf_value
