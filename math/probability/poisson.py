@@ -59,5 +59,5 @@ class Poisson:
         cdf_value = 0
         for i in range(k + 1):
             cdf_value += self.pmf(i)
-        
+
         return cdf_value
