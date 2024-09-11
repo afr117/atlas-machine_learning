@@ -50,7 +50,10 @@ class Normal:
         Approximate the error function for a given z.
         """
         pi = 3.1415926536
-        term = (2 / (pi ** 0.5)) * (z - (z ** 3) / 3 + (z ** 5) / 10 - (z ** 7) / 42 + (z ** 9) / 216)
+        term1 = z - (z ** 3) / 3
+        term2 = (z ** 5) / 10 - (z ** 7) / 42
+        term3 = (z ** 9) / 216
+        term = (2 / (pi ** 0.5)) * (term1 + term2 + term3)
         return term
 
     def cdf(self, x):
