@@ -8,8 +8,16 @@ This module defines a single neuron performing binary classification.
 It includes methods for forward propagation and cost calculation.
 """
 
-
 class Neuron:
+    """
+    Defines a single neuron for binary classification.
+
+    Attributes:
+    __W (numpy.ndarray): Weights of the neuron.
+    __b (float): Bias of the neuron.
+    __A (numpy.ndarray): Activated output of the neuron.
+    """
+
     def __init__(self, nx):
         """
         Initializes the Neuron class.
