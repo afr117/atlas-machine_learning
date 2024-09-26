@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 import numpy as np
 
+"""
+3-neuron.py
+
+This module defines a single neuron performing binary classification.
+It includes methods for forward propagation and cost calculation.
+"""
 
 class Neuron:
     def __init__(self, nx):
