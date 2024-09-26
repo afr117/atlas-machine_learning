@@ -5,28 +5,30 @@ import numpy as np
 
 class Neuron:
     def __init__(self, nx):
-        """Initialize the neuron with weights, bias, and activation."""
-        if not isinstance(nx, int) or nx <= 0:
+        if not isinstance(nx, int):
+            raise TypeError("nx must be an integer")
+        if nx < 1:
             raise ValueError("nx must be a positive integer")
-        self.W = np.random.randn(1, nx)  # weights initialization
-        self.b = 0  # bias initialization
-        self.A = 0  # activation initialization
+
+        self.__W = np.random.randn(1, nx)
+        self.__b = 0
+        self.__A = 0
 
     def forward_prop(self, X):
-        """Calculate the forward propagation of the neuron."""
-        Z = np.dot(self.W, X) + self.b
-        self.A = 1 / (1 + np.exp(-Z))  # Sigmoid activation
-        return self.A, Z
+        Z = np.dot(self.__W, X) + self.__b
+        self.__A = 1 / (1 + np.exp(-Z))
+        return self.__A
 
     def cost(self, Y, A):
-        """Calculate the cost using binary cross-entropy."""
-        m = Y.shape[1]  # number of examples
+        m = Y.shape[1]
+        # Add a small epsilon to avoid log(0)
+        epsilon = 1e-15
+        A = np.clip(A, epsilon, 1 - epsilon)
         cost = - (1 / m) * np.sum(Y * np.log(A) + (1 - Y) * np.log(1 - A))
         return cost
 
     def evaluate(self, X, Y):
-        """Evaluate the neuron’s predictions and cost."""
-        A, _ = self.forward_prop(X)  # Get activation output
-        cost = self.cost(Y, A)  # Calculate cost
-        predictions = (A >= 0.5).astype(int)  # Convert probabilities to binary predictions
+        self.forward_prop(X)
+        cost = self.cost(Y, self.__A)
+        predictions = np.where(self.__A >= 0.5, 1, 0)
         return predictions, cost
