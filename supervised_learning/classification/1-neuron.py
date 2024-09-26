@@ -31,10 +31,10 @@ class Neuron:
             raise ValueError("nx must be a positive integer")
 
         # Initialize weights, bias, and activation output
-        self.__W = np.random.randn(1, nx)  
+        self.__W = np.random.randn(1, nx)
         # Weights initialized random values from normal distribution
-        self.__b = 0                       # Bias initialized to zero
-        self.__A = 0                       # Activation output initialized to zero
+        self.__b = 0 # Bias initialized to zero
+        self.__A = 0 # Activation output initialized to zero
 
     @property
     def W(self):
