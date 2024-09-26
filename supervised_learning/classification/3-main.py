@@ -28,8 +28,13 @@ neuron = Neuron(X.shape[0])
 # Perform forward propagation
 A = neuron.forward_prop(X)
 
+# Print intermediate values for debugging
+print("A (activated output):")
+print(A)
+
 # Calculate the cost
 cost = neuron.cost(Y, A)
 
 # Print the cost
+print("Cost:")
 print(cost)
