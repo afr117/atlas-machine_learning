@@ -15,7 +15,7 @@ class Neuron:
     def __init__(self, nx):
         """
         Initialize a neuron.
-
+        
         Args:
             nx (int): The number of input features to the neuron.
 
@@ -27,7 +27,7 @@ class Neuron:
             raise TypeError("nx must be an integer")
         if nx < 1:
             raise ValueError("nx must be a positive integer")
-
+        
         # Weights and bias initialization
         self.W = np.random.randn(1, nx)
         self.b = 0
@@ -36,10 +36,10 @@ class Neuron:
     def sigmoid(self, z):
         """
         Compute the sigmoid activation function.
-
+        
         Args:
             z (numpy.ndarray): The input data to the sigmoid function.
-
+        
         Returns:
             numpy.ndarray: The sigmoid activation.
         """
@@ -48,10 +48,10 @@ class Neuron:
     def forward_prop(self, X):
         """
         Perform forward propagation of the neuron.
-
+        
         Args:
             X (numpy.ndarray): Input data with shape (nx, m).
-
+        
         Returns:
             numpy.ndarray: The activated output of the neuron.
         """
@@ -62,11 +62,11 @@ class Neuron:
     def cost(self, Y, A):
         """
         Calculate the cost using binary cross-entropy.
-
+        
         Args:
             Y (numpy.ndarray): Correct labels with shape (1, m).
             A (numpy.ndarray): Activated output with shape (1, m).
-
+        
         Returns:
             float: The cost of the model.
         """
@@ -79,7 +79,7 @@ class Neuron:
     def evaluate(self, X, Y):
         """
         Evaluate the neuron’s predictions.
-
+        
         Args:
             X (numpy.ndarray): Input data with shape (nx, m).
             Y (numpy.ndarray): Correct labels with shape (1, m).
