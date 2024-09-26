@@ -9,6 +9,9 @@ class Neuron:
 
         Parameters:
         nx (int): The number of input features.
+
+        Raises:
+        ValueError: If nx is not a positive integer.
         """
         if not isinstance(nx, int) or nx < 1:
             raise ValueError("nx must be a positive integer")
@@ -19,22 +22,42 @@ class Neuron:
 
     @property
     def W(self):
-        """ Getter for the weights """
+        """
+        Getter for the weights.
+
+        Returns:
+        numpy.ndarray: The weights of the neuron.
+        """
         return self.__W
 
     @property
     def b(self):
-        """ Getter for the bias """
+        """
+        Getter for the bias.
+
+        Returns:
+        float: The bias of the neuron.
+        """
         return self.__b
 
     @b.setter
     def b(self, value):
-        """ Setter for the bias """
+        """
+        Setter for the bias.
+
+        Parameters:
+        value (float): The new value for the bias.
+        """
         self.__b = value
 
     @property
     def A(self):
-        """ Getter for the activated output """
+        """
+        Getter for the activated output.
+
+        Returns:
+        numpy.ndarray: The activated output of the neuron.
+        """
         return self.__A
 
     def forward_prop(self, X):
