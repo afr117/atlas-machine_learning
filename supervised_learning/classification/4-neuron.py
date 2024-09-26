@@ -13,25 +13,25 @@ class Neuron:
     """
 
     def __init__(self, nx):
-    """
-    Initialize a neuron.
-    
-    Args:
-        nx (int): The number of input features to the neuron.
+        """
+        Initialize a neuron.
+        
+        Args:
+            nx (int): The number of input features to the neuron.
 
-    Raises:
-        TypeError: If nx is not an integer.
-        ValueError: If nx is less than 1.
-    """
-    if not isinstance(nx, int):
-        raise TypeError("nx must be an integer")
-    if nx < 1:
-        raise ValueError("nx must be a positive integer")
-    
-    np.random.seed(0)  # Add seed here for consistency
-    self.W = np.random.randn(1, nx)
-    self.b = 0
-    self.A = 0
+        Raises:
+            TypeError: If nx is not an integer.
+            ValueError: If nx is less than 1.
+        """
+        if not isinstance(nx, int):
+            raise TypeError("nx must be an integer")
+        if nx < 1:
+            raise ValueError("nx must be a positive integer")
+        
+        np.random.seed(0)  # Add seed here for consistency
+        self.W = np.random.randn(1, nx)  # Weight initialization
+        self.b = 0  # Bias initialization
+        self.A = 0  # Activated output
 
     def sigmoid(self, z):
         """
