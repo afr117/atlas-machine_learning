@@ -2,7 +2,7 @@
 """
 This module defines a Neuron class for binary classification.
 
-The Neuron class models single neuron with weights, bias, and activation output.
+The Neuron class models single neuron with weights, bias & activation output.
 It includes methods to initialize the neuron and manage its parameters.
 
 Attributes:
