@@ -1,48 +1,93 @@
 #!/usr/bin/env python3
+"""
+Module 4-neuron
+Defines a class Neuron for binary classification.
+"""
+
 import numpy as np
 
+
 class Neuron:
-    """Defines a single neuron performing binary classification"""
+    """
+    Class Neuron that defines a single neuron performing binary classification.
+    """
 
     def __init__(self, nx):
-        """Initialize the neuron"""
-        if not isinstance(nx, int) or nx <= 0:
+        """
+        Initialize a neuron.
+        
+        Args:
+            nx (int): The number of input features to the neuron.
+
+        Raises:
+            TypeError: If nx is not an integer.
+            ValueError: If nx is less than 1.
+        """
+        if not isinstance(nx, int):
+            raise TypeError("nx must be an integer")
+        if nx < 1:
             raise ValueError("nx must be a positive integer")
-        self.__W = np.random.randn(1, nx)  # Weights initialized with normal distribution
-        self.__b = 0  # Bias initialized to 0
-        self.__A = 0  # Activated output (sigmoid) initialized to 0
+        
+        # Weights and bias initialization
+        self.W = np.random.randn(1, nx)
+        self.b = 0
+        self.A = 0
+
+    def sigmoid(self, z):
+        """
+        Compute the sigmoid activation function.
+        
+        Args:
+            z (numpy.ndarray): The input data to the sigmoid function.
+        
+        Returns:
+            numpy.ndarray: The sigmoid activation.
+        """
+        return 1 / (1 + np.exp(-z))
 
     def forward_prop(self, X):
-        """Calculates the forward propagation of the neuron"""
-        Z = np.dot(self.__W, X) + self.__b  # Linear transformation
-        self.__A = 1 / (1 + np.exp(-Z))  # Sigmoid activation
-        return self.__A
+        """
+        Perform forward propagation of the neuron.
+        
+        Args:
+            X (numpy.ndarray): Input data with shape (nx, m).
+        
+        Returns:
+            numpy.ndarray: The activated output of the neuron.
+        """
+        z = np.dot(self.W, X) + self.b
+        self.A = self.sigmoid(z)
+        return self.A
 
     def cost(self, Y, A):
-        """Calculates the cost using logistic regression"""
-        m = Y.shape[1]  # Number of examples
-        epsilon = 1e-10  # Small value to avoid log(0)
-        cost = -np.sum(Y * np.log(A + epsilon) + (1 - Y) * np.log(1 - A + epsilon)) / m
+        """
+        Calculate the cost using binary cross-entropy.
+        
+        Args:
+            Y (numpy.ndarray): Correct labels with shape (1, m).
+            A (numpy.ndarray): Activated output with shape (1, m).
+        
+        Returns:
+            float: The cost of the model.
+        """
+        m = Y.shape[1]
+        cost = -(1/m) * np.sum(Y * np.log(A) + (1 - Y) * np.log(1 - A))
         return cost
 
     def evaluate(self, X, Y):
-        """Evaluates the neuron's predictions and calculates the cost"""
-        A = self.forward_prop(X)  # Forward propagation
-        predictions = (A >= 0.5).astype(int)  # Threshold the predictions
-        cost = self.cost(Y, A)  # Calculate the cost
-        return predictions, cost
-
-    @property
-    def W(self):
-        """Getter for weights"""
-        return self.__W
-
-    @property
-    def b(self):
-        """Getter for bias"""
-        return self.__b
-
-    @property
-    def A(self):
-        """Getter for activated output"""
-        return self.__A
+        """
+        Evaluate the neuron’s predictions.
+        
+        Args:
+            X (numpy.ndarray): Input data with shape (nx, m).
+            Y (numpy.ndarray): Correct labels with shape (1, m).
+        
+        Returns:
+            numpy.ndarray: The predicted labels for each example.
+            float: The cost of the network.
+        """
+        A = self.forward_prop(X)
+        cost = self.cost(Y, A)
+        # Convert probabilities to binary labels (0 or 1)
+        prediction = np.where(A >= 0.5, 1, 0)
+        return prediction, cost
