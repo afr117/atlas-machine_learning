@@ -33,9 +33,9 @@ class Neuron:
         # Initialize weights, bias, and activation output
         self.__W = np.random.randn(1, nx)
         # Weights initialized random values from normal distribution
-        self.__b = 0 
+        self.__b = 0
         # Bias initialized to zero
-        self.__A = 0 
+        self.__A = 0
         # Activation output initialized to zero
 
     @property
