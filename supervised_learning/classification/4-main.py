@@ -1,37 +1,27 @@
 #!/usr/bin/env python3
 
 import numpy as np
-import importlib.util
+import os
 
-# Dynamically load the 4-neuron.py module
-module_name = '4-neuron'
-module_path = './4-neuron.py'
+# Import the Neuron class
+Neuron = __import__('4-neuron').Neuron
 
-spec = importlib.util.spec_from_file_location(module_name, module_path)
-neuron_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(neuron_module)
+# Check if the file exists
+data_path = '../data/Binary_Train.npz'
+if os.path.isfile(data_path):
+    lib_train = np.load(data_path)
+    X_3D, Y = lib_train['X'], lib_train['Y']
+    X = X_3D.reshape((X_3D.shape[0], -1)).T
+else:
+    print(f"File not found: {data_path}")
+    # Create dummy data for testing
+    X = np.random.randint(0, 2, (10, 100))  # 10 features, 100 examples
+    Y = np.random.randint(0, 2, (1, 100))   # 1 label row, 100 examples
 
-# Access the Neuron class
-Neuron = neuron_module.Neuron
-
-# Simulate a dataset if the actual file is not available
-# Define the number of input features and examples
-nx = 5  # Number of input features
-m = 10  # Number of examples
-
-# Generate random data
+# Initialize and evaluate the neuron
 np.random.seed(0)
-X = np.random.randn(nx, m)
-Y = np.random.randint(0, 2, (1, m))
-
-# Initialize the neuron with the number of input features
-neuron = Neuron(nx)
-
-# Evaluate the neuron
+neuron = Neuron(X.shape[0])
 A, cost = neuron.evaluate(X, Y)
 
-# Print the outputs
-print("Predictions:")
 print(A)
-print("Cost:")
 print(cost)
