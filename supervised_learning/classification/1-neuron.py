@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 
+"""
+Neuron Module
+This module contains the Neuron class that models a single neuron
+for binary classification, handling initialization of weights,
+bias, and activation output.
+"""
+
 import numpy as np
 
 
@@ -36,8 +43,8 @@ class Neuron:
 
         # Initialize weights, bias, and activation output
         self.__W = np.random.randn(1, nx)
-        # The weights vector initialized
-        # with random values from standard normal distribution
+        # The weights vector is initialized
+        # with random values from a standard normal distribution
         self.__b = 0
         # The bias is initialized to zero
         self.__A = 0
