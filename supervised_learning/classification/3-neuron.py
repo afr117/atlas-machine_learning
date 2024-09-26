@@ -1,76 +1,50 @@
 #!/usr/bin/env python3
-"""
-3-neuron.py
-Defines a single neuron performing binary classification.
-"""
-
 import numpy as np
 
 class Neuron:
-    """
-    Class that defines a single neuron performing binary classification.
-    """
-
     def __init__(self, nx):
         """
-        Initialize a Neuron instance.
+        Initializes the Neuron class.
 
         Parameters:
-        nx (int): Number of input features to the neuron.
+        nx (int): The number of input features.
         """
-        if type(nx) is not int:
-            raise TypeError("nx must be an integer")
-        if nx < 1:
+        if not isinstance(nx, int) or nx < 1:
             raise ValueError("nx must be a positive integer")
         
-        self.__A = 0
+        self.__A = None  # Activated output
         self.__b = 0
-        self.__W = np.random.randn(1, nx)
-    
+        self.__W = np.random.randn(1, nx) * 0.01
+
     @property
-    def A(self):
-        """
-        Getter for the private attribute __A.
-        """
-        return self.__A
+    def W(self):
+        """ Getter for the weights """
+        return self.__W
 
     @property
     def b(self):
-        """
-        Getter for the private attribute __b.
-        """
+        """ Getter for the bias """
         return self.__b
 
     @b.setter
     def b(self, value):
-        """
-        Setter for the private attribute __b.
-        """
+        """ Setter for the bias """
         self.__b = value
 
     @property
-    def W(self):
-        """
-        Getter for the private attribute __W.
-        """
-        return self.__W
-
-    @W.setter
-    def W(self, value):
-        """
-        Setter for the private attribute __W.
-        """
-        self.__W = value
+    def A(self):
+        """ Getter for the activated output """
+        return self.__A
 
     def forward_prop(self, X):
         """
         Calculates the forward propagation of the neuron.
 
         Parameters:
-        X (numpy.ndarray): Input data with shape (nx, m).
+        X (numpy.ndarray): The input data with shape (nx, m).
 
         Returns:
-        numpy.ndarray: The activated output of the neuron.
+        numpy.ndarray: The activated output.
         """
         Z = np.dot(self.__W, X) + self.__b
         self.__A = 1 / (1 + np.exp(-Z))
@@ -88,8 +62,7 @@ class Neuron:
         float: The cost of the model.
         """
         m = Y.shape[1]
-        # Use a small epsilon value to prevent division by zero
-        epsilon = 1e-10
+        epsilon = 1e-15  # Use a very small epsilon to avoid log(0)
         A = np.clip(A, epsilon, 1 - epsilon)  # Clip values to avoid log(0)
         cost = -np.sum(Y * np.log(A) + (1 - Y) * np.log(1 - A)) / m
         return cost
