@@ -8,6 +8,10 @@ class Neuron:
     """
     A class representing a single neuron for binary classification.
 
+    This class models a single neuron for binary classification, including initialization
+    of its weights, bias, and activation output. The weights are initialized using a random
+    normal distribution, while the bias and activation output are initialized to zero.
+
     Attributes:
         __W (numpy.ndarray): The weights vector for the neuron.
         __b (float): The bias of the neuron.
@@ -32,7 +36,7 @@ class Neuron:
 
         # Initialize weights, bias, and activation output
         self.__W = np.random.randn(1, nx)
-        # Weights initialized random values from normal distribution
+        # Weights initialized with random values from a normal distribution
         self.__b = 0
         # Bias initialized to zero
         self.__A = 0
