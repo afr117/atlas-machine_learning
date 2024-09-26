@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 class Neuron:
     """
     A class representing a single neuron for binary classification.
@@ -27,7 +28,7 @@ class Neuron:
             raise TypeError("nx must be an integer")
         if nx < 1:
             raise ValueError("nx must be a positive integer")
-        
+
         # Initialize weights, bias, and activation output
         self.W = np.random.randn(1, nx)  # Weights initialized with random values
         self.b = 0                       # Bias initialized to zero
