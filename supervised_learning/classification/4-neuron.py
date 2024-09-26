@@ -28,10 +28,10 @@ class Neuron:
         if nx < 1:
             raise ValueError("nx must be a positive integer")
         
-        np.random.seed(0)  # Add seed here for consistency
-        self.W = np.random.randn(1, nx)  # Weight initialization
+        np.random.seed(0)  # Ensure deterministic weight initialization
+        self.W = np.random.randn(1, nx)  # Weight initialization using numpy
         self.b = 0  # Bias initialization
-        self.A = 0  # Activated output
+        self.A = 0  # Activated output placeholder
 
     def sigmoid(self, z):
         """
@@ -55,8 +55,8 @@ class Neuron:
         Returns:
             numpy.ndarray: The activated output of the neuron.
         """
-        z = np.dot(self.W, X) + self.b
-        self.A = self.sigmoid(z)
+        z = np.dot(self.W, X) + self.b  # Linear transformation of the inputs
+        self.A = self.sigmoid(z)  # Apply sigmoid activation function
         return self.A
 
     def cost(self, Y, A):
@@ -71,7 +71,7 @@ class Neuron:
             float: The cost of the model.
         """
         m = Y.shape[1]
-        # Add epsilon to A to avoid log(0)
+        # Add epsilon to A to avoid log(0) issues
         epsilon = 1e-8
         cost = -(1 / m) * np.sum(Y * np.log(A + epsilon) + (1 - Y) * np.log(1 - A + epsilon))
         return cost
@@ -88,8 +88,8 @@ class Neuron:
             numpy.ndarray: The predicted labels for each example.
             float: The cost of the network.
         """
-        A = self.forward_prop(X)
-        cost = self.cost(Y, A)
-        # Convert probabilities to binary labels (0 or 1)
+        A = self.forward_prop(X)  # Perform forward propagation
+        cost = self.cost(Y, A)  # Compute the cost
+        # Convert the predicted probabilities to binary labels (0 or 1)
         prediction = np.where(A >= 0.5, 1, 0)
         return prediction, cost
