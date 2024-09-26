@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 import numpy as np
 
 
@@ -9,15 +8,14 @@ class Neuron:
     A class representing a single neuron for binary classification.
 
     This class models a single neuron for binary classification,
-    including initialization of its weights, bias, and activation output.
-    The weights are initialized using a random
-    normal distribution, while the bias and activation output
-    are initialized to zero.
+    including the initialization of its weights, bias, and activation output.
+    The weights are initialized using a random normal distribution,
+    while the bias and activation output are initialized to zero.
 
     Attributes:
         __W (numpy.ndarray): The weights vector for the neuron.
         __b (float): The bias of the neuron.
-        __A (float): The activated output of the neuron.
+        __A (float): The activated output (prediction) of the neuron.
     """
 
     def __init__(self, nx):
@@ -38,16 +36,16 @@ class Neuron:
 
         # Initialize weights, bias, and activation output
         self.__W = np.random.randn(1, nx)
-        # Weights initialized with random values from a normal distribution
+        # The weights vector is initialized with random values from a standard normal distribution
         self.__b = 0
-        # Bias initialized to zero
+        # The bias is initialized to zero
         self.__A = 0
-        # Activation output initialized to zero
+        # The activation output is initialized to zero
 
     @property
     def W(self):
         """
-        Getter for the weights attribute.
+        Getter for the weights vector attribute.
 
         Returns:
             numpy.ndarray: The weights vector of the neuron.
@@ -70,7 +68,7 @@ class Neuron:
         Getter for the activation output attribute.
 
         Returns:
-            float: The activated output of the neuron.
+            float: The activated output (prediction) of the neuron.
         """
         return self.__A
 
@@ -78,6 +76,9 @@ class Neuron:
     def A(self, value):
         """
         Prevent setting the activation output attribute.
+
+        This method raises an AttributeError if an attempt is made to modify
+        the activation output directly since it's intended to be read-only.
 
         Args:
             value: The value to set (which is ignored).
