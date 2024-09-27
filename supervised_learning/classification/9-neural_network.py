@@ -17,6 +17,9 @@ class NeuralNetwork:
             raise TypeError("nodes must be an integer")
         if nodes < 1:
             raise ValueError("nodes must be a positive integer")
+        
+        # Set random seed for reproducibility
+        np.random.seed(0)
 
         # Initialize weights and biases for the hidden layer
         self.__W1 = np.random.randn(nodes, nx)  # Random normal distribution
