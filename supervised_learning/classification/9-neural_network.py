@@ -3,12 +3,13 @@ import numpy as np
 
 class NeuralNetwork:
     def __init__(self, nx, nodes):
-        """Initialize the neural network with one hidden layer"""
+        # Validate nx
         if not isinstance(nx, int):
             raise TypeError("nx must be an integer")
         if nx < 1:
             raise ValueError("nx must be a positive integer")
         
+        # Validate nodes
         if not isinstance(nodes, int):
             raise TypeError("nodes must be an integer")
         if nodes < 1:
@@ -53,4 +54,3 @@ class NeuralNetwork:
     @property
     def A2(self):
         return self.__A2
-
