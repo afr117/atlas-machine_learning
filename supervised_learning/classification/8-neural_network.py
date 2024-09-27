@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 import numpy as np
 
-
 class NeuralNetwork:
     """Defines a neural network with one hidden layer performing binary classification."""
 
     def __init__(self, nx, nodes):
         """
         Initializes the NeuralNetwork.
-        
+
         Arguments:
         nx -- number of input features
         nodes -- number of nodes in the hidden layer
         """
-
         # Validate nx
         if not isinstance(nx, int):
             raise TypeError("nx must be an integer")
