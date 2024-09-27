@@ -9,7 +9,7 @@ class NeuralNetwork:
     def __init__(self, nx, nodes):
         """
         Initializes the NeuralNetwork.
-
+        
         Args:
         nx: number of input features (must be a positive integer).
         nodes: number of nodes in the hidden layer (must be a positive integer).
