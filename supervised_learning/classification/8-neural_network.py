@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
 
-
 class NeuralNetwork:
     """
     Defines a neural network with one hidden layer performing binary classification.
@@ -66,4 +65,3 @@ class NeuralNetwork:
     def A2(self):
         """Getter for A2 (activated output of the output layer)."""
         return self.__A2
-
