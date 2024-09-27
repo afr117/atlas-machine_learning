@@ -106,11 +106,11 @@ class Neuron:
             self.W: Updated weights after gradient descent.
             self.b: Updated bias after gradient descent.
         """
-        m = X.shape[1]
-        dz = A - Y
-        dw = np.dot(dz, X.T) / m
-        db = np.sum(dz) / m
+        m = X.shape[1]  # Number of examples
+        dz = A - Y  # Derivative of the loss with respect to z
+        dw = np.dot(dz, X.T) / m  # Gradient of W
+        db = np.sum(dz) / m  # Gradient of b
 
-        # Update weights and bias
-        self.W = self.W - alpha * dw
-        self.b = self.b - alpha * db
+        # Update the weights and bias
+        self.W -= alpha * dw
+        self.b -= alpha * db
