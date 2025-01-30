@@ -58,27 +58,61 @@ class NeuralNetwork:
         accuracy = np.mean(predictions == Y) * 100
         return predictions, cost, accuracy
 
-    def train(self, X, Y, iterations=5000, alpha=0.05, verbose=False, graph=False, step=100):
-        """
-        Train the neural network using forward propagation and gradient descent.
-        """
-        # Validate iterations
-        if not isinstance(iterations, int):
-            raise TypeError("iterations must be an integer")
-        if iterations <= 0:
-            raise ValueError("iterations must be a positive integer")
+def train(self, X, Y, iterations=5000, alpha=0.05, verbose=False, graph=False, step=100):
+    """
+    Train the neural network using forward propagation and gradient descent.
+    """
+    # Validate iterations
+    if not isinstance(iterations, int):
+        raise TypeError("iterations must be an integer")
+    if iterations <= 0:
+        raise ValueError("iterations must be a positive integer")
 
-        # Validate alpha
-        if not isinstance(alpha, float):
-            raise TypeError("alpha must be a float")
-        if alpha <= 0:
-            raise ValueError("alpha must be positive")
+    # Validate alpha
+    if not isinstance(alpha, float):
+        raise TypeError("alpha must be a float")
+    if alpha <= 0:
+        raise ValueError("alpha must be positive")
 
-        # Validate step
-        if not isinstance(step, int):
-            raise TypeError("step must be an integer")
-        if step <= 0 or step > iterations:
-            raise ValueError("step must be positive and <= iterations")
+    # Validate step
+    if not isinstance(step, int):
+        raise TypeError("step must be an integer")
+    if step <= 0 or step > iterations:
+        raise ValueError("step must be positive and <= iterations")
+
+    # Vectorized gradient descent process for multiple iterations
+    m = X.shape[1]
+    costs = np.zeros(iterations)  # Store costs for each iteration
+
+    # Create a range for iteration numbers
+    iteration_range = np.arange(iterations)
+
+    # Perform all updates at once using broadcasting and vectorized operations
+    self.A1, self.A2 = self.forward_prop(X)  # Initial forward propagation
+
+    for iter_num in iteration_range:
+        # Compute the gradients
+        dZ2 = self.A2 - Y  # Derivative of cost with respect to output layer
+        dW2 = np.dot(dZ2, self.A1.T) / m  # Gradient for W2
+        db2 = np.sum(dZ2) / m  # Gradient for b2
+        dZ1 = np.dot(self.W2.T, dZ2) * self.A1 * (1 - self.A1)  # Derivative for hidden layer
+        dW1 = np.dot(dZ1, X.T) / m  # Gradient for W1
+        db1 = np.sum(dZ1) / m  # Gradient for b1
+
+        # Update parameters using gradient descent
+        self.W1 -= alpha * dW1
+        self.b1 -= alpha * db1
+        self.W2 -= alpha * dW2
+        self.b2 -= alpha * db2
+
+        # Calculate cost after each iteration (if verbose is True)
+        cost = self.cost(Y, self.A2)
+        costs[iter_num] = cost
+
+        if verbose and iter_num % step == 0:
+            print(f"Cost after {iter_num} iterations: {cost}")
+
+    return self.evaluate(X, Y)
 
         # Calculate the total number of iterations in a vectorized way (without an explicit loop)
         iteration_range = np.arange(iterations)
