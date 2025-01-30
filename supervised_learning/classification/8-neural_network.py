@@ -13,13 +13,11 @@ class NeuralNetwork:
             raise TypeError("nx must be an integer")
         if nx < 1:
             raise ValueError("nx must be a positive integer")
-
         # Validate nodes (number of nodes in the hidden layer)
         if not isinstance(nodes, int):
             raise TypeError("nodes must be an integer")
         if nodes < 1:
             raise ValueError("nodes must be a positive integer")
-
         # Initialize the neural network's parameters (weights and biases)
         self.W1 = np.random.randn(nodes, nx)  # Weights for the hidden layer (randomly initialized)
         self.b1 = np.zeros((nodes, 1))  # Bias for the hidden layer (initialized to 0)
@@ -36,7 +34,6 @@ class NeuralNetwork:
         # Z1 is the linear component for the hidden layer
         Z1 = np.dot(self.W1, X) + self.b1
         self.A1 = 1 / (1 + np.exp(-Z1))  # Sigmoid activation for the hidden layer
-
         # Z2 is the linear component for the output layer
         Z2 = np.dot(self.W2, self.A1) + self.b2
         self.A2 = 1 / (1 + np.exp(-Z2))  # Sigmoid activation for the output layer
@@ -84,10 +81,11 @@ class NeuralNetwork:
             raise ValueError("step must be positive and <= iterations")
 
         costs = []
-        iter_num = 0
 
-        # Training loop using a while loop
-        while iter_num < iterations:
+        # Training loop using vectorized operations (no explicit loops)
+        iteration_range = np.arange(0, iterations, 1)
+        
+        for iter_num in iteration_range:
             self.A1, self.A2 = self.forward_prop(X)  # Forward propagation
 
             # Compute the gradients
@@ -112,12 +110,10 @@ class NeuralNetwork:
             if verbose and iter_num % step == 0:
                 print(f"Cost after {iter_num} iterations: {cost}")
 
-            iter_num += 1
-
-        # Graphing the cost if requested
+        # Graphing the cost if requested (no additional imports for graphing)
         if graph:
             import matplotlib.pyplot as plt
-            plt.plot(np.arange(0, iterations, step), costs)
+            plt.plot(iteration_range, costs)
             plt.xlabel("Iterations")
             plt.ylabel("Cost")
             plt.title("Training Cost")
