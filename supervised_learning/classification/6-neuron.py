@@ -7,59 +7,60 @@ class Neuron:
             raise TypeError("nx must be an integer")
         if nx < 1:
             raise ValueError("nx must be a positive integer")
-        
-        self.__W = np.random.randn(1, nx)  # Weights initialized randomly
+
+        # Initialize weights (W) and bias (b) for the neuron
+        self.__W = np.random.randn(1, nx)  # Weight matrix initialized to random values
         self.__b = 0  # Bias initialized to 0
         self.__A = 0  # Activated output initialized to 0
 
     def forward_prop(self, X):
         """
-        Performs forward propagation using the sigmoid activation function.
-        X: The input data.
-        Returns the activated output A.
+        Implements forward propagation of the neuron.
+        X: Input data, numpy array with shape (nx, m)
+        Returns the activated output A
         """
-        Z = np.dot(self.__W, X) + self.__b  # Linear transformation
+        Z = np.dot(self.__W, X) + self.__b  # Linear part of the forward propagation
         self.__A = 1 / (1 + np.exp(-Z))  # Sigmoid activation function
         return self.__A
 
     def gradient_descent(self, X, Y, A, alpha=0.05):
         """
-        Performs one pass of gradient descent on the neuron.
-        X: Input data
-        Y: True labels
-        A: Activated output from forward propagation
-        alpha: Learning rate
+        Performs one step of gradient descent on the neuron.
+        X: Input data, numpy array with shape (nx, m)
+        Y: True labels, numpy array with shape (1, m)
+        A: Activated output of the neuron, numpy array with shape (1, m)
+        alpha: Learning rate (float)
+        Updates the weights (W) and bias (b)
         """
         m = X.shape[1]  # Number of examples
 
-        # Calculate the derivative of the cost with respect to weights and bias
-        dz = A - Y  # Derivative of the cost with respect to A
+        dz = A - Y  # Derivative of the cost with respect to the output
         dw = np.dot(dz, X.T) / m  # Derivative of the cost with respect to W
         db = np.sum(dz) / m  # Derivative of the cost with respect to b
 
-        # Update the weights and bias using the gradient descent rule
+        # Update weights and bias
         self.__W -= alpha * dw
         self.__b -= alpha * db
 
     def cost(self, Y, A):
         """
-        Computes the cost function for binary classification.
-        Y: True labels
-        A: Activated output
-        Returns the cost value.
+        Computes the cost using binary cross-entropy.
+        Y: True labels, numpy array with shape (1, m)
+        A: Activated output of the neuron, numpy array with shape (1, m)
+        Returns the cost (scalar)
         """
-        m = Y.shape[1]
+        m = Y.shape[1]  # Number of examples
         cost = -np.sum(Y * np.log(A) + (1 - Y) * np.log(1 - A)) / m
         return cost
 
     def train(self, X, Y, iterations=5000, alpha=0.05):
         """
         Trains the neuron.
-        X: Input data
-        Y: True labels
-        iterations: Number of iterations for training
-        alpha: Learning rate
-        Returns the final activated output and the final cost.
+        X: Input data, numpy array with shape (nx, m)
+        Y: True labels, numpy array with shape (1, m)
+        iterations: Number of iterations for training (int)
+        alpha: Learning rate (float)
+        Returns the final activated output and final cost after training
         """
         # Validate iterations
         if not isinstance(iterations, int):
@@ -73,17 +74,18 @@ class Neuron:
         if alpha <= 0:
             raise ValueError("alpha must be positive")
 
-        # Perform training
+        # Training loop
         for i in range(iterations):
             A = self.forward_prop(X)  # Forward propagation
-            self.gradient_descent(X, Y, A, alpha)  # Gradient descent
-            if i % 1000 == 0:  # Print cost every 1000 iterations
+            self.gradient_descent(X, Y, A, alpha)  # Perform gradient descent
+
+            if i % 1000 == 0:  # Optionally, print cost every 1000 iterations
                 cost = self.cost(Y, A)
                 print(f"Cost after {i} iterations: {cost}")
 
-        # Return final activated output and final cost
-        A = self.forward_prop(X)
-        cost = self.cost(Y, A)
+        # Return final activated output and cost after training
+        A = self.forward_prop(X)  # Final forward propagation
+        cost = self.cost(Y, A)  # Final cost computation
         return A, cost
 
     @property
@@ -100,10 +102,10 @@ class Neuron:
 
     def evaluate(self, X, Y):
         """
-        Evaluates the neuron after training.
-        X: Input data
-        Y: True labels
-        Returns the activated output and the cost.
+        Evaluates the neuron on the given data.
+        X: Input data, numpy array with shape (nx, m)
+        Y: True labels, numpy array with shape (1, m)
+        Returns the activated output and the cost
         """
         A = self.forward_prop(X)
         cost = self.cost(Y, A)
