@@ -1,108 +1,73 @@
 #!/usr/bin/env python3
 import numpy as np
 
-"""
-3-neuron.py
-
-This module defines a single neuron performing binary classification.
-It includes methods for forward propagation and cost calculation.
-"""
-
-
 class Neuron:
     """
-    Defines a single neuron for binary classification.
-
-    Attributes:
-    __W (numpy.ndarray): Weights of the neuron.
-    __b (float): Bias of the neuron.
-    __A (numpy.ndarray): Activated output of the neuron.
+    A class representing a single neuron for binary classification.
     """
-
     def __init__(self, nx):
         """
-        Initializes the Neuron class.
-
-        Parameters:
-        nx (int): The number of input features.
-
-        Raises:
-        ValueError: If nx is not a positive integer.
+        Initialize a Neuron instance.
+        
+        Args:
+            nx (int): The number of input features to the neuron.
         """
-        if not isinstance(nx, int) or nx < 1:
+        if not isinstance(nx, int):
+            raise TypeError("nx must be an integer")
+        if nx < 1:
             raise ValueError("nx must be a positive integer")
 
-        self.__A = None  # Activated output
+        # Initialize weights, bias, and activation output
+        self.__W = np.random.randn(1, nx)
         self.__b = 0
-        self.__W = np.random.randn(1, nx) * 0.01
+        self.__A = 0
 
     @property
     def W(self):
-        """
-        Getter for the weights.
-
-        Returns:
-        numpy.ndarray: The weights of the neuron.
-        """
+        """Getter for the weights."""
         return self.__W
 
     @property
     def b(self):
-        """
-        Getter for the bias.
-
-        Returns:
-        float: The bias of the neuron.
-        """
+        """Getter for the bias."""
         return self.__b
-
-    @b.setter
-    def b(self, value):
-        """
-        Setter for the bias.
-
-        Parameters:
-        value (float): The new value for the bias.
-        """
-        self.__b = value
 
     @property
     def A(self):
-        """
-        Getter for the activated output.
-
-        Returns:
-        numpy.ndarray: The activated output of the neuron.
-        """
+        """Getter for the activation output."""
         return self.__A
+
+    @A.setter
+    def A(self, value):
+        """Prevent setting the activation output attribute."""
+        raise AttributeError("can't set attribute")
 
     def forward_prop(self, X):
         """
-        Calculates the forward propagation of the neuron.
-
-        Parameters:
-        X (numpy.ndarray): The input data with shape (nx, m).
-
+        Calculate the forward propagation of the neuron.
+        
+        Args:
+            X (numpy.ndarray): The input data, shape (nx, m), where nx is
+                               the number of input features and m is the number of examples.
         Returns:
-        numpy.ndarray: The activated output.
+            numpy.ndarray: The activated output of the neuron.
         """
         Z = np.dot(self.__W, X) + self.__b
-        self.__A = 1 / (1 + np.exp(-Z))
+        self.__A = 1 / (1 + np.exp(-Z))  # Sigmoid activation function
         return self.__A
 
     def cost(self, Y, A):
         """
         Calculates the cost of the model using logistic regression.
-
-        Parameters:
-        Y (numpy.ndarray): Correct labels for the input data with shape (1, m).
-        A (numpy.ndarray): Activated output of the neuron with shape (1, m).
-
+        
+        Args:
+            Y (numpy.ndarray): True labels for the input data, shape (1, m).
+            A (numpy.ndarray): Activated output of the neuron, shape (1, m).
+        
         Returns:
-        float: The cost of the model.
+            float: The cost of the model.
         """
-        m = Y.shape[1]
-        # To avoid division by zero errors, use 1.0000001 - A instead of 1 - A
-        A = np.clip(A, 1e-7, 1 - 1e-7)  # To avoid log(0) and improve stability
-        cost = -np.sum(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A)) / m
+        m = Y.shape[1]  # Number of examples
+        # Compute the cost using the logistic regression formula
+        cost = - (1 / m) * np.sum(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A))
         return cost
