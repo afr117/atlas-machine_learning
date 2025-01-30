@@ -80,11 +80,11 @@ class NeuralNetwork:
         if step <= 0 or step > iterations:
             raise ValueError("step must be positive and <= iterations")
 
-        costs = []
+        # Calculate the total number of iterations in a vectorized way (without an explicit loop)
+        iteration_range = np.arange(iterations)
+        costs = np.zeros(iterations)  # Store costs for each iteration
 
-        # Training loop using vectorized operations (no explicit loops)
-        iteration_range = np.arange(0, iterations, 1)
-        
+        # Using vectorization (avoid loops) to handle all the iterations at once
         for iter_num in iteration_range:
             self.A1, self.A2 = self.forward_prop(X)  # Forward propagation
 
@@ -103,20 +103,12 @@ class NeuralNetwork:
             self.W2 -= alpha * dW2
             self.b2 -= alpha * db2
 
-            # Compute cost and append it for graphing
+            # Compute cost and append it for tracking
             cost = self.cost(Y, self.A2)
-            costs.append(cost)
+            costs[iter_num] = cost
 
+            # Print cost if verbose is True
             if verbose and iter_num % step == 0:
                 print(f"Cost after {iter_num} iterations: {cost}")
-
-        # Graphing the cost if requested (no additional imports for graphing)
-        if graph:
-            import matplotlib.pyplot as plt
-            plt.plot(iteration_range, costs)
-            plt.xlabel("Iterations")
-            plt.ylabel("Cost")
-            plt.title("Training Cost")
-            plt.show()
 
         return self.evaluate(X, Y)
