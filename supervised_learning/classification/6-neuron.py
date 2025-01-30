@@ -7,7 +7,7 @@ class Neuron:
             raise TypeError("nx must be an integer")
         if nx < 1:
             raise ValueError("nx must be a positive integer")
-
+        
         # Initialize weights (W) and bias (b) for the neuron
         self.__W = np.random.randn(1, nx)  # Weight matrix initialized to random values
         self.__b = 0  # Bias initialized to 0
@@ -33,7 +33,6 @@ class Neuron:
         Updates the weights (W) and bias (b)
         """
         m = X.shape[1]  # Number of examples
-
         dz = A - Y  # Derivative of the cost with respect to the output
         dw = np.dot(dz, X.T) / m  # Derivative of the cost with respect to W
         db = np.sum(dz) / m  # Derivative of the cost with respect to b
@@ -74,12 +73,14 @@ class Neuron:
         if alpha <= 0:
             raise ValueError("alpha must be positive")
 
-        # Training loop
+        # Single loop for the training process
         for i in range(iterations):
+            # Perform forward propagation and gradient descent in the same loop
             A = self.forward_prop(X)  # Forward propagation
             self.gradient_descent(X, Y, A, alpha)  # Perform gradient descent
-
-            if i % 1000 == 0:  # Optionally, print cost every 1000 iterations
+            
+            # Optionally, print cost every 1000 iterations
+            if i % 1000 == 0:
                 cost = self.cost(Y, A)
                 print(f"Cost after {i} iterations: {cost}")
 
