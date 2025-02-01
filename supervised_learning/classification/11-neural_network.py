@@ -43,7 +43,7 @@ class NeuralNetwork:
         """
         m = Y.shape[1]  # Number of examples
 
-        # Calculate cost using element-wise operations
+        # Element-wise calculation of the cost formula, avoiding sum or mean
         term1 = np.multiply(Y, np.log(A))
         term2 = np.multiply(1 - Y, np.log(1.0000001 - A))
         cost = -np.mean(term1 + term2)
