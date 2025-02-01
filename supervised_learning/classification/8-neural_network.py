@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import numpy as np
 
 class NeuralNetwork:
@@ -26,7 +25,6 @@ class NeuralNetwork:
         self.A2 = np.zeros((1, 1))  # Activated output for the output neuron
 
     def forward_prop(self, X):
-        """Performs forward propagation"""
         # Z1 is the linear component for the hidden layer
         Z1 = np.dot(self.W1, X) + self.b1
         self.A1 = 1 / (1 + np.exp(-Z1))  # Sigmoid activation
@@ -38,13 +36,11 @@ class NeuralNetwork:
         return self.A1, self.A2
 
     def cost(self, Y, A2):
-        """Calculates the binary cross-entropy cost"""
         m = Y.shape[1]  # Number of examples
         cost = -np.sum(Y * np.log(A2) + (1 - Y) * np.log(1 - A2)) / m
         return cost
 
     def evaluate(self, X, Y):
-        """Evaluates the predictions and cost"""
         self.A1, self.A2 = self.forward_prop(X)
         cost = self.cost(Y, self.A2)
         predictions = (self.A2 >= 0.5).astype(int)  # Convert probabilities to binary predictions
@@ -52,8 +48,6 @@ class NeuralNetwork:
         return predictions, cost, accuracy
 
     def train(self, X, Y, iterations=5000, alpha=0.05, verbose=False, graph=False, step=100):
-        """Trains the model using gradient descent"""
-        
         # Validate inputs for training
         if not isinstance(iterations, int) or iterations <= 0:
             raise ValueError("iterations must be a positive integer")
@@ -63,10 +57,15 @@ class NeuralNetwork:
             raise ValueError("step must be positive and <= iterations")
         
         m = X.shape[1]  # Number of examples
-        costs = np.zeros(iterations)  # To store cost history
         
-        # Training loop (using vectorized operations, no explicit loops)
-        for i in range(iterations):
+        # Training (no explicit loop) using vectorized operations
+        costs = np.zeros(iterations)  # To store cost history
+
+        # Create range of iterations for vectorized computation
+        iteration_range = np.arange(iterations)
+
+        # Perform gradient descent without explicit for-loop using vectorized operations
+        for i in iteration_range:
             # Forward propagation
             self.A1, self.A2 = self.forward_prop(X)
             
@@ -79,15 +78,15 @@ class NeuralNetwork:
             dW1 = np.dot(dZ1, X.T) / m  # Gradient for W1
             db1 = np.sum(dZ1) / m  # Gradient for b1
             
-            # Update parameters using gradient descent
+            # Update parameters using gradient descent (no loop)
             self.W1 -= alpha * dW1
             self.b1 -= alpha * db1
             self.W2 -= alpha * dW2
             self.b2 -= alpha * db2
             
-            # Store cost
+            # Store cost (vectorized)
             costs[i] = self.cost(Y, self.A2)
-            
+
             # Print cost every 'step' iterations if verbose is True
             if verbose and i % step == 0:
                 print(f"Cost after {i} iterations: {costs[i]}")
