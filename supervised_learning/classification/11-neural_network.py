@@ -43,7 +43,7 @@ class NeuralNetwork:
         """
         m = Y.shape[1]  # Number of examples
         
-        # Compute the cost using the formula
-        cost = -np.sum(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A)) / m
+        # Compute the cost using matrix operations to avoid loops
+        cost = np.mean(-Y * np.log(A) - (1 - Y) * np.log(1.0000001 - A))
         
         return cost
