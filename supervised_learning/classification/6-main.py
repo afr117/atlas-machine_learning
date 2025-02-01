@@ -5,7 +5,7 @@ import numpy as np
 
 Neuron = __import__('6-neuron').Neuron
 
-lib_train = np.load('/data/Binary_Train.npz')
+lib_train = np.load('data/Binary_Train.npz')
 X_train_3D, Y_train = lib_train['X'], lib_train['Y']
 X_train = X_train_3D.reshape((X_train_3D.shape[0], -1)).T
 lib_dev = np.load('../data/Binary_Dev.npz')
