@@ -43,11 +43,9 @@ class NeuralNetwork:
         """
         m = Y.shape[1]  # Number of examples
 
-        # Element-wise calculation of the cost formula, avoiding sum or mean
-        term1 = np.multiply(Y, np.log(A))
-        term2 = np.multiply(1 - Y, np.log(1.0000001 - A))
-        cost = -np.mean(term1 + term2)
-
+        # Calculate the cost using element-wise operations without explicit loops
+        cost = -np.mean(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A))
+        
         return cost
 
     def evaluate(self, X, Y):
