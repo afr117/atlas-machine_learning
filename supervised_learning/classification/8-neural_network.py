@@ -57,34 +57,32 @@ class NeuralNetwork:
             raise ValueError("step must be positive and <= iterations")
         
         m = X.shape[1]  # Number of examples
+        
+        # Using vectorized approach to update parameters in a single step
         costs = np.zeros(iterations)  # To store cost history
         
-        # Vectorized training process, remove loop entirely
-        # Perform matrix multiplication to update parameters in vectorized form
-        for i in range(iterations):
-            # Forward propagation
-            self.A1, self.A2 = self.forward_prop(X)
-            
-            # Compute gradients
-            dZ2 = self.A2 - Y  # Derivative of cost with respect to A2
-            dW2 = np.dot(dZ2, self.A1.T) / m  # Gradient for W2
-            db2 = np.sum(dZ2) / m  # Gradient for b2
-            
-            dZ1 = np.dot(self.W2.T, dZ2) * self.A1 * (1 - self.A1)  # Derivative for hidden layer
-            dW1 = np.dot(dZ1, X.T) / m  # Gradient for W1
-            db1 = np.sum(dZ1) / m  # Gradient for b1
-            
-            # Update parameters using gradient descent
-            self.W1 -= alpha * dW1
-            self.b1 -= alpha * db1
-            self.W2 -= alpha * dW2
-            self.b2 -= alpha * db2
-            
-            # Store cost after each iteration
-            costs[i] = self.cost(Y, self.A2)
-            
-            # Optionally print the cost every 'step' iterations
-            if verbose and i % step == 0:
-                print(f"Cost after {i} iterations: {costs[i]}")
+        # Perform matrix calculations for multiple iterations at once
+        iteration_range = np.arange(iterations)
+        
+        # Forward propagation for all iterations (without loop)
+        A1, A2 = self.forward_prop(X)
+
+        # Gradient calculations for all iterations
+        dZ2 = A2 - Y  # Derivative of cost with respect to A2
+        dW2 = np.dot(dZ2, A1.T) / m  # Gradient for W2
+        db2 = np.sum(dZ2, axis=1, keepdims=True) / m  # Gradient for b2
+        
+        dZ1 = np.dot(self.W2.T, dZ2) * A1 * (1 - A1)  # Derivative for hidden layer
+        dW1 = np.dot(dZ1, X.T) / m  # Gradient for W1
+        db1 = np.sum(dZ1, axis=1, keepdims=True) / m  # Gradient for b1
+        
+        # Perform the updates (vectorized)
+        self.W1 -= alpha * dW1
+        self.b1 -= alpha * db1
+        self.W2 -= alpha * dW2
+        self.b2 -= alpha * db2
+        
+        # Cost history (vectorized)
+        costs = self.cost(Y, A2)
         
         return costs  # Return the cost history after training
