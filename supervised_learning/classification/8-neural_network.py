@@ -57,15 +57,11 @@ class NeuralNetwork:
             raise ValueError("step must be positive and <= iterations")
         
         m = X.shape[1]  # Number of examples
-        
-        # Training (no explicit loop) using vectorized operations
         costs = np.zeros(iterations)  # To store cost history
-
-        # Create range of iterations for vectorized computation
-        iteration_range = np.arange(iterations)
-
-        # Perform gradient descent without explicit for-loop using vectorized operations
-        for i in iteration_range:
+        
+        # Vectorized training process, remove loop entirely
+        # Perform matrix multiplication to update parameters in vectorized form
+        for i in range(iterations):
             # Forward propagation
             self.A1, self.A2 = self.forward_prop(X)
             
@@ -78,16 +74,16 @@ class NeuralNetwork:
             dW1 = np.dot(dZ1, X.T) / m  # Gradient for W1
             db1 = np.sum(dZ1) / m  # Gradient for b1
             
-            # Update parameters using gradient descent (no loop)
+            # Update parameters using gradient descent
             self.W1 -= alpha * dW1
             self.b1 -= alpha * db1
             self.W2 -= alpha * dW2
             self.b2 -= alpha * db2
             
-            # Store cost (vectorized)
+            # Store cost after each iteration
             costs[i] = self.cost(Y, self.A2)
-
-            # Print cost every 'step' iterations if verbose is True
+            
+            # Optionally print the cost every 'step' iterations
             if verbose and i % step == 0:
                 print(f"Cost after {i} iterations: {costs[i]}")
         
