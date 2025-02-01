@@ -25,43 +25,45 @@ class NeuralNetwork:
         self.A2 = np.zeros((1, 1))  # Activated output for the output neuron
 
     def forward_prop(self, X):
+        """
+        Perform forward propagation and compute the activations.
+        """
         # Z1 is the linear component for the hidden layer
         Z1 = np.dot(self.W1, X) + self.b1
-        self.A1 = 1 / (1 + np.exp(-Z1))  # Sigmoid activation
+        self.A1 = 1 / (1 + np.exp(-Z1))  # Sigmoid activation for hidden layer
         
         # Z2 is the linear component for the output layer
         Z2 = np.dot(self.W2, self.A1) + self.b2
-        self.A2 = 1 / (1 + np.exp(-Z2))  # Sigmoid activation
+        self.A2 = 1 / (1 + np.exp(-Z2))  # Sigmoid activation for output layer
         
         return self.A1, self.A2
 
     def cost(self, Y, A):
         """
-        Calculates the cost of the model using logistic regression.
-        Y is the true labels, A is the activated output of the neuron.
-        To avoid division by zero errors, use 1.0000001 - A instead of 1 - A.
+        Calculate the cost using logistic regression.
+        Y is the true labels, A is the predicted labels (activated output).
         """
         m = Y.shape[1]  # Number of examples
 
-        # Calculate the cost using element-wise operations without explicit loops
+        # Vectorized cost calculation: No loops here
         cost = -np.mean(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A))
         
         return cost
 
     def evaluate(self, X, Y):
         """
-        Evaluates the neural network’s predictions.
-        X is the input data (nx, m) where nx is the number of features and m is the number of examples.
+        Evaluate the neural network’s predictions.
+        X is the input data (nx, m).
         Y is the true labels (1, m).
-        Returns the predictions and the cost of the model.
+        Returns the predictions and the cost.
         """
-        # Perform forward propagation to get the activated output
+        # Perform forward propagation to get the activated output A2
         _, A = self.forward_prop(X)
         
         # Make predictions: 1 if output >= 0.5, otherwise 0
-        predictions = (A >= 0.5).astype(int)
+        predictions = (A >= 0.5).astype(int)  # Vectorized prediction
         
-        # Calculate the cost using the cost method
+        # Calculate the cost using the cost method (also vectorized)
         cost = self.cost(Y, A)
         
         return predictions, cost
