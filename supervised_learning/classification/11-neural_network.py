@@ -42,8 +42,10 @@ class NeuralNetwork:
         To avoid division by zero errors, use 1.0000001 - A instead of 1 - A.
         """
         m = Y.shape[1]  # Number of examples
-        
-        # Compute the cost using matrix operations to avoid loops
-        cost = np.mean(-Y * np.log(A) - (1 - Y) * np.log(1.0000001 - A))
-        
+
+        # Calculate cost using element-wise operations
+        term1 = np.multiply(Y, np.log(A))
+        term2 = np.multiply(1 - Y, np.log(1.0000001 - A))
+        cost = -np.mean(term1 + term2)
+
         return cost
