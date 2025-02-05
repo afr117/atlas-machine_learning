@@ -1,11 +1,6 @@
 #!/usr/bin/env python3
 
 import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import accuracy_score, confusion_matrix
-import matplotlib.pyplot as plt
 
 # Activation function: Sigmoid
 def sigmoid(x):
@@ -75,25 +70,34 @@ def load_data():
     
     return X, y
 
-# Data preprocessing
-def preprocess_data(X, y):
-    # Split the dataset into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Split the dataset manually (train-test split)
+def train_test_split(X, y, test_size=0.2):
+    num_samples = X.shape[0]
+    num_train = int((1 - test_size) * num_samples)
     
-    # Standardize the features (zero mean, unit variance)
-    scaler = StandardScaler()
-    X_train = scaler.fit_transform(X_train)
-    X_test = scaler.transform(X_test)
+    X_train, X_test = X[:num_train], X[num_train:]
+    y_train, y_test = y[:num_train], y[num_train:]
     
     return X_train, X_test, y_train, y_test
+
+# Standardization: Zero mean, unit variance
+def standardize(X_train, X_test):
+    mean = np.mean(X_train, axis=0)
+    std = np.std(X_train, axis=0)
+    
+    X_train = (X_train - mean) / std
+    X_test = (X_test - mean) / std
+    
+    return X_train, X_test
 
 # Main function
 if __name__ == "__main__":
     # Load the data
     X, y = load_data()
     
-    # Preprocess the data
-    X_train, X_test, y_train, y_test = preprocess_data(X, y)
+    # Preprocess the data (train-test split and standardization)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    X_train, X_test = standardize(X_train, X_test)
     
     # Initialize the neural network
     input_size = X_train.shape[1]  # Number of features
@@ -109,20 +113,15 @@ if __name__ == "__main__":
     y_pred = nn.predict(X_test)
     y_pred = np.round(y_pred)  # Convert output to 0 or 1
     
-    # Evaluate the model performance
-    accuracy = accuracy_score(y_test, y_pred)
+    # Evaluate the model performance (accuracy)
+    accuracy = np.mean(y_pred == y_test)
     print(f"Accuracy: {accuracy * 100:.2f}%")
     
-    # Display confusion matrix
-    cm = confusion_matrix(y_test, y_pred)
-    print("Confusion Matrix:")
-    print(cm)
+    # Confusion Matrix (Manual computation)
+    tp = np.sum((y_pred == 1) & (y_test == 1))  # True Positives
+    tn = np.sum((y_pred == 0) & (y_test == 0))  # True Negatives
+    fp = np.sum((y_pred == 1) & (y_test == 0))  # False Positives
+    fn = np.sum((y_pred == 0) & (y_test == 1))  # False Negatives
     
-    # Plot results
-    plt.figure(figsize=(10,6))
-    plt.scatter(X_test[:, 0], X_test[:, 1], c=y_pred.flatten(), cmap='coolwarm', marker='o', s=50, alpha=0.7)
-    plt.title("Test Set Predictions")
-    plt.xlabel("Feature 1")
-    plt.ylabel("Feature 2")
-    plt.colorbar()
-    plt.show()
+    print("Confusion Matrix:")
+    print(f"TP: {tp}, TN: {tn}, FP: {fp}, FN: {fn}")
