@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import numpy as np
 
 # Activation function: Sigmoid
@@ -51,10 +50,13 @@ class NeuralNetwork:
     
     def train(self, X, y, epochs=10000, learning_rate=0.1):
         for epoch in range(epochs):
-            # Forward and backward pass
+            # Forward pass
             self.forward(X)
+            
+            # Backward pass
             self.backward(X, y, learning_rate)
             
+            # Print loss every 1000 epochs
             if epoch % 1000 == 0:
                 loss = np.mean(np.square(y - self.final_output))
                 print(f"Epoch {epoch}, Loss: {loss}")
