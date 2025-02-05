@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 Neuron = __import__('6-neuron').Neuron
