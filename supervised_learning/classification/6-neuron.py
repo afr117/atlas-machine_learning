@@ -1,11 +1,4 @@
 #!/usr/bin/env python3
-"""
-Neuron class for binary classification
-
-This module defines a Neuron class that implements a single neuron 
-performing binary classification, including training and evaluation.
-"""
-
 import numpy as np
 
 
