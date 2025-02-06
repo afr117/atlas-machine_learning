@@ -57,7 +57,7 @@ class Neuron:
         Z = np.dot(self.__W, X) + self.__b  # Linear transformation
         self.__A = 1 / (1 + np.exp(-Z))  # Sigmoid activation function
         return self.__A
-        
+
     def gradient_descent(self, X, Y, A, alpha=0.05):
         """
         Performs one pass of gradient descent on the neuron to
