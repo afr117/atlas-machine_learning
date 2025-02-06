@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 
 """
-This module defines a class Neuron for binary classification using logistic regression.
-The class is initialized with the number of input features and computes the forward
-propagation, cost, and other relevant metrics for training a single neuron.
+This module defines a class Neuron for binary classification
+using logistic regression.
+The class is initialized with the number of input features
+and computes the forward
+propagation, cost, and other relevant metrics for
+training a single neuron.
 """
 
 import numpy as np
@@ -11,8 +14,10 @@ import numpy as np
 
 class Neuron:
     """
-    A class representing a single neuron for binary classification.
-    The neuron uses logistic regression for the forward propagation and cost calculation.
+    A class representing a single neuron for
+    binary classification.
+    The neuron uses logistic regression for
+    the forward propagation and cost calculation.
     """
 
     def __init__(self, nx):
@@ -69,13 +74,16 @@ class Neuron:
     @A.setter
     def A(self, value):
         """
-        Setter for the activation output, which is not allowed.
+        Setter for the activation output,
+        which is not allowed.
 
         Args:
-            value: The value to set for the activation output (which is disallowed).
+            value: The value to set for the activation output
+            (which is disallowed).
 
         Raises:
-            AttributeError: Always raises an error because activation output should not be set manually.
+            AttributeError: Always raises an error
+            because activation output should not be set manually.
         """
         raise AttributeError("can't set attribute")
 
@@ -84,11 +92,13 @@ class Neuron:
         Calculate the forward propagation of the neuron.
 
         Args:
-            X (numpy.ndarray): The input data, shape (nx, m), where nx is the number of input features
+            X (numpy.ndarray): The input data, shape (nx, m),
+            where nx is the number of input features
                                and m is the number of examples.
 
         Returns:
-            numpy.ndarray: The activated output of the neuron after applying the sigmoid activation function.
+            numpy.ndarray: The activated output of the neuron
+            after applying the sigmoid activation function.
         """
         Z = np.dot(self.__W, X) + self.__b  # Linear transformation
         self.__A = 1 / (1 + np.exp(-Z))  # Sigmoid activation function
@@ -96,14 +106,18 @@ class Neuron:
 
     def cost(self, Y, A):
         """
-        Calculates the cost of the model using logistic regression.
+        Calculates the cost of the model using
+        logistic regression.
 
         Args:
-            Y (numpy.ndarray): True labels for the input data, shape (1, m).
-            A (numpy.ndarray): Activated output of the neuron, shape (1, m).
+            Y (numpy.ndarray): True labels for the input data,
+            shape (1, m).
+            A (numpy.ndarray): Activated output of the neuron,
+            shape (1, m).
 
         Returns:
-            float: The cost of the model using the logistic regression cost function.
+            float: The cost of the model using the
+            logistic regression cost function.
         """
         m = Y.shape[1]  # Number of examples
         # Compute the cost using the logistic regression formula
