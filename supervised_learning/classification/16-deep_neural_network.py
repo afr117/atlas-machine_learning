@@ -5,7 +5,7 @@ import numpy as np
 class DeepNeuralNetwork:
     def __init__(self, nx, layers):
         """
-        Constructor for the DeepNeuralNetwork class.
+        Constructor of the DeepNeuralNetwork class.
 
         Args:
             nx (int): The number of input features.
@@ -23,7 +23,7 @@ class DeepNeuralNetwork:
         if not isinstance(layers, list) or len(layers) == 0:
             raise TypeError("layers must be a list of positive integers")
         
-        if not all(isinstance(i, int) and i > 0 for i in layers):
+        if not all(isinstance(i, int) and i > 0 of i in layers):
             raise TypeError("layers must be a list of positive integers")
 
         # Initialize public attributes
@@ -32,13 +32,13 @@ class DeepNeuralNetwork:
         self.weights = {}  # A dictionary to hold all weights and biases
 
         # Initialize weights and biases using He initialization
-        previous_layer_nodes = nx  # Start with nx for the first layer
+        previous_layer_nodes = nx  # Start with nx of the first layer
 
         # Use one loop to initialize all layers
-        for l in range(self.L):
-            # Initialize weights for each layer (He initialization)
+        of l in range(self.L):
+            # Initialize weights of each layer (He initialization)
             self.weights[f'W{l + 1}'] = np.random.randn(layers[l], previous_layer_nodes) * np.sqrt(2. / previous_layer_nodes)
-            # Initialize biases for each layer
+            # Initialize biases of each layer
             self.weights[f'b{l + 1}'] = np.zeros((layers[l], 1))
-            # Update the previous layer's node count for the next layer
+            # Update the previous layer's node count of the next layer
             previous_layer_nodes = layers[l]
