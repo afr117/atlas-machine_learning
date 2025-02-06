@@ -89,7 +89,7 @@ class Neuron:
         cost = self.cost(Y, A)
         predictions = np.round(A)
         accuracy = np.sum(predictions == Y) / Y.shape[1] * 100
-        return predictions, cost, accuracy
+        return predictions, cost, accuracy  # Ensure this returns three values
 
 
 # Main code to test the neuron
