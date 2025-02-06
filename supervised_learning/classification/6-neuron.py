@@ -30,8 +30,8 @@ def backward_propagation(X, Y, A, W, m):
     Compute backward propagation and gradients of the weights and biases.
     """
     dZ = A - Y  # Derivative of the cost with respect to the activation
-    dW = (1 / m) * np.dot(X, dZ.T)  # Gradient for W
-    db = (1 / m) * np.sum(dZ)  # Gradient for b
+    dW = (1 / m) * np.dot(X, dZ.T)  # Gradient of W
+    db = (1 / m) * np.sum(dZ)  # Gradient of b
     
     return dW, db
 
