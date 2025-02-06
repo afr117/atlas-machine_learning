@@ -1,53 +1,35 @@
 #!/usr/bin/env python3
-"""
-Neuron class for binary classification
-
-This module defines a Neuron class that implements a single neuron 
-performing binary classification, including training and evaluation.
-"""
 
 import numpy as np
 
-
 class Neuron:
-    """
-    Class that defines a single neuron for binary classification.
-    """
-
     def __init__(self, nx):
         """
-        Initializes the Neuron instance.
+        Class constructor of a neuron with binary classification.
 
         Args:
-            nx (int): The number of input features.
-
-        Attributes:
-            __W (numpy.ndarray): Weights vector of shape (1, nx).
-            __b (float): Bias, initialized to 0.
-            __A (float): Activation output, initialized to 0.
+        - nx (int): number of input features.
         """
         if not isinstance(nx, int):
             raise TypeError("nx must be an integer")
         if nx < 1:
             raise ValueError("nx must be a positive integer")
 
-        self.__W = np.random.randn(1, nx)
-        self.__b = 0
-        self.__A = 0
+        # Initialize the parameters W (weights) and b (bias)
+        self.__W = np.random.randn(1, nx)  # Weights initialization
+        self.__b = 0  # Bias initialization
+        self.__A = 0  # Activated output initialization
 
     @property
     def W(self):
-        """Getter for the private __W attribute."""
         return self.__W
 
     @property
     def b(self):
-        """Getter for the private __b attribute."""
         return self.__b
 
     @property
     def A(self):
-        """Getter for the private __A attribute."""
         return self.__A
 
     def sigmoid(self, Z):
@@ -55,71 +37,44 @@ class Neuron:
         Sigmoid activation function.
 
         Args:
-            Z (numpy.ndarray): Input to the sigmoid function.
+        - Z (numpy.ndarray): The input to the sigmoid function.
 
         Returns:
-            numpy.ndarray: Result after applying sigmoid.
+        - A (numpy.ndarray): The activated output.
         """
         return 1 / (1 + np.exp(-Z))
 
-    def forward_prop(self, X):
-        """
-        Performs forward propagation to calculate the neuron output.
-
-        Args:
-            X (numpy.ndarray): Input data of shape (nx, m).
-
-        Returns:
-            numpy.ndarray: Activation output after applying sigmoid.
-        """
-        Z = np.matmul(self.__W, X) + self.__b
-        self.__A = self.sigmoid(Z)
-        return self.__A
-
     def cost(self, Y, A):
         """
-        Calculates the cost using binary cross-entropy.
+        Calculates the cost of the model using logistic regression.
 
         Args:
-            Y (numpy.ndarray): True labels of shape (1, m).
-            A (numpy.ndarray): Predicted outputs of shape (1, m).
+        - Y (numpy.ndarray): True labels of shape (1, m).
+        - A (numpy.ndarray): Predicted activated output of shape (1, m).
 
         Returns:
-            float: The cost value.
+        - cost (float): The cost of the model.
         """
-        m = Y.shape[1]
-        cost = -np.sum(Y * np.log(A) + (1 - Y) * np.log(1 - A)) / m
+        m = Y.shape[1]  # Number of examples
+        # Compute the binary cross-entropy cost
+        cost = -np.mean(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A))
         return cost
-
-    def evaluate(self, X, Y):
-        """
-        Evaluates the neuron’s performance.
-
-        Args:
-            X (numpy.ndarray): Input data of shape (nx, m).
-            Y (numpy.ndarray): True labels of shape (1, m).
-
-        Returns:
-            tuple: The predicted labels (A) and the cost.
-        """
-        A = self.forward_prop(X)
-        cost = self.cost(Y, A)
-        predictions = np.round(A)
-        return predictions, cost
 
     def train(self, X, Y, iterations=5000, alpha=0.05):
         """
-        Trains the neuron using gradient descent.
+        Trains the neuron.
 
         Args:
-            X (numpy.ndarray): Input data of shape (nx, m).
-            Y (numpy.ndarray): True labels of shape (1, m).
-            iterations (int): Number of iterations to train over.
-            alpha (float): Learning rate.
+        - X (numpy.ndarray): Input data with shape (nx, m).
+        - Y (numpy.ndarray): True labels with shape (1, m).
+        - iterations (int): Number of iterations of training.
+        - alpha (float): Learning rate of gradient descent.
 
         Returns:
-            tuple: The predicted labels after training (A) and the final cost.
+        - A (numpy.ndarray): Final output after training.
+        - cost (float): Final cost after training.
         """
+        m = X.shape[1]  # Number of examples
         if not isinstance(iterations, int):
             raise TypeError("iterations must be an integer")
         if iterations <= 0:
@@ -128,16 +83,39 @@ class Neuron:
             raise TypeError("alpha must be a float")
         if alpha <= 0:
             raise ValueError("alpha must be positive")
+        
+        # Gradient descent loop (allowed to use one loop)
+        for _ in range(iterations):
+            # Forward propagation: Z = W * X + b, A = sigmoid(Z)
+            Z = np.dot(self.__W, X) + self.__b
+            self.__A = self.sigmoid(Z)
+            
+            # Compute the cost
+            cost = self.cost(Y, self.__A)
 
-        m = X.shape[1]
-        for i in range(iterations):
-            A = self.forward_prop(X)
-            dZ = A - Y
-            dW = np.matmul(dZ, X.T) / m
-            db = np.sum(dZ) / m
+            # Backward propagation: Compute gradients
+            dZ = self.__A - Y  # Derivative of the cost w.r.t. Z
+            dW = np.dot(dZ, X.T) / m  # Derivative w.r.t. W
+            db = np.sum(dZ) / m  # Derivative w.r.t. b
+
+            # Update parameters
             self.__W -= alpha * dW
             self.__b -= alpha * db
 
-        A = self.forward_prop(X)
-        cost = self.cost(Y, A)
-        return A, cost               
+        return self.__A, cost
+
+    def evaluate(self, X, Y):
+        """
+        Evaluates the neuron after training.
+
+        Args:
+        - X (numpy.ndarray): Input data with shape (nx, m).
+        - Y (numpy.ndarray): True labels with shape (1, m).
+
+        Returns:
+        - A (numpy.ndarray): The activated output of the neuron.
+        - cost (float): The cost of the model.
+        """
+        # Forward propagation
+        A, cost = self.train(X, Y, iterations=0, alpha=0)  # Only get the forward output
+        return A, cost
