@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
+
 import numpy as np
+
 class Neuron:
     def __init__(self, nx):
         if not isinstance(nx, int):
@@ -60,7 +62,6 @@ class Neuron:
         if alpha <= 0:
             raise ValueError("alpha must be positive")
         
-        # Merging training and evaluation steps into a single loop
         for i in range(iterations):
             # Forward propagation
             A = self.forward_prop(X)
@@ -74,12 +75,17 @@ class Neuron:
             # Update parameters
             self.update_params(dW, db, alpha)
             
-            # Evaluate performance on each iteration
+            # If cost is NaN, handle it
+            if np.isnan(cost):
+                print("Warning: cost is NaN. Training may be unstable.")
+                break
+            
+            # Output every 500 iterations or last iteration in binary
             if i % 500 == 0 or i == iterations - 1:  # Every 500 iterations or last iteration
                 # Training performance
-                train_accuracy = np.sum(A == Y) / Y.shape[1] * 100
+                train_accuracy = np.sum(np.round(A) == Y) / Y.shape[1] * 100
                 print(f"Iteration {i}/{iterations}:")
-                print("Train cost:", np.round(cost, decimals=10))
+                print(f"Train cost: {np.round(cost, decimals=10)}")
                 print(f"Train accuracy: {np.round(train_accuracy, decimals=10)}%")
                 
         return self.__A, cost
@@ -87,9 +93,11 @@ class Neuron:
     def evaluate(self, X, Y):
         A = self.forward_prop(X)
         cost = self.cost(Y, A)
-        predictions = np.round(A)
+        predictions = np.round(A).astype(int)  # Ensure binary output
         accuracy = np.sum(predictions == Y) / Y.shape[1] * 100
-        return predictions, cost, accuracy  # Ensure this returns three values
+        
+        # Return binary format for the predictions
+        return predictions, cost, accuracy
 
 
 # Main code to test the neuron
@@ -114,8 +122,10 @@ if __name__ == '__main__':
     # Evaluating on development data after training is complete
     predictions, cost_dev, accuracy_dev = neuron.evaluate(X_dev, Y_dev)
     
-    # Print final evaluation results
+    # Print final evaluation results in binary format
     print("Final Dev cost:", np.round(cost_dev, decimals=10))
     print(f"Final Dev accuracy: {np.round(accuracy_dev, decimals=10)}%")
-    print("Dev predictions:", np.round(predictions, decimals=10))
-    print("Final Neuron A:", np.round(neuron.A, decimals=10))
+    print("Dev predictions:")
+    print(predictions)  # Binary predictions
+    print("Final Neuron A:")
+    print(np.round(neuron.A, decimals=10))  # Sigmoid output in binary
