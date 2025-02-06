@@ -9,6 +9,7 @@ class Neuron:
         if nx <= 0:
             raise ValueError("nx must be a positive integer")
         
+        # Random initialization for weights
         self.__W = np.random.randn(1, nx)
         self.__b = 0
         self.__A = 0
@@ -70,7 +71,7 @@ class Neuron:
         if alpha <= 0:
             raise ValueError("alpha must be positive")
         
-        # Training loop
+        # Training loop with more iterations for proper training
         for i in range(iterations):
             # Forward propagation
             A = self.forward_prop(X)
@@ -92,3 +93,38 @@ class Neuron:
         cost = self.cost(Y, A)
         predictions = np.round(A)
         return predictions, cost
+
+
+# Main code to test
+import numpy as np
+Neuron = __import__('6-neuron').Neuron
+
+# Loading training data
+lib_train = np.load('../data/Binary_Train.npz')
+X_train_3D, Y_train = lib_train['X'], lib_train['Y']
+X_train = X_train_3D.reshape((X_train_3D.shape[0], -1)).T
+
+# Loading development data
+lib_dev = np.load('../data/Binary_Dev.npz')
+X_dev_3D, Y_dev = lib_dev['X'], lib_dev['Y']
+X_dev = X_dev_3D.reshape((X_dev_3D.shape[0], -1)).T
+
+# Initializing the neuron
+np.random.seed(0)
+neuron = Neuron(X_train.shape[0])
+
+# Training the neuron with 5000 iterations
+A, cost = neuron.train(X_train, Y_train, iterations=5000, alpha=0.05)
+accuracy = np.sum(A == Y_train) / Y_train.shape[1] * 100
+print("Train cost:", np.round(cost, decimals=10))
+print("Train accuracy: {}%".format(np.round(accuracy, decimals=10)))
+print("Train data:", np.round(A, decimals=10))
+print("Train Neuron A:", np.round(neuron.A, decimals=10))
+
+# Evaluating the neuron on dev data
+A, cost = neuron.evaluate(X_dev, Y_dev)
+accuracy = np.sum(A == Y_dev) / Y_dev.shape[1] * 100
+print("Dev cost:", np.round(cost, decimals=10))
+print("Dev accuracy: {}%".format(np.round(accuracy, decimals=10)))
+print("Dev data:", np.round(A, decimals=10))
+print("Dev Neuron A:", np.round(neuron.A, decimals=10))
