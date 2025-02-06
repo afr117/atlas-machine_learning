@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 """
-This module defines a NeuralNetwork class used for binary classification.
+This module defines a NeuralNetwork class used of binary classification.
 The network consists of a single hidden layer and an output layer. The class
 performs forward propagation, computes the cost using binary cross-entropy loss,
 and evaluates predictions.
@@ -12,7 +12,7 @@ import numpy as np
 
 class NeuralNetwork:
     """
-    A neural network with a single hidden layer, used for binary classification.
+    A neural network with a single hidden layer, used of binary classification.
     The network performs forward propagation, cost calculation, and evaluation of predictions.
     """
 
@@ -21,7 +21,7 @@ class NeuralNetwork:
         Initializes the neural network by validating the input dimensions and setting up the weights.
 
         Args:
-            nx (int): The number of input features for the neural network.
+            nx (int): The number of input features of the neural network.
             nodes (int): The number of nodes in the hidden layer.
 
         Raises:
@@ -38,35 +38,35 @@ class NeuralNetwork:
         if nodes < 1:
             raise ValueError("nodes must be a positive integer")
 
-        # Initialize the weights, biases, and activated outputs for both layers
-        self.W1 = np.random.randn(nodes, nx)  # Weights for the hidden layer
-        self.b1 = np.zeros((nodes, 1))  # Bias for the hidden layer
-        self.A1 = np.zeros((nodes, 1))  # Activated output for the hidden layer
+        # Initialize the weights, biases, and activated outputs of both layers
+        self.W1 = np.random.randn(nodes, nx)  # Weights of the hidden layer
+        self.b1 = np.zeros((nodes, 1))  # Bias of the hidden layer
+        self.A1 = np.zeros((nodes, 1))  # Activated output of the hidden layer
 
-        self.W2 = np.random.randn(1, nodes)  # Weights for the output layer
-        self.b2 = np.zeros((1, 1))  # Bias for the output layer
-        self.A2 = np.zeros((1, 1))  # Activated output for the output layer
+        self.W2 = np.random.randn(1, nodes)  # Weights of the output layer
+        self.b2 = np.zeros((1, 1))  # Bias of the output layer
+        self.A2 = np.zeros((1, 1))  # Activated output of the output layer
 
     def forward_prop(self, X):
         """
-        Perform forward propagation to compute the activations for both layers.
+        Perform forward propagation to compute the activations of both layers.
 
         Args:
             X (numpy.ndarray): The input data, shape (nx, m), where nx is the number of input features
                                and m is the number of examples.
 
         Returns:
-            tuple: The activations for the hidden layer (A1) and the output layer (A2).
+            tuple: The activations of the hidden layer (A1) and the output layer (A2).
         """
         # Validate the shapes of the input data and weights
         if self.W1.shape[1] != X.shape[0]:
             raise ValueError("Shape mismatch: W1 and X are not aligned.")
         
-        Z1 = np.dot(self.W1, X) + self.b1  # Linear transformation for the hidden layer
-        self.A1 = 1 / (1 + np.exp(-Z1))  # Sigmoid activation function for the hidden layer
+        Z1 = np.dot(self.W1, X) + self.b1  # Linear transformation of the hidden layer
+        self.A1 = 1 / (1 + np.exp(-Z1))  # Sigmoid activation function of the hidden layer
 
-        Z2 = np.dot(self.W2, self.A1) + self.b2  # Linear transformation for the output layer
-        self.A2 = 1 / (1 + np.exp(-Z2))  # Sigmoid activation function for the output layer
+        Z2 = np.dot(self.W2, self.A1) + self.b2  # Linear transformation of the output layer
+        self.A2 = 1 / (1 + np.exp(-Z2))  # Sigmoid activation function of the output layer
 
         return self.A1, self.A2
 
@@ -75,7 +75,7 @@ class NeuralNetwork:
         Calculate the cost using binary cross-entropy loss.
 
         Args:
-            Y (numpy.ndarray): True labels for the input data, shape (1, m).
+            Y (numpy.ndarray): True labels of the input data, shape (1, m).
             A (numpy.ndarray): Predicted output of the neural network, shape (1, m).
 
         Returns:
@@ -83,7 +83,7 @@ class NeuralNetwork:
         """
         m = Y.shape[1]  # Number of examples
 
-        # Check if the shapes of Y and A are compatible for element-wise operations
+        # Check if the shapes of Y and A are compatible of element-wise operations
         if Y.shape != A.shape:
             raise ValueError("Shape mismatch: Y and A must have the same shape.")
         
@@ -101,7 +101,7 @@ class NeuralNetwork:
 
         Returns:
             tuple: A tuple containing:
-                - numpy.ndarray: The predictions (1 for A >= 0.5, otherwise 0).
+                - numpy.ndarray: The predictions (1 of A >= 0.5, otherwise 0).
                 - float: The cost of the model.
         """
         _, A = self.forward_prop(X)  # Perform forward propagation
