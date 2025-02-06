@@ -35,12 +35,12 @@ class Neuron:
             raise TypeError("nx must be an integer")
         if nx < 1:
             raise ValueError("nx must be a positive integer")
-        
+
         # Initialize weights, bias, and activation output
         self.__W = np.random.randn(1, nx)  # Weights initialized randomly
         self.__b = 0  # Bias initialized to 0
         self.__A = 0  # Activated output initialized to 0
-    
+
     def forward_prop(self, X):
         """
         Performs forward propagation using the sigmoid activation function.
@@ -57,7 +57,7 @@ class Neuron:
         Z = np.dot(self.__W, X) + self.__b  # Linear transformation
         self.__A = 1 / (1 + np.exp(-Z))  # Sigmoid activation function
         return self.__A
-
+        
     def gradient_descent(self, X, Y, A, alpha=0.05):
         """
         Performs one pass of gradient descent on the neuron to
@@ -69,7 +69,7 @@ class Neuron:
             A (numpy.ndarray): The activated output from forward propagation,
             shape (1, m).
             alpha (float, optional): The learning rate. Default is 0.05.
-        
+
         Updates:
             The weights and bias are updated using the
             gradient descent rule.
