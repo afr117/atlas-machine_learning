@@ -33,9 +33,12 @@ class DeepNeuralNetwork:
 
         # Initialize weights and biases using He initialization
         previous_layer_nodes = nx  # Start with nx for the first layer
-        
+
         # Use one loop to initialize all layers
-        for l in range(1, self.L + 1):
-            self.weights[f'W{l}'] = np.random.randn(layers[l - 1], previous_layer_nodes) * np.sqrt(2. / previous_layer_nodes)
-            self.weights[f'b{l}'] = np.zeros((layers[l - 1], 1))  # Biases initialized to zero
-            previous_layer_nodes = layers[l - 1]  # Update the number of nodes for the next layer
+        for l in range(self.L):
+            # Initialize weights for each layer (He initialization)
+            self.weights[f'W{l + 1}'] = np.random.randn(layers[l], previous_layer_nodes) * np.sqrt(2. / previous_layer_nodes)
+            # Initialize biases for each layer
+            self.weights[f'b{l + 1}'] = np.zeros((layers[l], 1))
+            # Update the previous layer's node count for the next layer
+            previous_layer_nodes = layers[l]
