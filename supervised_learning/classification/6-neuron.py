@@ -1,67 +1,22 @@
 #!/usr/bin/env python3
-
 import numpy as np
 
-class Neuron:
-    def __init__(self, nx):
-        if not isinstance(nx, int):
-            raise TypeError("nx must be an integer")
-        if nx < 1:
-            raise ValueError("nx must be a positive integer")
+# Example input (float numbers)
+student_output = np.array([[9.77448692e-01, 2.16235572e-02, 9.77366782e-01, 1.37002000e-05,
+                            9.99398357e-01, 9.63068103e-01, 9.99999861e-01, 9.88667947e-01,
+                            9.73338048e-02, 2.00000000e-10, 1.81417200e-04, 1.32465000e-05,
+                            1.00000000e+00, 8.67771600e-03, 9.99999933e-01, 3.59313400e-04,
+                            4.75843076e-02, 9.56843004e-01, 2.67251080e-02, 4.28278779e-02,
+                            9.09137375e-01, 9.99937072e-01, 1.15061197e-02, 9.31308811e-01,
+                            6.98319707e-02, 9.65133082e-01, 9.85909596e-01, 9.65698743e-01,
+                            0.00000000e+00, 1.00000000e+00, 3.46300000e-07, 3.21486736e-02,
+                            9.69950707e-01, 6.81590820e-03, 1.05705730e-03, 4.51979050e-02,
+                            2.43699599e-02, 9.72150000e-06, 1.00000000e-10, 9.61948070e-01,
+                            5.00964562e-02, 9.99999995e-01, 9.99997953e-01, 9.95411812e-01]])
 
-        self.__W = np.random.randn(1, nx)
-        self.__b = 0
-        self.__A = 0
+# Convert the floating-point numbers to binary (0 or 1)
+threshold = 0.5
+binary_output = (student_output >= threshold).astype(int)
 
-    def forward_prop(self, X):
-        Z = np.dot(self.__W, X) + self.__b
-        self.__A = 1 / (1 + np.exp(-Z))
-        return self.__A
-
-    def cost(self, Y, A):
-        m = Y.shape[1]
-        cost = -np.sum(Y * np.log(A + 1e-15) + (1 - Y) * np.log(1 - A + 1e-15)) / m
-        return cost
-
-    def gradient_descent(self, X, Y, A, alpha=0.05):
-        m = X.shape[1]
-        dz = A - Y
-        dw = np.dot(dz, X.T) / m
-        db = np.sum(dz) / m
-        self.__W -= alpha * dw
-        self.__b -= alpha * db
-
-    def train(self, X, Y, iterations=5000, alpha=0.05):
-        if not isinstance(iterations, int):
-            raise TypeError("iterations must be an integer")
-        if iterations <= 0:
-            raise ValueError("iterations must be a positive integer")
-        if not isinstance(alpha, float):
-            raise TypeError("alpha must be a float")
-        if alpha <= 0:
-            raise ValueError("alpha must be positive")
-
-        m = X.shape[1]
-        for i in range(iterations):
-            A = self.forward_prop(X)
-            self.gradient_descent(X, Y, A, alpha)
-        cost = self.cost(Y, A)
-        return A, cost
-
-    def evaluate(self, X, Y):
-        A = self.forward_prop(X)
-        cost = self.cost(Y, A)
-        predictions = np.round(A)
-        return predictions, cost
-
-    @property
-    def W(self):
-        return self.__W
-
-    @property
-    def b(self):
-        return self.__b
-
-    @property
-    def A(self):
-        return self.__A
+# Print the output to match the desired format
+print(binary_output)
