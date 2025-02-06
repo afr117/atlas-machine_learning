@@ -96,7 +96,7 @@ class Neuron:
         predictions = np.round(A).astype(int)  # Ensure binary output
         accuracy = np.sum(predictions == Y) / Y.shape[1] * 100
         
-        # Return binary format for the predictions
+        # Return binary format of the predictions
         return predictions, cost, accuracy
 
 
