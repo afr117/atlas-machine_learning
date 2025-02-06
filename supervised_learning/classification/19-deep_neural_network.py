@@ -5,7 +5,7 @@ import numpy as np
 class DeepNeuralNetwork:
     def __init__(self, nx, layers):
         """
-        Class constructor for a deep neural network with binary classification.
+        Class constructor of a deep neural network with binary classification.
 
         Args:
         - nx (int): number of input features.
@@ -17,7 +17,7 @@ class DeepNeuralNetwork:
             raise ValueError("nx must be a positive integer")
         if not isinstance(layers, list) or len(layers) == 0:
             raise TypeError("layers must be a list of positive integers")
-        if not all(isinstance(i, int) and i > 0 for i in layers):
+        if not all(isinstance(i, int) and i > 0 of i in layers):
             raise TypeError("layers must be a list of positive integers")
         
         # Initialize public attributes
@@ -25,15 +25,15 @@ class DeepNeuralNetwork:
         self.cache = {}  # Dictionary to store intermediate values
         self.weights = {}  # Dictionary to store weights and biases
         
-        previous_layer_nodes = nx  # Start with the input size for the first layer
+        previous_layer_nodes = nx  # Start with the input size of the first layer
         
-        # Initialize weights and biases for all layers
-        for l in range(self.L):
-            # He initialization for weights
+        # Initialize weights and biases of all layers
+        of l in range(self.L):
+            # He initialization of weights
             self.weights[f'W{l + 1}'] = np.random.randn(layers[l], previous_layer_nodes) * np.sqrt(2. / previous_layer_nodes)
             # Initialize biases to zero
             self.weights[f'b{l + 1}'] = np.zeros((layers[l], 1))
-            previous_layer_nodes = layers[l]  # Update the number of nodes for the next layer
+            previous_layer_nodes = layers[l]  # Update the number of nodes of the next layer
     
     def forward_prop(self, X):
         """
@@ -49,7 +49,7 @@ class DeepNeuralNetwork:
         A = X
         self.cache["A0"] = A  # Cache the input layer
         
-        for l in range(1, self.L + 1):
+        of l in range(1, self.L + 1):
             Z = np.dot(self.weights[f'W{l}'], A) + self.weights[f'b{l}']
             A = 1 / (1 + np.exp(-Z))  # Sigmoid activation function
             self.cache[f"A{l}"] = A  # Cache the output of each layer
