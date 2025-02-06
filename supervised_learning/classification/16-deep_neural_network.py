@@ -9,7 +9,7 @@ class DeepNeuralNetwork:
 
         Args:
             nx (int): The number of input features.
-            layers (list): A list of the number of nodes in each layer.
+            layers (list): A list representing the number of nodes in each layer.
 
         Raises:
             TypeError: If nx is not an integer or layers is not a list of positive integers.
@@ -33,6 +33,8 @@ class DeepNeuralNetwork:
 
         # Initialize weights and biases using He initialization
         previous_layer_nodes = nx  # Start with nx for the first layer
+        
+        # Use one loop to initialize all layers
         for l in range(1, self.L + 1):
             self.weights[f'W{l}'] = np.random.randn(layers[l - 1], previous_layer_nodes) * np.sqrt(2. / previous_layer_nodes)
             self.weights[f'b{l}'] = np.zeros((layers[l - 1], 1))  # Biases initialized to zero
