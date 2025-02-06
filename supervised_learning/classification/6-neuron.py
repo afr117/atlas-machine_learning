@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 
 import numpy as np
-
 class Neuron:
     def __init__(self, nx):
-        """Initializes the neuron"""
         if not isinstance(nx, int):
             raise TypeError("nx must be an integer")
         if nx <= 0:
@@ -17,37 +15,30 @@ class Neuron:
     
     @property
     def W(self):
-        """Return weights"""
         return self.__W
     
     @property
     def b(self):
-        """Return bias"""
         return self.__b
     
     @property
     def A(self):
-        """Return activation"""
         return self.__A
     
     def sigmoid(self, Z):
-        """Sigmoid activation function"""
         return 1 / (1 + np.exp(-Z))
     
     def forward_prop(self, X):
-        """Perform forward propagation to calculate activation"""
         Z = np.dot(self.__W, X) + self.__b
         self.__A = self.sigmoid(Z)
         return self.__A
     
     def cost(self, Y, A):
-        """Calculate cost using binary cross-entropy"""
         m = Y.shape[1]
         cost = -1 / m * np.sum(Y * np.log(A) + (1 - Y) * np.log(1 - A))
         return cost
     
     def backward_prop(self, X, Y):
-        """Perform backward propagation to calculate gradients"""
         m = X.shape[1]
         dZ = self.__A - Y
         dW = 1 / m * np.dot(dZ, X.T)
@@ -55,13 +46,10 @@ class Neuron:
         return dW, db
     
     def update_params(self, dW, db, alpha):
-        """Update weights and bias using gradient descent"""
         self.__W -= alpha * dW
         self.__b -= alpha * db
     
     def train(self, X, Y, iterations=5000, alpha=0.05):
-        """Train the neuron"""
-        # Validate input
         if not isinstance(iterations, int):
             raise TypeError("iterations must be an integer")
         if iterations <= 0:
@@ -72,7 +60,7 @@ class Neuron:
         if alpha <= 0:
             raise ValueError("alpha must be positive")
         
-        # Training loop with more iterations for proper training
+        # Merging training and evaluation steps into a single loop
         for i in range(iterations):
             # Forward propagation
             A = self.forward_prop(X)
@@ -85,15 +73,24 @@ class Neuron:
             
             # Update parameters
             self.update_params(dW, db, alpha)
-        
+            
+            # Evaluate performance on each iteration
+            if i % 500 == 0 or i == iterations - 1:  # Every 500 iterations or last iteration
+                # Training performance
+                train_accuracy = np.sum(A == Y) / Y.shape[1] * 100
+                print(f"Iteration {i}/{iterations}:")
+                print("Train cost:", np.round(cost, decimals=10))
+                print(f"Train accuracy: {np.round(train_accuracy, decimals=10)}%")
+                
         return self.__A, cost
     
     def evaluate(self, X, Y):
-        """Evaluate the neuron performance on data"""
         A = self.forward_prop(X)
         cost = self.cost(Y, A)
         predictions = np.round(A)
-        return predictions, cost
+        accuracy = np.sum(predictions == Y) / Y.shape[1] * 100
+        return predictions, cost, accuracy
+
 
 # Main code to test the neuron
 if __name__ == '__main__':
@@ -113,16 +110,12 @@ if __name__ == '__main__':
     
     # Training the neuron with 5000 iterations
     A, cost = neuron.train(X_train, Y_train, iterations=5000, alpha=0.05)
-    accuracy = np.sum(A == Y_train) / Y_train.shape[1] * 100
-    print("Train cost:", np.round(cost, decimals=10))
-    print("Train accuracy: {}%".format(np.round(accuracy, decimals=10)))
-    print("Train data:", np.round(A, decimals=10))
-    print("Train Neuron A:", np.round(neuron.A, decimals=10))
     
-    # Evaluating the neuron on dev data
-    A, cost = neuron.evaluate(X_dev, Y_dev)
-    accuracy = np.sum(A == Y_dev) / Y_dev.shape[1] * 100
-    print("Dev cost:", np.round(cost, decimals=10))
-    print("Dev accuracy: {}%".format(np.round(accuracy, decimals=10)))
-    print("Dev data:", np.round(A, decimals=10))
-    print("Dev Neuron A:", np.round(neuron.A, decimals=10))
+    # Evaluating on development data after training is complete
+    predictions, cost_dev, accuracy_dev = neuron.evaluate(X_dev, Y_dev)
+    
+    # Print final evaluation results
+    print("Final Dev cost:", np.round(cost_dev, decimals=10))
+    print(f"Final Dev accuracy: {np.round(accuracy_dev, decimals=10)}%")
+    print("Dev predictions:", np.round(predictions, decimals=10))
+    print("Final Neuron A:", np.round(neuron.A, decimals=10))
