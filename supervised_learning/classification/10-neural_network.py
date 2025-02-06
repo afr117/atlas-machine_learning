@@ -24,12 +24,12 @@ class NeuralNetwork:
         if nodes < 1:
             raise ValueError("nodes must be a positive integer")
 
-        # Initialize weights and biases for the hidden layer
+        # Initialize weights and biases the hidden layer
         self.__W1 = np.random.randn(nodes, nx)
         self.__b1 = np.zeros((nodes, 1))
         self.__A1 = 0
 
-        # Initialize weights and biases for the output layer
+        # Initialize weights and biases the output layer
         self.__W2 = np.random.randn(1, nodes)
         self.__b2 = np.zeros((1, 1))
         self.__A2 = 0
@@ -70,7 +70,7 @@ class NeuralNetwork:
         X: numpy.ndarray with shape (nx, m) that contains the input data.
 
         Returns:
-        The activated outputs for the hidden layer (__A1) and the output layer (__A2).
+        The activated outputs of the hidden layer (__A1) and the output layer (__A2).
         """
         # Calculate Z1 = W1 * X + b1
         Z1 = np.dot(self.__W1, X) + self.__b1
