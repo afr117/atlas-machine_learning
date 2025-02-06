@@ -96,7 +96,7 @@ class Neuron:
 
 
 # Main code to test
-import numpy as np
+
 Neuron = __import__('6-neuron').Neuron
 
 # Loading training data
