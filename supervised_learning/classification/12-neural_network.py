@@ -58,6 +58,10 @@ class NeuralNetwork:
         Returns:
             tuple: The activations for the hidden layer (A1) and the output layer (A2).
         """
+        # Validate the shapes of the input data and weights
+        if self.W1.shape[1] != X.shape[0]:
+            raise ValueError("Shape mismatch: W1 and X are not aligned.")
+        
         Z1 = np.dot(self.W1, X) + self.b1  # Linear transformation for the hidden layer
         self.A1 = 1 / (1 + np.exp(-Z1))  # Sigmoid activation function for the hidden layer
 
@@ -79,6 +83,10 @@ class NeuralNetwork:
         """
         m = Y.shape[1]  # Number of examples
 
+        # Check if the shapes of Y and A are compatible for element-wise operations
+        if Y.shape != A.shape:
+            raise ValueError("Shape mismatch: Y and A must have the same shape.")
+        
         # Compute the binary cross-entropy cost
         cost = -np.mean(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A))
         return cost
