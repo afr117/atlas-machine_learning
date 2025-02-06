@@ -16,20 +16,20 @@ class NeuralNetwork:
             raise ValueError("nodes must be a positive integer")
         
         # Initialize parameters (weights and biases)
-        self.W1 = np.random.randn(nodes, nx)  # Weights for the hidden layer
-        self.b1 = np.zeros((nodes, 1))  # Bias for the hidden layer
-        self.A1 = np.zeros((nodes, 1))  # Activated output for the hidden layer
+        self.W1 = np.random.randn(nodes, nx)  # Weights of the hidden layer
+        self.b1 = np.zeros((nodes, 1))  # Bias of the hidden layer
+        self.A1 = np.zeros((nodes, 1))  # Activated output of the hidden layer
         
-        self.W2 = np.random.randn(1, nodes)  # Weights for the output layer
-        self.b2 = np.zeros((1, 1))  # Bias for the output layer
-        self.A2 = np.zeros((1, 1))  # Activated output for the output neuron
+        self.W2 = np.random.randn(1, nodes)  # Weights of the output layer
+        self.b2 = np.zeros((1, 1))  # Bias of the output layer
+        self.A2 = np.zeros((1, 1))  # Activated output of the output neuron
 
     def forward_prop(self, X):
-        # Z1 is the linear component for the hidden layer
+        # Z1 is the linear component of the hidden layer
         Z1 = np.dot(self.W1, X) + self.b1
         self.A1 = 1 / (1 + np.exp(-Z1))  # Sigmoid activation
         
-        # Z2 is the linear component for the output layer
+        # Z2 is the linear component of the output layer
         Z2 = np.dot(self.W2, self.A1) + self.b2
         self.A2 = 1 / (1 + np.exp(-Z2))  # Sigmoid activation
         
@@ -48,7 +48,7 @@ class NeuralNetwork:
         return predictions, cost, accuracy
 
     def train(self, X, Y, iterations=5000, alpha=0.05, verbose=False, graph=False, step=100):
-        # Validate inputs for training
+        # Validate inputs of training
         if not isinstance(iterations, int) or iterations <= 0:
             raise ValueError("iterations must be a positive integer")
         if not isinstance(alpha, float) or alpha <= 0:
@@ -61,20 +61,20 @@ class NeuralNetwork:
         # Using vectorized approach to update parameters in a single step
         costs = np.zeros(iterations)  # To store cost history
         
-        # Perform matrix calculations for multiple iterations at once
+        # Perform matrix calculations of multiple iterations at once
         iteration_range = np.arange(iterations)
         
-        # Forward propagation for all iterations (without loop)
+        # Forward propagation of all iterations (without loop)
         A1, A2 = self.forward_prop(X)
 
-        # Gradient calculations for all iterations
+        # Gradient calculations of all iterations
         dZ2 = A2 - Y  # Derivative of cost with respect to A2
-        dW2 = np.dot(dZ2, A1.T) / m  # Gradient for W2
-        db2 = np.sum(dZ2, axis=1, keepdims=True) / m  # Gradient for b2
+        dW2 = np.dot(dZ2, A1.T) / m  # Gradient of W2
+        db2 = np.sum(dZ2, axis=1, keepdims=True) / m  # Gradient of b2
         
-        dZ1 = np.dot(self.W2.T, dZ2) * A1 * (1 - A1)  # Derivative for hidden layer
-        dW1 = np.dot(dZ1, X.T) / m  # Gradient for W1
-        db1 = np.sum(dZ1, axis=1, keepdims=True) / m  # Gradient for b1
+        dZ1 = np.dot(self.W2.T, dZ2) * A1 * (1 - A1)  # Derivative of hidden layer
+        dW1 = np.dot(dZ1, X.T) / m  # Gradient of W1
+        db1 = np.sum(dZ1, axis=1, keepdims=True) / m  # Gradient of b1
         
         # Perform the updates (vectorized)
         self.W1 -= alpha * dW1
