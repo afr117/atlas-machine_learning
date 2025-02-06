@@ -5,8 +5,7 @@ This module defines a class Neuron that represents a
 single neuron for binary classification.
 The class allows for forward propagation using the
 sigmoid activation function and performs
-gradient descent to optimize the
-neuron’s weights and bias.
+gradient descent to optimize the neuron’s weights and bias.
 """
 
 import numpy as np
@@ -22,8 +21,8 @@ class Neuron:
 
     def __init__(self, nx):
         """
-        Initializes the Neuron instance with random weights,
-        a bias, and sets the activation output to 0.
+        Initializes the Neuron instance with random weights, a bias,
+        and sets the activation output to 0.
 
         Args:
             nx (int): The number of input features to the neuron.
@@ -44,8 +43,7 @@ class Neuron:
     
     def forward_prop(self, X):
         """
-        Performs forward propagation using the
-        sigmoid activation function.
+        Performs forward propagation using the sigmoid activation function.
 
         Args:
             X (numpy.ndarray): The input data, shape (nx, m),
@@ -70,12 +68,11 @@ class Neuron:
             Y (numpy.ndarray): The true labels, shape (1, m).
             A (numpy.ndarray): The activated output from forward propagation,
             shape (1, m).
-            alpha (float, optional): The learning rate.
-            Default is 0.05.
+            alpha (float, optional): The learning rate. Default is 0.05.
         
         Updates:
-            The weights and bias are updated using
-            the gradient descent rule.
+            The weights and bias are updated using the
+            gradient descent rule.
         """
         m = X.shape[1]  # Number of examples
 
@@ -84,8 +81,7 @@ class Neuron:
         dw = np.dot(dz, X.T) / m  # Derivative of the cost with respect to W
         db = np.sum(dz) / m  # Derivative of the cost with respect to b
 
-        # Update the weights and bias using the
-        gradient descent rule
+        # Update the weights and bias using the gradient descent rule
         self.__W -= alpha * dw
         self.__b -= alpha * db
 
@@ -115,7 +111,6 @@ class Neuron:
         Getter for the activation output.
 
         Returns:
-            numpy.ndarray: The activation output of
-            the neuron.
+            numpy.ndarray: The activation output of the neuron.
         """
         return self.__A
