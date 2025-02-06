@@ -8,7 +8,7 @@ class Neuron:
         if nx <= 0:
             raise ValueError("nx must be a positive integer")
         
-        # Random initialization for weights
+        # Random initialization of weights
         self.__W = np.random.randn(1, nx)
         self.__b = 0
         self.__A = 0
