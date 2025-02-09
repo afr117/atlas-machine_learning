@@ -48,7 +48,7 @@ class Neuron:
         """
         m = Y.shape[1]
         cost = -np.sum(Y * np.log(A) + (1 - Y) * np.log(1 - A)) / m
-        return cost
+        return np.round(cost, decimals=10)
     
     def evaluate(self, X, Y):
         """
