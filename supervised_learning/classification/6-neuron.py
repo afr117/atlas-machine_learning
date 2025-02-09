@@ -1,81 +1,89 @@
 #!/usr/bin/env python3
+"""
+Defines a single neuron performing binary classification
+"""
 import numpy as np
 
-def sigmoid(z):
-    """
-    Sigmoid activation function.
-    """
-    return 1 / (1 + np.exp(-z))
 
-def cost_function(A, Y, m):
+class Neuron:
     """
-    Compute the cost function with regularization to avoid NaN values.
+    Class that defines a single neuron for binary classification
     """
-    epsilon = 1e-10  # A small value to prevent log(0) and division by zero errors
-    A = np.clip(A, epsilon, 1 - epsilon)  # Clipping to avoid log(0)
-    
-    cost = -1 / m * np.sum(Y * np.log(A) + (1 - Y) * np.log(1 - A))
-    return cost
-
-def forward_propagation(X, W, b):
-    """
-    Perform forward propagation through the network.
-    """
-    Z = np.dot(W.T, X) + b  # Linear step
-    A = sigmoid(Z)  # Sigmoid activation
-    return A
-
-def backward_propagation(X, Y, A, W, m):
-    """
-    Compute backward propagation and gradients of the weights and biases.
-    """
-    dZ = A - Y  # Derivative of the cost with respect to the activation
-    dW = (1 / m) * np.dot(X, dZ.T)  # Gradient of W
-    db = (1 / m) * np.sum(dZ)  # Gradient of b
-    
-    return dW, db
-
-def update_parameters(W, b, dW, db, learning_rate):
-    """
-    Update the parameters using gradient descent.
-    """
-    W = W - learning_rate * dW
-    b = b - learning_rate * db
-    return W, b
-
-def train_neural_network(X, Y, W, b, learning_rate, epochs):
-    """
-    Train the neural network of a given number of epochs.
-    """
-    m = X.shape[1]  # Number of training examples
-    
-    for i in range(epochs):
-        # Forward propagation
-        A = forward_propagation(X, W, b)
+    def __init__(self, nx):
+        """
+        Initializes the neuron
+        """
+        if not isinstance(nx, int):
+            raise TypeError("nx must be an integer")
+        if nx < 1:
+            raise ValueError("nx must be a positive integer")
         
-        # Compute the cost
-        cost = cost_function(A, Y, m)
-        
-        # Backward propagation
-        dW, db = backward_propagation(X, Y, A, W, m)
-        
-        # Update parameters
-        W, b = update_parameters(W, b, dW, db, learning_rate)
-        
-        # Print the cost at every 100th epoch
-        if i % 100 == 0:
-            print(f"Epoch {i} - Cost: {cost}")
+        self.__W = np.random.randn(1, nx)
+        self.__b = 0
+        self.__A = 0
     
-    return W, b
-
-# Example usage (with dummy data)
-np.random.seed(42)
-X = np.random.randn(5, 100)  # 5 features, 100 samples
-Y = np.random.randint(0, 2, (1, 100))  # Binary labels of 100 samples
-
-W = np.random.randn(5, 1)  # Random weights
-b = np.random.randn(1)  # Random bias
-learning_rate = 0.01
-epochs = 1000
-
-W, b = train_neural_network(X, Y, W, b, learning_rate, epochs)
+    @property
+    def W(self):
+        return self.__W
+    
+    @property
+    def b(self):
+        return self.__b
+    
+    @property
+    def A(self):
+        return self.__A
+    
+    def forward_prop(self, X):
+        """
+        Performs forward propagation using sigmoid activation function
+        """
+        Z = np.matmul(self.__W, X) + self.__b
+        self.__A = 1 / (1 + np.exp(-Z))
+        return self.__A
+    
+    def cost(self, Y, A):
+        """
+        Computes the cost using logistic regression loss
+        """
+        m = Y.shape[1]
+        cost = -np.sum(Y * np.log(A) + (1 - Y) * np.log(1 - A)) / m
+        return cost
+    
+    def evaluate(self, X, Y):
+        """
+        Evaluates the neuron’s predictions
+        """
+        A = self.forward_prop(X)
+        prediction = np.where(A >= 0.5, 1, 0)
+        cost = self.cost(Y, A)
+        return prediction, cost
+    
+    def gradient_descent(self, X, Y, A, alpha):
+        """
+        Performs one pass of gradient descent
+        """
+        m = Y.shape[1]
+        dW = np.matmul(A - Y, X.T) / m
+        db = np.sum(A - Y) / m
+        self.__W -= alpha * dW
+        self.__b -= alpha * db
+    
+    def train(self, X, Y, iterations=5000, alpha=0.05):
+        """
+        Trains the neuron using gradient descent
+        """
+        if not isinstance(iterations, int):
+            raise TypeError("iterations must be an integer")
+        if iterations <= 0:
+            raise ValueError("iterations must be a positive integer")
+        if not isinstance(alpha, float):
+            raise TypeError("alpha must be a float")
+        if alpha <= 0:
+            raise ValueError("alpha must be positive")
+        
+        for _ in range(iterations):
+            A = self.forward_prop(X)
+            self.gradient_descent(X, Y, A, alpha)
+        
+        return self.evaluate(X, Y)
