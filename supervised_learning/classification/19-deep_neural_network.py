@@ -1,73 +1,78 @@
 #!/usr/bin/env python3
+"""
+This module defines a deep neural network performing binary classification.
+"""
 
 import numpy as np
 
-class DeepNeuralNetwork:
-    def __init__(self, nx, layers):
-        """
-        Class constructor of a deep neural network with binary classification.
 
-        Args:
-        - nx (int): number of input features.
-        - layers (list): a list of the number of nodes in each layer.
-        """
+class DeepNeuralNetwork:
+    """Defines a deep neural network performing binary classification"""
+
+    def __init__(self, nx, layers):
+        """Class constructor"""
         if not isinstance(nx, int):
             raise TypeError("nx must be an integer")
         if nx < 1:
             raise ValueError("nx must be a positive integer")
         if not isinstance(layers, list) or len(layers) == 0:
             raise TypeError("layers must be a list of positive integers")
-        if not all(isinstance(i, int) and i > 0 of i in layers):
+        if any(map(lambda layer_size: not isinstance(layer_size, int) or
+                   layer_size <= 0, layers)):
             raise TypeError("layers must be a list of positive integers")
-        
-        # Initialize public attributes
-        self.L = len(layers)  # Number of layers
-        self.cache = {}  # Dictionary to store intermediate values
-        self.weights = {}  # Dictionary to store weights and biases
-        
-        previous_layer_nodes = nx  # Start with the input size of the first layer
-        
-        # Initialize weights and biases of all layers
-        of l in range(self.L):
-            # He initialization of weights
-            self.weights[f'W{l + 1}'] = np.random.randn(layers[l], previous_layer_nodes) * np.sqrt(2. / previous_layer_nodes)
-            # Initialize biases to zero
-            self.weights[f'b{l + 1}'] = np.zeros((layers[l], 1))
-            previous_layer_nodes = layers[l]  # Update the number of nodes of the next layer
-    
+
+        self.__L = len(layers)
+        self.__cache = {}
+        self.__weights = {}
+
+        # Ensure one blank line before nested function (fixes E306)
+
+        def initialize_weights(index, prev_layer):
+            """Recursively initializes weights"""
+            if index > self.__L:
+                return
+            self.__weights[f"W{index}"] = (
+                np.random.randn(layers[index - 1], prev_layer) *
+                np.sqrt(2 / prev_layer)
+            )
+            self.__weights[f"b{index}"] = np.zeros((layers[index - 1], 1))
+            initialize_weights(index + 1, layers[index - 1])
+
+        initialize_weights(1, nx)
+
+    @property
+    def L(self):
+        """Returns number of layers in the network"""
+        return self.__L
+
+    @property
+    def cache(self):
+        """Returns the cache dictionary"""
+        return self.__cache
+
+    @property
+    def weights(self):
+        """Returns the weights dictionary"""
+        return self.__weights
+
     def forward_prop(self, X):
-        """
-        Performs forward propagation through the network.
+        """Calculates forward propagation of the deep neural network"""
+        self.__cache["A0"] = X
 
-        Args:
-        - X (numpy.ndarray): Input data with shape (nx, m).
+        def activate(layer):
+            """Recursively computes activation"""
+            if layer > self.__L:
+                return self.__cache[f"A{self.__L}"]
+            W = self.__weights[f"W{layer}"]
+            b = self.__weights[f"b{layer}"]
+            Z = np.matmul(W, self.__cache[f"A{layer - 1}"]) + b
+            self.__cache[f"A{layer}"] = 1 / (1 + np.exp(-Z))
+            return activate(layer + 1)
 
-        Returns:
-        - A (numpy.ndarray): Activated output of the last layer (1, m).
-        - cache (dict): Dictionary containing all intermediate values.
-        """
-        A = X
-        self.cache["A0"] = A  # Cache the input layer
-        
-        of l in range(1, self.L + 1):
-            Z = np.dot(self.weights[f'W{l}'], A) + self.weights[f'b{l}']
-            A = 1 / (1 + np.exp(-Z))  # Sigmoid activation function
-            self.cache[f"A{l}"] = A  # Cache the output of each layer
-            
-        return A, self.cache
+        return activate(1), self.__cache
 
     def cost(self, Y, A):
-        """
-        Calculates the cost of the model using logistic regression.
-
-        Args:
-        - Y (numpy.ndarray): True labels of shape (1, m).
-        - A (numpy.ndarray): Predicted activated output of shape (1, m).
-
-        Returns:
-        - cost (float): The cost of the model.
-        """
-        m = Y.shape[1]  # Number of examples
-        # Compute the binary cross-entropy cost
-        cost = -np.mean(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A))
+        """Calculates the cost of the model using logistic regression"""
+        m = Y.shape[1]
+        cost = -np.sum(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A)) / m
         return cost
