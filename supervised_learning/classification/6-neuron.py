@@ -18,61 +18,45 @@ class Neuron:
         if nx < 1:
             raise ValueError("nx must be a positive integer")
         
-        np.random.seed(0)  # Ensure deterministic initialization
-        self.__W = np.random.randn(1, nx)
-        self.__b = 0
-        self.__A = 0
-    
-    @property
-    def W(self):
-        return self.__W
-    
-    @property
-    def b(self):
-        return self.__b
-    
-    @property
-    def A(self):
-        return self.__A
-    
+        self.W = np.random.randn(1, nx)
+        self.b = 0
+        self.A = 0
+
     def forward_prop(self, X):
         """
-        Performs forward propagation using sigmoid activation function
+        Performs forward propagation using a sigmoid activation function
         """
-        Z = np.matmul(self.__W, X) + self.__b
-        self.__A = 1 / (1 + np.exp(-Z))
-        return self.__A
-    
+        self.A = 1 / (1 + np.exp(-(np.matmul(self.W, X) + self.b)))
+        return self.A
+
     def cost(self, Y, A):
         """
-        Computes the cost using logistic regression loss
+        Computes the logistic regression cost function
         """
         m = Y.shape[1]
-        cost = -np.sum(Y * np.log(A) + (1 - Y) * np.log(1 - A)) / m
-        return np.round(cost, decimals=10)
-    
+        return -np.sum(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A)) / m
+
     def evaluate(self, X, Y):
         """
-        Evaluates the neuron’s predictions
+        Evaluates the neuron's predictions
         """
         A = self.forward_prop(X)
-        prediction = np.where(A >= 0.5, 1, 0)
         cost = self.cost(Y, A)
-        return prediction, cost
-    
-    def gradient_descent(self, X, Y, A, alpha):
+        return np.where(A >= 0.5, 1, 0), cost
+
+    def gradient_descent(self, X, Y, A, alpha=0.05):
         """
         Performs one pass of gradient descent
         """
         m = Y.shape[1]
-        dW = np.matmul(A - Y, X.T) / m
+        dW = np.matmul((A - Y), X.T) / m
         db = np.sum(A - Y) / m
-        self.__W -= np.round(alpha * dW, decimals=10)
-        self.__b -= np.round(alpha * db, decimals=10)
-    
+        self.W -= alpha * dW
+        self.b -= alpha * db
+
     def train(self, X, Y, iterations=5000, alpha=0.05):
         """
-        Trains the neuron using gradient descent
+        Trains the neuron
         """
         if not isinstance(iterations, int):
             raise TypeError("iterations must be an integer")
@@ -82,7 +66,7 @@ class Neuron:
             raise TypeError("alpha must be a float")
         if alpha <= 0:
             raise ValueError("alpha must be positive")
-        
+
         for _ in range(iterations):
             A = self.forward_prop(X)
             self.gradient_descent(X, Y, A, alpha)
