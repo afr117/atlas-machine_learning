@@ -72,17 +72,20 @@ class DeepNeuralNetwork:
     def gradient_descent(self, Y, cache, alpha=0.05):
         """Performs one pass of gradient descent on the neural network"""
         m = Y.shape[1]
-        L = self.__L
-        dZ = cache[f"A{L}"] - Y
-        def update_weights(layer, dZ, prev_A):
+        dZ = cache[f"A{self.__L}"] - Y
+        
+        def update_weights(layer, dZ):
             if layer < 1:
                 return
+            A_prev = cache[f"A{layer - 1}"]
             W = self.__weights[f"W{layer}"]
-            dW = np.matmul(dZ, prev_A.T) / m
+            dW = np.matmul(dZ, A_prev.T) / m
             db = np.sum(dZ, axis=1, keepdims=True) / m
             self.__weights[f"W{layer}"] -= alpha * dW
             self.__weights[f"b{layer}"] -= alpha * db
+            
             if layer > 1:
-                dZ = np.matmul(W.T, dZ) * (cache[f"A{layer - 1}"] * (1 - cache[f"A{layer - 1}"]))
-                update_weights(layer - 1, dZ, cache[f"A{layer - 2}"])
-        update_weights(L, dZ, cache[f"A{L-1}"])
+                dZ = np.matmul(W.T, dZ) * (A_prev * (1 - A_prev))
+                update_weights(layer - 1, dZ)
+        
+        update_weights(self.__L, dZ)
