@@ -8,17 +8,18 @@ import tensorflow.compat.v1 as tf
 
 tf.disable_eager_execution()
 
+
 def create_placeholders(nx, classes):
     """
     Creates two TensorFlow placeholders, x and y, for a neural network.
-    
+
     Args:
         nx (int): Number of feature columns in the input data.
         classes (int): Number of classes in the classifier.
-    
+
     Returns:
         tuple: x and y placeholders
-    
+
     x is the placeholder for the input data to the neural network.
     y is the placeholder for the one-hot labels for the input data.
     """
