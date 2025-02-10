@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
+import matplotlib.pyplot as plt
 
 class DeepNeuralNetwork:
     """Defines a deep neural network performing binary classification"""
@@ -89,7 +90,7 @@ class DeepNeuralNetwork:
         
         update_weights(self.__L, dZ)
     
-    def train(self, X, Y, iterations=5000, alpha=0.05):
+    def train(self, X, Y, iterations=5000, alpha=0.05, verbose=True, graph=True, step=100):
         """Trains the deep neural network"""
         if not isinstance(iterations, int):
             raise TypeError("iterations must be an integer")
@@ -99,10 +100,32 @@ class DeepNeuralNetwork:
             raise TypeError("alpha must be a float")
         if alpha <= 0:
             raise ValueError("alpha must be positive")
+        if not isinstance(step, int):
+            raise TypeError("step must be an integer")
+        if step < 1 or step > iterations:
+            raise ValueError("step must be positive and <= iterations")
 
-        # Updated training logic to remove recursion
-        for _ in range(iterations):
+        costs = []
+
+        for i in range(iterations + 1):
             A, cache = self.forward_prop(X)
-            self.gradient_descent(Y, cache, alpha)
+            cost = self.cost(Y, A)
+
+            if verbose and i % step == 0:
+                print(f"Cost after {i} iterations: {cost}")
+
+            if graph and i % step == 0:
+                costs.append((i, cost))
+
+            if i < iterations:
+                self.gradient_descent(Y, cache, alpha)
+
+        if graph:
+            x_vals, y_vals = zip(*costs)
+            plt.plot(x_vals, y_vals, 'b-')
+            plt.xlabel("Iteration")
+            plt.ylabel("Cost")
+            plt.title("Training Cost")
+            plt.show()
 
         return self.evaluate(X, Y)
