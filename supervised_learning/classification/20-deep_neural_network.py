@@ -47,8 +47,8 @@ class DeepNeuralNetwork:
 
     def forward_prop(self, X):
         """Calculates forward propagation of the deep neural network"""
-        self.__cache["A0"] = X
         
+        self.__cache["A0"] = X
         def activate(layer):
             if layer > self.__L:
                 return self.__cache[f"A{self.__L}"]
