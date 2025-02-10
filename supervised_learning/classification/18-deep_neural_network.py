@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+This module defines a deep neural network performing binary classification.
+"""
+
 import numpy as np
 
 
