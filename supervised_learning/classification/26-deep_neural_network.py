@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
 import numpy as np
 import pickle
-import matplotlib.pyplot as plt
 
 class DeepNeuralNetwork:
     """Defines a deep neural network performing binary classification"""
 
     def __init__(self, nx, layers):
         """Class constructor"""
-        if not isinstance(nx, int):
-            raise TypeError("nx must be an integer")
-        if nx < 1:
-            raise ValueError("nx must be a positive integer")
-        if not isinstance(layers, list) or len(layers) == 0:
-            raise TypeError("layers must be a list of positive integers")
-        if any(map(lambda l: not isinstance(l, int) or l <= 0, layers)):
+        if not isinstance(nx, int) or nx < 1:
+            raise TypeError("nx must be an integer") if not isinstance(nx, int) else ValueError("nx must be a positive integer")
+        if not isinstance(layers, list) or len(layers) == 0 or any(map(lambda l: not isinstance(l, int) or l <= 0, layers)):
             raise TypeError("layers must be a list of positive integers")
 
         self.__L = len(layers)
@@ -22,9 +17,7 @@ class DeepNeuralNetwork:
         self.__weights = {}
 
         for i in range(1, self.__L + 1):
-            self.__weights[f"W{i}"] = (
-                np.random.randn(layers[i - 1], nx if i == 1 else layers[i - 2]) * np.sqrt(2 / (nx if i == 1 else layers[i - 2]))
-            )
+            self.__weights[f"W{i}"] = np.random.randn(layers[i - 1], nx if i == 1 else layers[i - 2]) * np.sqrt(2 / (nx if i == 1 else layers[i - 2]))
             self.__weights[f"b{i}"] = np.zeros((layers[i - 1], 1))
 
     @property
@@ -74,30 +67,19 @@ class DeepNeuralNetwork:
             if i > 1:
                 dZ = np.matmul(self.__weights[f"W{i}"].T, dZ) * (A_prev * (1 - A_prev))
 
-    def train(self, X, Y, iterations=5000, alpha=0.05, verbose=True, graph=True, step=100):
+    def train(self, X, Y, iterations=5000, alpha=0.05, verbose=True):
         """Trains the deep neural network"""
         if not isinstance(iterations, int) or iterations < 1:
             raise TypeError("iterations must be an integer") if not isinstance(iterations, int) else ValueError("iterations must be a positive integer")
         if not isinstance(alpha, float) or alpha <= 0:
             raise TypeError("alpha must be a float") if not isinstance(alpha, float) else ValueError("alpha must be positive")
-        if verbose or graph:
-            if not isinstance(step, int) or step <= 0 or step > iterations:
-                raise TypeError("step must be an integer") if not isinstance(step, int) else ValueError("step must be positive and <= iterations")
 
-        costs = []
         for i in range(iterations):
             A, cache = self.forward_prop(X)
             self.gradient_descent(Y, cache, alpha)
-            if verbose and i % step == 0:
-                cost = self.cost(Y, A)
-                costs.append(cost)
-                print(f"Cost after {i} iterations: {cost}")
-        if graph:
-            plt.plot(range(0, iterations, step), costs, 'b-')
-            plt.xlabel("Iteration")
-            plt.ylabel("Cost")
-            plt.title("Training Cost")
-            plt.show()
+            if verbose and i % 100 == 0:
+                print(f"Cost after {i} iterations: {self.cost(Y, A)}")
+
         return self.evaluate(X, Y)
 
     def save(self, filename):
