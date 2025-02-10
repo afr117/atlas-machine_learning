@@ -103,7 +103,9 @@ class DeepNeuralNetwork:
         try:
             with open(filename, "wb") as f:
                 pickle.dump(self, f)
-            os.fsync(f.fileno())  # Ensure file is flushed to disk before closing
+            # Verify file is actually created
+            if not os.path.exists(filename):
+                raise OSError(f"File {filename} was not saved correctly")
         except Exception as e:
             print(f"Error saving model: {e}")
 
