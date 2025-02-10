@@ -26,7 +26,8 @@ class Neuron:
         """
         Performs forward propagation using a sigmoid activation function
         """
-        self.A = 1 / (1 + np.exp(-(np.matmul(self.W, X) + self.b)))
+        Z = np.matmul(self.W, X) + self.b
+        self.A = 1 / (1 + np.exp(-Z))
         return self.A
 
     def cost(self, Y, A):
