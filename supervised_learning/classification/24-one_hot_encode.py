@@ -11,13 +11,15 @@ def one_hot_encode(Y, classes):
     Converts a numeric label vector into a one-hot matrix.
 
     Parameters:
-    - Y (numpy.ndarray): A 1D array of shape (m,) containing numeric class labels.
+    - Y (numpy.ndarray): A 1D array of shape (m,)
+    containing numeric class labels.
     - classes (int): The total number of classes.
 
     Returns:
     - numpy.ndarray: A one-hot encoded matrix of shape (classes, m) where:
         - Each column represents a single label as a one-hot vector.
-    - None: If the input is invalid (e.g., incorrect type, dimension, or class range).
+    - None: If the input is invalid (e.g., incorrect type,
+    dimension, or class range).
     """
     if not isinstance(Y, np.ndarray) or not isinstance(classes, int):
         return None
