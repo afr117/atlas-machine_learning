@@ -52,7 +52,7 @@ class NeuralNetwork:
     @property
     def A2(self):
         return self.__A2
-        
+
     def forward_prop(self, X):
         """
         Performs forward propagation
