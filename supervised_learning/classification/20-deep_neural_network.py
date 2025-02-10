@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 class DeepNeuralNetwork:
     """Defines a deep neural network performing binary classification"""
 
@@ -24,11 +25,12 @@ class DeepNeuralNetwork:
             if index > self.__L:
                 return
             self.__weights[f"W{index}"] = (
-                np.random.randn(layers[index - 1], prev_layer) * np.sqrt(2 / prev_layer)
+                np.random.randn(layers[index - 1], prev_layer) *
+                np.sqrt(2 / prev_layer)
             )
             self.__weights[f"b{index}"] = np.zeros((layers[index - 1], 1))
             initialize_weights(index + 1, layers[index - 1])
-        
+
         initialize_weights(1, nx)
 
     @property
