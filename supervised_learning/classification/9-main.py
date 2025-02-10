@@ -1,9 +1,11 @@
+alexa@ubuntu-xenial:$ cat 9-main.py
 #!/usr/bin/env python3
 
 import numpy as np
+
 NN = __import__('9-neural_network').NeuralNetwork
 
-lib_train = np.load('data/Binary_Train.npz')
+lib_train = np.load('../data/Binary_Train.npz')
 X_3D, Y = lib_train['X'], lib_train['Y']
 X = X_3D.reshape((X_3D.shape[0], -1)).T
 
@@ -15,8 +17,5 @@ print(nn.W2)
 print(nn.b2)
 print(nn.A1)
 print(nn.A2)
-# The following line should raise an AttributeError as A1 is a private attribute
-try:
-    nn.A1 = 10
-except AttributeError as e:
-    print(e)
+nn.A1 = 10
+print(nn.A1)
