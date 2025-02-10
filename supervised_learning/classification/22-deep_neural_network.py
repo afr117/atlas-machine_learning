@@ -3,7 +3,8 @@ import numpy as np
 
 
 class DeepNeuralNetwork:
-    """Defines a deep neural network performing binary classification"""
+    """Defines a deep neural network
+    performing binary classification"""
 
     def __init__(self, nx, layers):
         """Class constructor"""
@@ -28,7 +29,7 @@ class DeepNeuralNetwork:
             )
             self.__weights[f"b{index}"] = np.zeros((layers[index - 1], 1))
             initialize_weights(index + 1, layers[index - 1])
-        
+
         initialize_weights(1, nx)
 
     @property
@@ -73,7 +74,7 @@ class DeepNeuralNetwork:
         """Performs one pass of gradient descent on the neural network"""
         m = Y.shape[1]
         dZ = cache[f"A{self.__L}"] - Y
-        
+
         def update_weights(layer, dZ):
             if layer < 1:
                 return
@@ -83,13 +84,13 @@ class DeepNeuralNetwork:
             db = np.sum(dZ, axis=1, keepdims=True) / m
             self.__weights[f"W{layer}"] -= alpha * dW
             self.__weights[f"b{layer}"] -= alpha * db
-            
+
             if layer > 1:
                 dZ = np.matmul(W.T, dZ) * (A_prev * (1 - A_prev))
                 update_weights(layer - 1, dZ)
-        
+
         update_weights(self.__L, dZ)
-    
+
     def train(self, X, Y, iterations=5000, alpha=0.05, verbose=True, graph=True, step=100):
         """Trains the deep neural network"""
         if not isinstance(iterations, int):
