@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import numpy as np
 
 class DeepNeuralNetwork:
@@ -100,12 +99,10 @@ class DeepNeuralNetwork:
             raise TypeError("alpha must be a float")
         if alpha <= 0:
             raise ValueError("alpha must be positive")
-        
-        def training_step(i):
-            if i > iterations:
-                return self.evaluate(X, Y)
+
+        # Updated training logic to remove recursion
+        for _ in range(iterations):
             A, cache = self.forward_prop(X)
             self.gradient_descent(Y, cache, alpha)
-            return training_step(i + 1)
-        
-        return training_step(1)
+
+        return self.evaluate(X, Y)
