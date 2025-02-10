@@ -9,7 +9,7 @@ def one_hot_encode(Y, classes):
         return None
     if Y.ndim != 1 or classes < np.max(Y) + 1:
         return None
-    
+
     one_hot = np.zeros((classes, Y.shape[0]))
     one_hot[Y, np.arange(Y.shape[0])] = 1
     return one_hot
