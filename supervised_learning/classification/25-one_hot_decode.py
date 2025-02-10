@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-This module provides a function to decode a one-hot matrix into a vector of labels.
+This module provides a function to decode a
+one-hot matrix into a vector of labels.
 """
 
 import numpy as np
@@ -16,7 +17,8 @@ def one_hot_decode(one_hot):
         - `m` is the number of examples.
 
     Returns:
-    - numpy.ndarray: A 1D array of shape (m,) containing the decoded class labels.
+    - numpy.ndarray: A 1D array of shape (m,)
+    containing the decoded class labels.
     - None: If the input is invalid (not a proper one-hot matrix).
 
     The function ensures:
