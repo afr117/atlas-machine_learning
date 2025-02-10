@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Defines a function for creating the forward propagation graph for a neural network.
+Defines a function for creating the forward
+propagation graph for a neural network.
 """
 
 import tensorflow.compat.v1 as tf
