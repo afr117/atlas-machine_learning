@@ -18,26 +18,6 @@ class Neuron:
         if nx < 1:
             raise ValueError("nx must be a positive integer")
         
-        np.random.seed(0)  # Ensure deterministic initialization
-        self.__W = np.random.randn(1, nx)
-        self.__b = 0
-        self.__A = 0
-    
-    @property
-    def W(self):
-        return self.__W
-    
-    @property
-    def b(self):
-        return self.__b
-    
-    @property
-    def A(self):
-        return self.__A
-    
-    @A.setter
-    def A(self, value):
-        """
-        Allow setting A value
-        """
-        self.__A = value
+        self.W = np.random.randn(1, nx)  # No seed, fully random
+        self.b = 0
+        self.A = 0
