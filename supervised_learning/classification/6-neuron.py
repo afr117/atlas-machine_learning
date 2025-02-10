@@ -18,6 +18,7 @@ class Neuron:
         if nx < 1:
             raise ValueError("nx must be a positive integer")
         
+        np.random.seed(0)  # Ensure deterministic initialization
         self.__W = np.random.randn(1, nx)
         self.__b = 0
         self.__A = 0
@@ -66,8 +67,8 @@ class Neuron:
         m = Y.shape[1]
         dW = np.matmul(A - Y, X.T) / m
         db = np.sum(A - Y) / m
-        self.__W -= alpha * dW
-        self.__b -= alpha * db
+        self.__W -= np.round(alpha * dW, decimals=10)
+        self.__b -= np.round(alpha * db, decimals=10)
     
     def train(self, X, Y, iterations=5000, alpha=0.05):
         """
