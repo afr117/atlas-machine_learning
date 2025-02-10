@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-This module defines a Deep Neural Network (DNN) class for performing binary classification.
+This module defines a Deep Neural Network (DNN)
+class for performing binary classification.
 """
 
 import numpy as np
@@ -13,7 +14,8 @@ class DeepNeuralNetwork:
     Attributes:
     - __L (int): The number of layers in the network.
     - __cache (dict): A dictionary to store intermediary values of the network.
-    - __weights (dict): A dictionary to store the weights and biases of the network.
+    - __weights (dict): A dictionary to store the
+    weights and biases of the network.
     """
 
     def __init__(self, nx, layers):
@@ -43,7 +45,8 @@ class DeepNeuralNetwork:
         self.__weights = {}
 
         def initialize_weights(index, prev_layer):
-            """Recursively initializes the weights and biases for each layer."""
+            """Recursively initializes the weights and
+            biases for each layer."""
             if index > self.__L:
                 return
             self.__weights[f"W{index}"] = (
