@@ -1,15 +1,28 @@
 #!/usr/bin/env python3
+"""
+This module defines a NeuralNetwork class that implements a
+binary classification model with one hidden layer.
+"""
 
 import numpy as np
 
 
 class NeuralNetwork:
     """
-    Neural Network with one hidden layer for binary classification.
+    Defines a neural network with one hidden layer performing binary classification.
+
+    Attributes:
+        W1 (numpy.ndarray): Weights for the hidden layer.
+        b1 (numpy.ndarray): Bias for the hidden layer.
+        A1 (float): Activated output of the hidden layer.
+        W2 (numpy.ndarray): Weights for the output layer.
+        b2 (float): Bias for the output layer.
+        A2 (float): Activated output of the output layer.
     """
+
     def __init__(self, nx, nodes):
         """
-        Initializes the neural network.
+        Initializes a neural network.
 
         Args:
             nx (int): Number of input features.
@@ -39,30 +52,60 @@ class NeuralNetwork:
 
     @property
     def W1(self):
-        """Getter for W1."""
+        """
+        Getter for W1 (weights for the hidden layer).
+
+        Returns:
+            numpy.ndarray: Weights of the hidden layer.
+        """
         return self.__W1
 
     @property
     def b1(self):
-        """Getter for b1."""
+        """
+        Getter for b1 (bias for the hidden layer).
+
+        Returns:
+            numpy.ndarray: Bias of the hidden layer.
+        """
         return self.__b1
 
     @property
     def A1(self):
-        """Getter for A1."""
+        """
+        Getter for A1 (activated output of the hidden layer).
+
+        Returns:
+            float: Activation value of the hidden layer.
+        """
         return self.__A1
 
     @property
     def W2(self):
-        """Getter for W2."""
+        """
+        Getter for W2 (weights for the output layer).
+
+        Returns:
+            numpy.ndarray: Weights of the output layer.
+        """
         return self.__W2
 
     @property
     def b2(self):
-        """Getter for b2."""
+        """
+        Getter for b2 (bias for the output layer).
+
+        Returns:
+            float: Bias of the output layer.
+        """
         return self.__b2
 
     @property
     def A2(self):
-        """Getter for A2."""
+        """
+        Getter for A2 (activated output of the output layer).
+
+        Returns:
+            float: Activation value of the output layer.
+        """
         return self.__A2
