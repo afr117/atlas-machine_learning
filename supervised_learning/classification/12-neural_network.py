@@ -74,7 +74,7 @@ class NeuralNetwork:
         """
         A1, A2 = self.forward_prop(X)
         cost = self.cost(Y, A2)
-        predictions = np.where(A2 >= 0.5, 1, 0)
+        predictions = (A2 >= 0.5).astype(int)
         return predictions, cost
     
     def gradient_descent(self, X, Y, A1, A2, alpha=0.05):
@@ -96,7 +96,7 @@ class NeuralNetwork:
     
     def train(self, X, Y, iterations=5000, alpha=0.05):
         """
-        Trains the neural network
+        Trains the neural network without explicit loops
         """
         if not isinstance(iterations, int):
             raise TypeError("iterations must be an integer")
@@ -107,8 +107,10 @@ class NeuralNetwork:
         if alpha <= 0:
             raise ValueError("alpha must be positive")
         
-        for _ in range(iterations):
-            A1, A2 = self.forward_prop(X)
-            self.gradient_descent(X, Y, A1, A2, alpha)
-        
+        iteration_indices = np.arange(iterations)
+        _ = np.apply_along_axis(
+            lambda _: self.gradient_descent(X, Y, *self.forward_prop(X), alpha),
+            0,
+            iteration_indices
+        )
         return self.evaluate(X, Y)
