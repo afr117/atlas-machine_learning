@@ -5,6 +5,7 @@ using TensorFlow v1 with He et al. initialization.
 """
 import tensorflow.compat.v1 as tf
 
+
 def create_layer(prev, n, activation):
     """
     Creates a layer for a neural network using He et al. initialization.
