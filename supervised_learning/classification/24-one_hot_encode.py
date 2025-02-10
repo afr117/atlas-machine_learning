@@ -2,6 +2,7 @@
 
 import numpy as np
 
+
 def one_hot_encode(Y, classes):
     """Converts a numeric label vector into a one-hot matrix"""
     if not isinstance(Y, np.ndarray) or not isinstance(classes, int):
