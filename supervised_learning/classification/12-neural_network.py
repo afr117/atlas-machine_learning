@@ -1,115 +1,114 @@
 #!/usr/bin/env python3
-
-"""
-This module defines a NeuralNetwork class used of binary classification.
-The network consists of a single hidden layer and an output layer. The class
-performs forward propagation, computes the cost using binary cross-entropy loss,
-and evaluates predictions.
-"""
-
 import numpy as np
 
 
 class NeuralNetwork:
     """
-    A neural network with a single hidden layer, used of binary classification.
-    The network performs forward propagation, cost calculation, and evaluation of predictions.
+    Class that defines a neural network with one hidden layer
+    performing binary classification.
     """
-
     def __init__(self, nx, nodes):
         """
-        Initializes the neural network by validating the input dimensions and setting up the weights.
-
-        Args:
-            nx (int): The number of input features of the neural network.
-            nodes (int): The number of nodes in the hidden layer.
-
-        Raises:
-            TypeError: If nx or nodes is not an integer.
-            ValueError: If nx or nodes is less than 1.
+        Initializes the neural network
         """
         if not isinstance(nx, int):
             raise TypeError("nx must be an integer")
         if nx < 1:
             raise ValueError("nx must be a positive integer")
-
         if not isinstance(nodes, int):
             raise TypeError("nodes must be an integer")
         if nodes < 1:
             raise ValueError("nodes must be a positive integer")
-
-        # Initialize the weights, biases, and activated outputs of both layers
-        self.W1 = np.random.randn(nodes, nx)  # Weights of the hidden layer
-        self.b1 = np.zeros((nodes, 1))  # Bias of the hidden layer
-        self.A1 = np.zeros((nodes, 1))  # Activated output of the hidden layer
-
-        self.W2 = np.random.randn(1, nodes)  # Weights of the output layer
-        self.b2 = np.zeros((1, 1))  # Bias of the output layer
-        self.A2 = np.zeros((1, 1))  # Activated output of the output layer
-
+        
+        self.__W1 = np.random.randn(nodes, nx)
+        self.__b1 = np.zeros((nodes, 1))
+        self.__A1 = 0
+        self.__W2 = np.random.randn(1, nodes)
+        self.__b2 = 0
+        self.__A2 = 0
+    
+    @property
+    def W1(self):
+        return self.__W1
+    
+    @property
+    def b1(self):
+        return self.__b1
+    
+    @property
+    def A1(self):
+        return self.__A1
+    
+    @property
+    def W2(self):
+        return self.__W2
+    
+    @property
+    def b2(self):
+        return self.__b2
+    
+    @property
+    def A2(self):
+        return self.__A2
+    
     def forward_prop(self, X):
         """
-        Perform forward propagation to compute the activations of both layers.
-
-        Args:
-            X (numpy.ndarray): The input data, shape (nx, m), where nx is the number of input features
-                               and m is the number of examples.
-
-        Returns:
-            tuple: The activations of the hidden layer (A1) and the output layer (A2).
+        Calculates the forward propagation of the neural network
         """
-        # Validate the shapes of the input data and weights
-        if self.W1.shape[1] != X.shape[0]:
-            raise ValueError("Shape mismatch: W1 and X are not aligned.")
-        
-        Z1 = np.dot(self.W1, X) + self.b1  # Linear transformation of the hidden layer
-        self.A1 = 1 / (1 + np.exp(-Z1))  # Sigmoid activation function of the hidden layer
-
-        Z2 = np.dot(self.W2, self.A1) + self.b2  # Linear transformation of the output layer
-        self.A2 = 1 / (1 + np.exp(-Z2))  # Sigmoid activation function of the output layer
-
-        return self.A1, self.A2
-
+        Z1 = np.matmul(self.__W1, X) + self.__b1
+        self.__A1 = 1 / (1 + np.exp(-Z1))
+        Z2 = np.matmul(self.__W2, self.__A1) + self.__b2
+        self.__A2 = 1 / (1 + np.exp(-Z2))
+        return self.__A1, self.__A2
+    
     def cost(self, Y, A):
         """
-        Calculate the cost using binary cross-entropy loss.
-
-        Args:
-            Y (numpy.ndarray): True labels of the input data, shape (1, m).
-            A (numpy.ndarray): Predicted output of the neural network, shape (1, m).
-
-        Returns:
-            float: The binary cross-entropy cost of the model.
+        Calculates the cost of the model using logistic regression
         """
-        m = Y.shape[1]  # Number of examples
-
-        # Check if the shapes of Y and A are compatible of element-wise operations
-        if Y.shape != A.shape:
-            raise ValueError("Shape mismatch: Y and A must have the same shape.")
-        
-        # Compute the binary cross-entropy cost
-        cost = -np.mean(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A))
-        return cost
-
+        m = Y.shape[1]
+        return -np.sum(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A)) / m
+    
     def evaluate(self, X, Y):
         """
-        Evaluate the neural network's predictions.
-
-        Args:
-            X (numpy.ndarray): The input data, shape (nx, m).
-            Y (numpy.ndarray): The true labels, shape (1, m).
-
-        Returns:
-            tuple: A tuple containing:
-                - numpy.ndarray: The predictions (1 of A >= 0.5, otherwise 0).
-                - float: The cost of the model.
+        Evaluates the neural network’s predictions
         """
-        _, A = self.forward_prop(X)  # Perform forward propagation
-
-        # Predictions: 1 if A >= 0.5, else 0 (vectorized)
-        predictions = (A >= 0.5).astype(int)
-
-        # Calculate the cost using the cost method
-        cost = self.cost(Y, A)
-
+        A1, A2 = self.forward_prop(X)
+        cost = self.cost(Y, A2)
+        predictions = np.where(A2 >= 0.5, 1, 0)
         return predictions, cost
+    
+    def gradient_descent(self, X, Y, A1, A2, alpha=0.05):
+        """
+        Performs one pass of gradient descent
+        """
+        m = Y.shape[1]
+        dZ2 = A2 - Y
+        dW2 = np.matmul(dZ2, A1.T) / m
+        db2 = np.sum(dZ2, axis=1, keepdims=True) / m
+        dZ1 = np.matmul(self.__W2.T, dZ2) * (A1 * (1 - A1))
+        dW1 = np.matmul(dZ1, X.T) / m
+        db1 = np.sum(dZ1, axis=1, keepdims=True) / m
+        
+        self.__W1 -= alpha * dW1
+        self.__b1 -= alpha * db1
+        self.__W2 -= alpha * dW2
+        self.__b2 -= alpha * db2
+    
+    def train(self, X, Y, iterations=5000, alpha=0.05):
+        """
+        Trains the neural network
+        """
+        if not isinstance(iterations, int):
+            raise TypeError("iterations must be an integer")
+        if iterations <= 0:
+            raise ValueError("iterations must be a positive integer")
+        if not isinstance(alpha, float):
+            raise TypeError("alpha must be a float")
+        if alpha <= 0:
+            raise ValueError("alpha must be positive")
+        
+        for _ in range(iterations):
+            A1, A2 = self.forward_prop(X)
+            self.gradient_descent(X, Y, A1, A2, alpha)
+        
+        return self.evaluate(X, Y)
