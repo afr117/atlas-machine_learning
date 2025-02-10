@@ -34,3 +34,10 @@ class Neuron:
     @property
     def A(self):
         return self.__A
+    
+    @A.setter
+    def A(self, value):
+        """
+        Allow setting A value
+        """
+        self.__A = value
