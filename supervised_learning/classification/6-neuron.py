@@ -26,8 +26,8 @@ class Neuron:
         """
         Performs forward propagation using a sigmoid activation function
         """
-        Z = np.matmul(self.W, X) + self.b
-        self.A = 1 / (1 + np.exp(-Z))
+        z = np.matmul(self.W, X) + self.b
+        self.A = 1 / (1 + np.exp(-z))
         return self.A
 
     def cost(self, Y, A):
@@ -35,7 +35,7 @@ class Neuron:
         Computes the logistic regression cost function
         """
         m = Y.shape[1]
-        return -np.sum(Y * np.log(A) + (1 - Y) * np.log(1.0000001 - A)) / m
+        return -np.sum(Y * np.log(A + 1e-8) + (1 - Y) * np.log(1 - A + 1e-8)) / m
 
     def evaluate(self, X, Y):
         """
