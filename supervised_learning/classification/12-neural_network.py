@@ -187,7 +187,8 @@ class NeuralNetwork:
 
         iteration_indices = np.arange(iterations)
         _ = np.apply_along_axis(
-            lambda _: self.gradient_descent(X, Y, *self.forward_prop(X), alpha),
+            lambda _: self.gradient_descent(X, Y,
+                                            *self.forward_prop(X), alpha),
             0,
             iteration_indices
         )
