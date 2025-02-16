@@ -18,7 +18,7 @@ def update_variables_RMSProp(alpha, beta2, epsilon, var, grad, s):
     var (numpy.ndarray): The variable to be updated.
     grad (numpy.ndarray): The gradient of var.
     s (numpy.ndarray): The previous second moment of var.
-    
+
     Returns:
     tuple: The updated variable and the new moment,
     respectively.
