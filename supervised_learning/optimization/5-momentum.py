@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Updates a variable using the gradient descent with momentum optimization algorithm.
+Updates a variable using the gradient descent with
+momentum optimization algorithm.
 """
 import numpy as np
 
