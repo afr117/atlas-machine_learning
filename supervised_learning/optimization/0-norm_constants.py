@@ -9,11 +9,12 @@ import numpy as np
 def normalization_constants(X):
     """
     Calculates the normalization constants of a matrix.
-    
+
     Parameters:
-    X (numpy.ndarray): A matrix of shape (m, nx) where m is the number of data points
+    X (numpy.ndarray): A matrix of shape
+    (m, nx) where m is the number of data points
                        and nx is the number of features.
-    
+
     Returns:
     tuple: The mean and standard deviation of each feature, respectively.
     """
