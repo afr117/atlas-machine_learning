@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Trains a Keras model using mini-batch gradient descent with validation and early stopping.
+Trains a Keras model using mini-batch gradient descent
+with validation and early stopping.
 """
 import tensorflow.keras as K
 
@@ -34,7 +35,8 @@ def train_model(network, data, labels, batch_size, epochs,
     """
     callbacks = []
     if early_stopping and validation_data is not None:
-        early_stop = K.callbacks.EarlyStopping(monitor='val_loss', patience=patience)
+        early_stop = K.callbacks.EarlyStopping(monitor='val_loss',
+                                               patience=patience)
         callbacks.append(early_stop)
 
     return network.fit(
