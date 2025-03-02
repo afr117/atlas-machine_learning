@@ -11,13 +11,16 @@ def dropout_forward_prop(X, weights, L, keep_prob):
     Conducts forward propagation using Dropout.
 
     Args:
-        X (numpy.ndarray): Input data for the network of shape (nx, m).
-        weights (dict): Dictionary containing the weights and biases of the network.
+        X (numpy.ndarray): Input data for the
+        network of shape (nx, m).
+        weights (dict): Dictionary containing the weights and
+        biases of the network.
         L (int): Number of layers in the network.
         keep_prob (float): Probability that a node will be kept.
 
     Returns:
-        dict: Dictionary containing the outputs of each layer and dropout masks.
+        dict: Dictionary containing the outputs of
+        each layer and dropout masks.
     """
     cache = {'A0': X}
 
@@ -36,7 +39,8 @@ def dropout_forward_prop(X, weights, L, keep_prob):
             D = np.random.rand(A.shape[0], A.shape[1]) < keep_prob
             A *= D
             A /= keep_prob
-            cache[f'D{i}'] = D.astype(int)  # Ensure dropout mask is binary (0/1)
+            cache[f'D{i}'] = D.astype(int) 
+            # Ensure dropout mask is binary (0/1)
 
         cache[f'A{i}'] = A
 
