@@ -6,9 +6,12 @@ early stopping, learning rate decay, and saving the best model.
 import tensorflow.keras as K
 
 
-def train_model(network, data, labels, batch_size, epochs, validation_data=None,
-                early_stopping=False, patience=0, learning_rate_decay=False,
-                alpha=0.1, decay_rate=1, save_best=False, filepath=None,
+def train_model(network, data, labels, batch_size, epochs,
+                validation_data=None,
+                early_stopping=False, patience=0,
+                learning_rate_decay=False,
+                alpha=0.1, decay_rate=1, save_best=False,
+                filepath=None,
                 verbose=True, shuffle=False):
     """
     Trains a model using mini-batch gradient descent with
