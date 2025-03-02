@@ -4,6 +4,7 @@ Builds a neural network using the Keras library.
 """
 import tensorflow.keras as K
 
+
 def build_model(nx, layers, activations, lambtha, keep_prob):
     """
     Builds a sequential neural network model using Keras.
@@ -20,7 +21,7 @@ def build_model(nx, layers, activations, lambtha, keep_prob):
     """
     model = K.Sequential()
     regularizer = K.regularizers.l2(lambtha)
-    
+
     for i in range(len(layers)):
         if i == 0:
             model.add(K.layers.Dense(
@@ -35,8 +36,8 @@ def build_model(nx, layers, activations, lambtha, keep_prob):
                 activation=activations[i],
                 kernel_regularizer=regularizer
             ))
-        
+
         if i < len(layers) - 1:
             model.add(K.layers.Dropout(rate=1 - keep_prob))
-    
+
     return model
