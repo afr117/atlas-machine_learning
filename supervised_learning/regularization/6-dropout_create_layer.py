@@ -2,7 +2,6 @@
 """
 Creates a layer of a neural network using dropout.
 """
-
 import tensorflow as tf
 
 
@@ -31,7 +30,7 @@ def dropout_create_layer(prev, n, activation, keep_prob, training=True):
     )(prev)
 
     if training:
-        layer = tf.keras.layers.Dropout(rate=1-keep_prob)
-        (layer, training=training)
-
+        layer = tf.keras.layers.Dropout(rate=1-keep_prob)(layer,
+                                                          training=training)
+    
     return layer
