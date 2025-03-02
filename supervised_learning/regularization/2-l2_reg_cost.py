@@ -12,7 +12,8 @@ def l2_reg_cost(cost, model):
     Args:
         cost (tf.Tensor): Tensor containing the cost of the network
         without L2 regularization.
-        model (tf.keras.Model): Keras model including layers with L2 regularization.
+        model (tf.keras.Model): Keras model including layers
+        with L2 regularization.
 
     Returns:
         tf.Tensor: Tensor containing the total cost for
