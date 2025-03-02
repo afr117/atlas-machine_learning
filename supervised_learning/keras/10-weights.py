@@ -28,7 +28,8 @@ def load_weights(network, filename):
 
     Parameters:
     network (K.Model): The model to which the weights should be loaded.
-    filename (str): The path of the file from where the weights should be loaded.
+    filename (str): The path of the file from where the
+    weights should be loaded.
 
     Returns:
     None
