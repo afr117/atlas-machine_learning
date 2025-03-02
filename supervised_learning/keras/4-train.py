@@ -5,7 +5,8 @@ Trains a Keras model using mini-batch gradient descent.
 import tensorflow.keras as K
 
 
-def train_model(network, data, labels, batch_size, epochs, verbose=True, shuffle=False):
+def train_model(network, data, labels, batch_size,
+                epochs, verbose=True, shuffle=False):
     """
     Trains a model using mini-batch gradient descent.
 
@@ -15,8 +16,10 @@ def train_model(network, data, labels, batch_size, epochs, verbose=True, shuffle
         labels (numpy.ndarray): One-hot labels of shape (m, classes).
         batch_size (int): Batch size for mini-batch gradient descent.
         epochs (int): Number of training epochs.
-        verbose (bool, optional): Whether to print training output. Defaults to True.
-        shuffle (bool, optional): Whether to shuffle data every epoch. Defaults to False.
+        verbose (bool, optional): Whether to print training output.
+        Defaults to True.
+        shuffle (bool, optional): Whether to shuffle data every epoch.
+        Defaults to False.
 
     Returns:
         keras.callbacks.History: The history object generated after training.
@@ -29,4 +32,3 @@ def train_model(network, data, labels, batch_size, epochs, verbose=True, shuffle
         verbose=verbose, 
         shuffle=shuffle
     )
-  
