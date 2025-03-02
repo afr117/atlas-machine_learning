@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Conducts forward propagation using Dropout.
+Conducts forward propagation using Dropout and performs gradient descent.
 """
-
 import numpy as np
 
 
@@ -42,25 +41,20 @@ def dropout_forward_prop(X, weights, L, keep_prob):
 
     return cache
 
-
 def dropout_gradient_descent(Y, weights, cache, alpha, keep_prob, L):
     """
-    Updates the weights of a neural network with
-    Dropout regularization using gradient descent.
+    Updates the weights of a neural network with Dropout regularization using gradient descent.
 
     Args:
         Y (numpy.ndarray): One-hot encoded labels of shape (classes, m).
-        weights (dict): Dictionary containing the weights and
-        biases of the network.
-        cache (dict): Dictionary containing the outputs and
-        dropout masks of each layer.
+        weights (dict): Dictionary containing the weights and biases of the network.
+        cache (dict): Dictionary containing the outputs and dropout masks of each layer.
         alpha (float): Learning rate.
         keep_prob (float): Probability that a node will be kept.
         L (int): Number of layers of the network.
     """
     m = Y.shape[1]
-    dZ = cache[f'A{L}'] - Y 
-    # dZ for last layer
+    dZ = cache[f'A{L}'] - Y  # dZ for last layer
 
     for i in range(L, 0, -1):
         A_prev = cache[f'A{i-1}']
@@ -78,4 +72,4 @@ def dropout_gradient_descent(Y, weights, cache, alpha, keep_prob, L):
             D = cache[f'D{i-1}']
             dA *= D  # Apply dropout mask
             dA /= keep_prob  # Scale gradients
-            dZ = dA * (1 - cache[f'A{i-1}'] ** 2)  # Derivative of tanh
+            dZ = dA * (1 - np.square(cache[f'A{i-1}']))  # Derivative of tanh
