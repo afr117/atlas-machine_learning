@@ -31,7 +31,8 @@ def train_model(network, data, labels, batch_size, epochs, validation_data=None,
         alpha (float, optional): Initial learning rate. Defaults to 0.1.
         decay_rate (float, optional): Decay rate for learning rate.
         Defaults to 1.
-        save_best (bool, optional): Whether to save the best model based on validation loss. Defaults to False.
+        save_best (bool, optional): Whether to save the best model
+        based on validation loss. Defaults to False.
         filepath (str, optional): File path to save the best model.
         Defaults to None.
         verbose (bool, optional): Whether to print training output.
@@ -45,7 +46,8 @@ def train_model(network, data, labels, batch_size, epochs, validation_data=None,
     callbacks = []
 
     if early_stopping and validation_data is not None:
-        early_stop = K.callbacks.EarlyStopping(monitor='val_loss', patience=patience)
+        early_stop = K.callbacks.EarlyStopping(monitor='val_loss',
+                                               patience=patience)
         callbacks.append(early_stop)
 
     if learning_rate_decay and validation_data is not None:
