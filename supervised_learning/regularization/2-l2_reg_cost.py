@@ -15,6 +15,6 @@ def l2_reg_cost(cost, model):
     Returns:
         tf.Tensor: Tensor containing the total cost for each layer of the network, accounting for L2 regularization.
     """
-    l2_losses = tf.reduce_sum(model.losses)
-    total_cost = cost + l2_losses
+    l2_losses = tf.stack(model.losses)  # Stack L2 losses as a tensor
+    total_cost = cost + l2_losses  # Element-wise addition
     return total_cost
