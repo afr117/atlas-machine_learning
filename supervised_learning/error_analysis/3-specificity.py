@@ -14,8 +14,8 @@ def specificity(confusion):
                                    columns represent the predicted labels.
 
     Returns:
-        numpy.ndarray: A 1D array of shape (classes,) containing the specificity
-                       of each class.
+        numpy.ndarray: A 1D array of shape (classes,)
+        containing the specificity of each class.
     """
     true_positives = np.diag(confusion)  # Extract the diagonal (TP)
     false_positives = np.sum(confusion, axis=0) - true_positives
@@ -23,6 +23,7 @@ def specificity(confusion):
     false_negatives = np.sum(confusion, axis=1) - true_positives
     # FN = Sum of row - TP
     true_negatives = np.sum(confusion) - (true_positives +
-                                          false_positives + false_negatives)  # TN
+                                          false_positives +
+                                          false_negatives)  # TN
 
     return true_negatives / (true_negatives + false_positives)
