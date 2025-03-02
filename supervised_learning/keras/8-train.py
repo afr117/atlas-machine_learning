@@ -25,8 +25,10 @@ def train_model(network, data, labels, batch_size, epochs, validation_data=None,
         Defaults to None.
         early_stopping (bool, optional): Whether to apply early stopping.
         Defaults to False.
-        patience (int, optional): Number of epochs to wait before stopping if no improvement. Defaults to 0.
-        learning_rate_decay (bool, optional): Whether to use learning rate decay.
+        patience (int, optional): Number of epochs to wait before
+        stopping if no improvement. Defaults to 0.
+        learning_rate_decay (bool, optional): Whether to use
+        learning rate decay.
         Defaults to False.
         alpha (float, optional): Initial learning rate. Defaults to 0.1.
         decay_rate (float, optional): Decay rate for learning rate.
