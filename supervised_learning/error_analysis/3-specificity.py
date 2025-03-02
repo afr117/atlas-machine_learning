@@ -18,8 +18,11 @@ def specificity(confusion):
                        of each class.
     """
     true_positives = np.diag(confusion)  # Extract the diagonal (TP)
-    false_positives = np.sum(confusion, axis=0) - true_positives  # FP = Sum of column - TP
-    false_negatives = np.sum(confusion, axis=1) - true_positives  # FN = Sum of row - TP
-    true_negatives = np.sum(confusion) - (true_positives + false_positives + false_negatives)  # TN
+    false_positives = np.sum(confusion, axis=0) - true_positives
+    # FP = Sum of column - TP
+    false_negatives = np.sum(confusion, axis=1) - true_positives
+    # FN = Sum of row - TP
+    true_negatives = np.sum(confusion) - (true_positives +
+                                          false_positives + false_negatives)  # TN
 
     return true_negatives / (true_negatives + false_positives)
