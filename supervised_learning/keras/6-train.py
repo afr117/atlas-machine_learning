@@ -9,7 +9,8 @@ def train_model(network, data, labels, batch_size, epochs,
                 validation_data=None, early_stopping=False,
                 patience=0, verbose=True, shuffle=False):
     """
-    Trains a model using mini-batch gradient descent with validation and optional early stopping.
+    Trains a model using mini-batch gradient descent with
+    validation and optional early stopping.
 
     Args:
         network (keras.Model): The model to train.
