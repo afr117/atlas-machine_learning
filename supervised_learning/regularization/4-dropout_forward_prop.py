@@ -39,7 +39,7 @@ def dropout_forward_prop(X, weights, L, keep_prob):
             D = np.random.rand(A.shape[0], A.shape[1]) < keep_prob
             A *= D
             A /= keep_prob
-            cache[f'D{i}'] = D.astype(int) 
+            cache[f'D{i}'] = D.astype(int)
             # Ensure dropout mask is binary (0/1)
 
         cache[f'A{i}'] = A
