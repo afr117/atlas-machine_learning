@@ -1,40 +1,26 @@
 #!/usr/bin/env python3
-"""Module to update weights and biases using gradient descent with L2 regularization."""
-
+"""
+Calculates the cost of a neural network with L2 regularization.
+"""
 import numpy as np
 
-
-def l2_reg_gradient_descent(Y, weights, cache, alpha, lambtha, L):
+def l2_reg_cost(cost, lambtha, weights, L, m):
     """
-    Updates the weights and biases of a neural network using gradient descent
-    with L2 regularization.
-
+    Calculates the cost of a neural network with L2 regularization.
+    
     Args:
-        Y (numpy.ndarray): One-hot matrix of shape (classes, m) with correct labels.
+        cost (float): Cost of the network without L2 regularization.
+        lambtha (float): Regularization parameter.
         weights (dict): Dictionary containing the weights and biases of the network.
-        cache (dict): Dictionary containing the outputs of each layer.
-        alpha (float): Learning rate.
-        lambtha (float): L2 regularization parameter.
-        L (int): Number of layers in the network.
-
+        L (int): Number of layers in the neural network.
+        m (int): Number of data points used.
+    
     Returns:
-        None: Updates the weights and biases in place.
+        float: The cost of the network accounting for L2 regularization.
     """
-    m = Y.shape[1]
-    dZ = cache[f"A{L}"] - Y  # Compute output layer error (Softmax)
-
-    for i in range(L, 0, -1):
-        A_prev = cache[f"A{i-1}"]
-        W = weights[f"W{i}"]
-
-        # Compute gradients with L2 regularization
-        dW = (np.matmul(dZ, A_prev.T) / m) + (lambtha / m) * W
-        db = np.sum(dZ, axis=1, keepdims=True) / m
-
-        # Apply learning rate updates
-        weights[f"W{i}"] -= np.round(alpha * dW, decimals=8)  # Ensure precision
-        weights[f"b{i}"] -= np.round(alpha * db, decimals=8)  # Ensure precision
-
-        # Compute dZ for next layer (if not input layer)
-        if i > 1:
-            dZ = np.matmul(W.T, dZ) * (1 - np.square(A_prev))  # tanh derivative
+    l2_sum = 0
+    for i in range(1, L + 1):
+        l2_sum += np.linalg.norm(weights[f'W{i}'])**2
+    
+    l2_cost = cost + (lambtha / (2 * m)) * l2_sum
+    return l2_cost
