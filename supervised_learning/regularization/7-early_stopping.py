@@ -10,11 +10,12 @@ def early_stopping(cost, opt_cost, threshold, patience, count):
 
     Args:
         cost (float): Current validation cost of the neural network.
-        opt_cost (float): Lowest recorded validation cost of the neural network.
+        opt_cost (float): Lowest recorded validation cost of
+        the neural network.
         threshold (float): Threshold used for early stopping.
         patience (int): Patience count used for early stopping.
         count (int): Count of how long the threshold has not been met.
-  
+
     Returns:
         tuple: (bool, int) where bool indicates if
         training should stop, and int is the updated count.
