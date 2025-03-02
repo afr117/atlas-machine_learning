@@ -19,6 +19,6 @@ def precision(confusion):
                        of each class.
     """
     true_positives = np.diag(confusion)  # Extract the diagonal (TP)
-    false_positives = np.sum(confusion, axis=0) - true_positives 
+    false_positives = np.sum(confusion, axis=0) - true_positives
     # Sum of column - TP
     return true_positives / (true_positives + false_positives)
