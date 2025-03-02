@@ -19,6 +19,6 @@ def sensitivity(confusion):
                        of each class.
     """
     true_positives = np.diag(confusion)  # Extract the diagonal (TP)
-    false_negatives = np.sum(confusion,
-                             axis=1) - true_positives # Sum of row - TP
+    false_negatives = np.sum(confusion, axis=1)
+    - true_positives # Sum of row - TP
     return true_positives / (true_positives + false_negatives)
