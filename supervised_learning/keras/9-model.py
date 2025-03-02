@@ -1,19 +1,28 @@
 #!/usr/bin/env python3
+import tensorflow.keras as K
 
-import tensorflow as tf
 
 def save_model(network, filename):
     """
     Saves an entire model to a file.
-    :param network: the model to save
-    :param filename: the path of the file that the model should be saved to
+
+    Parameters:
+    network (K.Model): The model to save.
+    filename (str): The path of the file where the model should be saved.
+
+    Returns:
+    None
     """
     network.save(filename)
 
 def load_model(filename):
     """
     Loads an entire model from a file.
-    :param filename: the path of the file that the model should be loaded from
-    :return: the loaded model
+
+    Parameters:
+    filename (str): The path of the file where the model should be loaded from.
+
+    Returns:
+    K.Model: The loaded model.
     """
-    return tf.keras.models.load_model(filename)
+    return K.models.load_model(filename)
