@@ -13,7 +13,8 @@ def l2_reg_cost(cost, lambtha, weights, L, m):
     Args:
         cost (float): Cost of the network without L2 regularization.
         lambtha (float): Regularization parameter.
-        weights (dict): Dictionary containing the weights and biases of the network.
+        weights (dict): Dictionary containing the
+        weights and biases of the network.
         L (int): Number of layers in the neural network.
         m (int): Number of data points used.
 
