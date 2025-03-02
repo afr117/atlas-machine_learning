@@ -25,10 +25,10 @@ def train_model(network, data, labels, batch_size,
         keras.callbacks.History: The history object generated after training.
     """
     return network.fit(
-        x=data, 
-        y=labels, 
-        batch_size=batch_size, 
-        epochs=epochs, 
-        verbose=verbose, 
+        x=data,
+        y=labels,
+        batch_size=batch_size,
+        epochs=epochs,
+        verbose=verbose,
         shuffle=shuffle
     )
