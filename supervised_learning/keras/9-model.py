@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+"""
+Module for saving and loading a Keras model.
+"""
 import tensorflow.keras as K
 
 
