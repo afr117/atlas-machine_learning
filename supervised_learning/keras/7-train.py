@@ -6,9 +6,12 @@ early stopping, and learning rate decay.
 import tensorflow.keras as K
 
 
-def train_model(network, data, labels, batch_size, epochs, validation_data=None,
-                early_stopping=False, patience=0, learning_rate_decay=False,
-                alpha=0.1, decay_rate=1, verbose=True, shuffle=False):
+def train_model(network, data, labels, batch_size, epochs,
+                validation_data=None,
+                early_stopping=False, patience=0,
+                learning_rate_decay=False,
+                alpha=0.1, decay_rate=1, verbose=True,
+                shuffle=False):
     """
     Trains a model using mini-batch gradient descent
     with validation, early stopping,
@@ -28,7 +31,8 @@ def train_model(network, data, labels, batch_size, epochs, validation_data=None,
         Defaults to False.
         patience (int, optional): Number of epochs to wait before
         stopping if no improvement. Defaults to 0.
-        learning_rate_decay (bool, optional): Whether to use learning rate decay.
+        learning_rate_decay (bool, optional):
+        Whether to use learning rate decay.
         Defaults to False.
         alpha (float, optional): Initial learning rate.
         Defaults to 0.1.
