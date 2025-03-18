@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """
-Performs forward propagation over a
-convolutional layer of a neural network.
+Performs forward propagation over a convolutional layer of a neural network.
 """
 import numpy as np
 
@@ -11,18 +10,13 @@ def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
     Performs forward propagation over a convolutional layer.
 
     Parameters:
-    A_prev (numpy.ndarray): Input data of shape
-    (m, h_prev, w_prev, c_prev).
-    W (numpy.ndarray): Weights of shape
-    (kh, kw, c_prev, c_new).
-    b (numpy.ndarray): Bias of shape
-    (1, 1, 1, c_new).
-    activation (function): Activation function applied to
-    the convolution.
-    padding (str): Either 'same' or 'valid',
-    indicating the type of padding used.
+    A_prev (numpy.ndarray): Input data of shape (m, h_prev, w_prev, c_prev).
+    W (numpy.ndarray): Weights of shape (kh, kw, c_prev, c_new).
+    b (numpy.ndarray): Bias of shape (1, 1, 1, c_new).
+    activation (function): Activation function applied to the convolution.
+    padding (str): Either 'same' or 'valid', indicating the type of padding used.
     stride (tuple): Tuple of (sh, sw) containing stride values.
-
+    
     Returns:
     numpy.ndarray: The output of the convolutional layer.
     """
@@ -31,8 +25,8 @@ def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
     sh, sw = stride
 
     if padding == "same":
-        ph = ((h_prev - 1) * sh + kh - h_prev) // 2 + 1
-        pw = ((w_prev - 1) * sw + kw - w_prev) // 2 + 1
+        ph = max((h_prev - 1) * sh + kh - h_prev, 0) // 2
+        pw = max((w_prev - 1) * sw + kw - w_prev, 0) // 2
     elif padding == "valid":
         ph, pw = 0, 0
     else:
