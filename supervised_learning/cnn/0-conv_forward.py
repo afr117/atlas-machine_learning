@@ -14,9 +14,10 @@ def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
     W (numpy.ndarray): Weights of shape (kh, kw, c_prev, c_new).
     b (numpy.ndarray): Bias of shape (1, 1, 1, c_new).
     activation (function): Activation function applied to the convolution.
-    padding (str): Either 'same' or 'valid', indicating the type of padding used.
+    padding (str): Either 'same' or 'valid',
+    indicating the type of padding used.
     stride (tuple): Tuple of (sh, sw) containing stride values.
-    
+
     Returns:
     numpy.ndarray: The output of the convolutional layer.
     """
@@ -37,13 +38,15 @@ def conv_forward(A_prev, W, b, activation, padding="same", stride=(1, 1)):
     output_h = (padded_h - kh) // sh + 1
     output_w = (padded_w - kw) // sw + 1
 
-    A_prev_padded = np.pad(A_prev, ((0, 0), (ph, ph), (pw, pw), (0, 0)), mode='constant')
+    A_prev_padded = np.pad(A_prev, ((0, 0), (ph, ph),
+                                    (pw, pw), (0, 0)), mode='constant')
     output = np.zeros((m, output_h, output_w, c_new))
 
     for i in range(output_h):
         for j in range(output_w):
             output[:, i, j, :] = activation(
-                np.sum(A_prev_padded[:, i * sh:i * sh + kh, j * sw:j * sw + kw, :, np.newaxis] * W,
+                np.sum(A_prev_padded[:, i * sh:i * sh + kh,
+                       j * sw:j * sw + kw, :, np.newaxis] * W,
                        axis=(1, 2, 3)) + b
             )
 
