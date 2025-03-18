@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 """
 Performs back propagation over a convolutional layer of a neural network.
 """
@@ -49,7 +48,7 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
                 )
 
     if padding == "same":
-        dA_prev = dA_prev_padded[:, ph:-ph if ph > 0 else None, pw:-pw if pw > 0 else None, :]
+        dA_prev = dA_prev_padded[:, ph:ph + h_prev, pw:pw + w_prev, :]
     else:
         dA_prev = dA_prev_padded
 
