@@ -4,7 +4,6 @@ Performs back propagation over a convolutional layer of a neural network.
 """
 import numpy as np
 
-
 def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
     """
     Performs back propagation over a convolutional layer.
@@ -24,18 +23,18 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
     kh, kw, c_prev, c_new = W.shape
     sh, sw = stride
     m, h_new, w_new, c_new = dZ.shape
-
+    
     if padding == "same":
         ph = ((h_prev - 1) * sh + kh - h_prev) // 2
         pw = ((w_prev - 1) * sw + kw - w_prev) // 2
     else:
         ph, pw = 0, 0
-
+    
     A_prev_padded = np.pad(A_prev, ((0, 0), (ph, ph), (pw, pw), (0, 0)), mode='constant')
     dA_prev_padded = np.zeros_like(A_prev_padded)
     dW = np.zeros_like(W)
     db = np.sum(dZ, axis=(0, 1, 2), keepdims=True)
-
+    
     for i in range(h_new):
         for j in range(w_new):
             for k in range(c_new):
@@ -46,10 +45,10 @@ def conv_backward(dZ, A_prev, W, b, padding="same", stride=(1, 1)):
                 dW[:, :, :, k] += np.sum(
                     slice_A * dZ[:, i, j, k][:, np.newaxis, np.newaxis, np.newaxis], axis=0
                 )
-
+    
     if padding == "same":
         dA_prev = dA_prev_padded[:, ph:ph + h_prev, pw:pw + w_prev, :]
     else:
         dA_prev = dA_prev_padded
-
+    
     return dA_prev, dW, db
