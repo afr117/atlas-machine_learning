@@ -29,7 +29,7 @@ def pool(images, kernel_shape, stride, mode='max'):
     output_w = (w - kw) // sw + 1
 
     output = np.zeros((m, output_h, output_w, c))
-  
+
     for i in range(output_h):
         for j in range(output_w):
             if mode == 'max':
@@ -42,5 +42,5 @@ def pool(images, kernel_shape, stride, mode='max'):
                     images[:, i * sh:i * sh + kh, j * sw:j * sw + kw, :],
                     axis=(1, 2)
                 )
-  
+
     return output
