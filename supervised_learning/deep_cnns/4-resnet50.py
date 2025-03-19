@@ -23,7 +23,7 @@ def resnet50():
     X = K.layers.Conv2D(filters=64, kernel_size=(7, 7), strides=2, padding='same',
                         kernel_initializer=initializer)(input_layer)
     X = K.layers.BatchNormalization(axis=3)(X)
-    X = K.layers.Activation('relu')(X)
+    X = K.layers.ReLU()(X)  # ✅ FIX: Use ReLU() instead of Activation('relu')
     X = K.layers.MaxPooling2D(pool_size=(3, 3), strides=2, padding='same')(X)
 
     # Stage 1: 1 projection block + 2 identity blocks
