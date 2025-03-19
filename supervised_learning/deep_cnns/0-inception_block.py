@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Builds an inception block as described in Going Deeper with Convolutions (2014).
+Builds an inception block as described in
+Going Deeper with Convolutions (2014).
 """
 
 from tensorflow import keras as K
@@ -26,7 +27,8 @@ def inception_block(A_prev, filters):
                               kernel_initializer=he_normal)(A_prev)
 
     # 1x1 Convolution -> 3x3 Convolution Branch
-    conv3x3_reduce = K.layers.Conv2D(filters=F3R, kernel_size=(1, 1), padding='same',
+    conv3x3_reduce = K.layers.Conv2D(filters=F3R,
+                                     kernel_size=(1, 1), padding='same',
                                      activation='relu',
                                      kernel_initializer=he_normal)(A_prev)
     conv3x3 = K.layers.Conv2D(filters=F3, kernel_size=(3, 3), padding='same',
