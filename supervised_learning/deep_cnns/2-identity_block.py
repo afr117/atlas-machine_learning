@@ -21,26 +21,27 @@ def identity_block(A_prev, filters):
     - Activated output of the identity block.
     """
     F11, F3, F12 = filters
+    initializer = K.initializers.HeNormal(seed=0)
 
     # First 1x1 Convolution
     X = K.layers.Conv2D(filters=F11, kernel_size=(1, 1), padding='same',
-                        kernel_initializer=K.initializers.HeNormal(seed=0))(A_prev)
-    X = K.layers.BatchNormalization(axis=-1)(X)
-    X = K.layers.Activation('relu')(X)
+                        kernel_initializer=initializer)(A_prev)
+    X = K.layers.BatchNormalization(axis=3)(X)
+    X = K.layers.ReLU()(X)  # ✅ FIX: Use ReLU() instead of Activation('relu')
 
     # 3x3 Convolution
     X = K.layers.Conv2D(filters=F3, kernel_size=(3, 3), padding='same',
-                        kernel_initializer=K.initializers.HeNormal(seed=0))(X)
-    X = K.layers.BatchNormalization(axis=-1)(X)
-    X = K.layers.Activation('relu')(X)
+                        kernel_initializer=initializer)(X)
+    X = K.layers.BatchNormalization(axis=3)(X)
+    X = K.layers.ReLU()(X)  # ✅ FIX: Use ReLU() instead of Activation('relu')
 
     # Second 1x1 Convolution
     X = K.layers.Conv2D(filters=F12, kernel_size=(1, 1), padding='same',
-                        kernel_initializer=K.initializers.HeNormal(seed=0))(X)
-    X = K.layers.BatchNormalization(axis=-1)(X)
+                        kernel_initializer=initializer)(X)
+    X = K.layers.BatchNormalization(axis=3)(X)
 
-    # Add skip connection (A_prev must have same shape as X)
+    # Add skip connection (A_prev must have the same shape as X)
     X = K.layers.Add()([X, A_prev])
-    X = K.layers.Activation('relu')(X)
+    X = K.layers.ReLU()(X)  # ✅ FIX: Use ReLU() instead of Activation('relu')
 
     return X
