@@ -5,7 +5,6 @@ Builds an identity block for ResNet as described in Deep Residual Learning for I
 
 from tensorflow import keras as K
 
-
 def identity_block(A_prev, filters):
     """
     Builds an identity block.
@@ -20,28 +19,26 @@ def identity_block(A_prev, filters):
     Returns:
     - Activated output of the identity block.
     """
-    he_normal = K.initializers.HeNormal(seed=0)
-
     F11, F3, F12 = filters
 
     # First 1x1 Convolution
-    X = K.layers.Conv2D(filters=F11, kernel_size=(1, 1), padding='same',
-                        kernel_initializer=he_normal)(A_prev)
+    X = K.layers.Conv2D(F11, (1, 1), padding='same',
+                        kernel_initializer=K.initializers.HeNormal(seed=0))(A_prev)
     X = K.layers.BatchNormalization(axis=3)(X)
     X = K.layers.Activation('relu')(X)
 
     # 3x3 Convolution
-    X = K.layers.Conv2D(filters=F3, kernel_size=(3, 3), padding='same',
-                        kernel_initializer=he_normal)(X)
+    X = K.layers.Conv2D(F3, (3, 3), padding='same',
+                        kernel_initializer=K.initializers.HeNormal(seed=0))(X)
     X = K.layers.BatchNormalization(axis=3)(X)
     X = K.layers.Activation('relu')(X)
 
     # Second 1x1 Convolution
-    X = K.layers.Conv2D(filters=F12, kernel_size=(1, 1), padding='same',
-                        kernel_initializer=he_normal)(X)
+    X = K.layers.Conv2D(F12, (1, 1), padding='same',
+                        kernel_initializer=K.initializers.HeNormal(seed=0))(X)
     X = K.layers.BatchNormalization(axis=3)(X)
 
-    # Add skip connection
+    # Add skip connection and apply activation
     X = K.layers.Add()([X, A_prev])
     X = K.layers.Activation('relu')(X)
 
