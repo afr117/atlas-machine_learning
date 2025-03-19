@@ -21,32 +21,37 @@ def projection_block(A_prev, filters, s=2):
     Returns:
     - Activated output of the projection block.
     """
-    F11, F3, F12 = filters
-    he_normal = K.initializers.HeNormal(seed=0)
 
-    # First 1x1 Convolution (Reduce Dimension)
+    # Extract filter sizes
+    F11, F3, F12 = filters
+
+    # Define HeNormal initializer with fixed seed
+    initializer = K.initializers.VarianceScaling(scale=2.0, mode='fan_avg', distribution='truncated_normal', seed=0)
+
+    # **MAIN PATH**
+    # 1x1 Convolution (Reduce Dimension)
     X = K.layers.Conv2D(filters=F11, kernel_size=(1, 1), strides=s, padding='same',
-                        kernel_initializer=he_normal)(A_prev)
-    X = K.layers.BatchNormalization(axis=-1)(X)
+                        kernel_initializer=initializer)(A_prev)
+    X = K.layers.BatchNormalization(axis=3)(X)
     X = K.layers.Activation('relu')(X)
 
     # 3x3 Convolution
-    X = K.layers.Conv2D(filters=F3, kernel_size=(3, 3), padding='same',
-                        kernel_initializer=he_normal)(X)
-    X = K.layers.BatchNormalization(axis=-1)(X)
+    X = K.layers.Conv2D(filters=F3, kernel_size=(3, 3), strides=1, padding='same',
+                        kernel_initializer=initializer)(X)
+    X = K.layers.BatchNormalization(axis=3)(X)
     X = K.layers.Activation('relu')(X)
 
-    # Second 1x1 Convolution (Restore Dimension)
-    X = K.layers.Conv2D(filters=F12, kernel_size=(1, 1), padding='same',
-                        kernel_initializer=he_normal)(X)
-    X = K.layers.BatchNormalization(axis=-1)(X)
+    # 1x1 Convolution (Restore Dimension)
+    X = K.layers.Conv2D(filters=F12, kernel_size=(1, 1), strides=1, padding='same',
+                        kernel_initializer=initializer)(X)
+    X = K.layers.BatchNormalization(axis=3)(X)
 
-    # Shortcut Path (Projection Shortcut)
+    # **SHORTCUT PATH (Projection Shortcut)**
     shortcut = K.layers.Conv2D(filters=F12, kernel_size=(1, 1), strides=s, padding='same',
-                               kernel_initializer=he_normal)(A_prev)
-    shortcut = K.layers.BatchNormalization(axis=-1)(shortcut)
+                               kernel_initializer=initializer)(A_prev)
+    shortcut = K.layers.BatchNormalization(axis=3)(shortcut)
 
-    # Add Skip Connection
+    # **Add Skip Connection**
     X = K.layers.Add()([X, shortcut])
     X = K.layers.Activation('relu')(X)
 
