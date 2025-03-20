@@ -26,7 +26,8 @@ def projection_block(A_prev, filters, s=2):
     initializer = K.initializers.HeNormal(seed=0)
 
     # First 1x1 Convolution (Reduce Dimension)
-    X = K.layers.Conv2D(filters=F11, kernel_size=(1, 1), strides=s, padding="same",
+    X = K.layers.Conv2D(filters=F11, kernel_size=(1, 1),
+                        strides=s, padding="same",
                         kernel_initializer=initializer)(A_prev)
     X = K.layers.BatchNormalization(axis=3)(X)
     X = K.layers.ReLU()(X)  # ✅ FIX: Use ReLU() instead of Activation('relu')
@@ -43,12 +44,13 @@ def projection_block(A_prev, filters, s=2):
     X = K.layers.BatchNormalization(axis=3)(X)
 
     # Shortcut Path (Projection Shortcut)
-    shortcut = K.layers.Conv2D(filters=F12, kernel_size=(1, 1), strides=s, padding="same",
+    shortcut = K.layers.Conv2D(filters=F12, kernel_size=(1, 1),
+                               strides=s, padding="same",
                                kernel_initializer=initializer)(A_prev)
     shortcut = K.layers.BatchNormalization(axis=3)(shortcut)
 
     # Add Skip Connection
     X = K.layers.Add()([X, shortcut])
-    X = K.layers.ReLU()(X)  # ✅ FIX: Use ReLU() instead of Activation('relu')
+    X = K.layers.ReLU()(X)  # Use ReLU() instead of Activation('relu')
 
     return X
