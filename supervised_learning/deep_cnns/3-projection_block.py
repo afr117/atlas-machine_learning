@@ -5,6 +5,7 @@ Builds a projection block for ResNet as described in Deep Residual Learning for 
 
 from tensorflow import keras as K
 
+
 def projection_block(A_prev, filters, s=2):
     """
     Builds a projection block.
