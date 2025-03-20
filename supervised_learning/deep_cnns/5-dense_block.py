@@ -9,7 +9,7 @@ def dense_block(X, nb_filters, growth_rate, layers):
     Builds a dense block as described in DenseNet architecture.
     
     Parameters:
-    - X: output from the previous layer
+    - X: output for the previous layer
     - nb_filters: number of filters in X
     - growth_rate: growth rate for the dense block
     - layers: number of layers in the dense block
