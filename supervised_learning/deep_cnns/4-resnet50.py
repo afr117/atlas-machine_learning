@@ -1,5 +1,8 @@
+#!/usr/bin/env python3
+
 import tensorflow as tf
 from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Concatenate
+
 
 def dense_block(X, nb_filters, growth_rate, layers):
     """
