@@ -10,7 +10,7 @@ def projection_block(A_prev, filters, s=2):
     Builds a projection block.
 
     Parameters:
-    - A_prev: The output of the previous layer.
+    - A_prev: The output from the previous layer.
     - filters: Tuple or list containing F11, F3, F12 respectively:
         - F11: Number of filters in the first 1x1 convolution.
         - F3: Number of filters in the 3x3 convolution.
@@ -22,33 +22,33 @@ def projection_block(A_prev, filters, s=2):
     """
     F11, F3, F12 = filters
 
-    # Define HeNormal initializer with mode="fan_in"
-    initializer = K.initializers.HeNormal(seed=0, mode="fan_in")
+    # He Normal Initialization (seed set to 0)
+    initializer = K.initializers.HeNormal(seed=0)
 
     # First 1x1 Convolution (Reduce Dimension)
-    X = K.layers.Conv2D(F11, (1, 1), strides=s, padding="same",
+    X = K.layers.Conv2D(filters=F11, kernel_size=(1, 1), strides=s, padding="same",
                         kernel_initializer=initializer)(A_prev)
     X = K.layers.BatchNormalization(axis=3)(X)
-    X = K.layers.ReLU()(X)  # ✅ FIXED: Use ReLU() instead of Activation('relu')
+    X = K.layers.ReLU()(X)  # ✅ FIX: Use ReLU() instead of Activation('relu')
 
     # 3x3 Convolution
-    X = K.layers.Conv2D(F3, (3, 3), padding="same",
+    X = K.layers.Conv2D(filters=F3, kernel_size=(3, 3), padding="same",
                         kernel_initializer=initializer)(X)
     X = K.layers.BatchNormalization(axis=3)(X)
-    X = K.layers.ReLU()(X)  # ✅ FIXED: Use ReLU() instead of Activation('relu')
+    X = K.layers.ReLU()(X)  # ✅ FIX: Use ReLU() instead of Activation('relu')
 
     # Second 1x1 Convolution (Restore Dimension)
-    X = K.layers.Conv2D(F12, (1, 1), padding="same",
+    X = K.layers.Conv2D(filters=F12, kernel_size=(1, 1), padding="same",
                         kernel_initializer=initializer)(X)
     X = K.layers.BatchNormalization(axis=3)(X)
 
     # Shortcut Path (Projection Shortcut)
-    shortcut = K.layers.Conv2D(F12, (1, 1), strides=s, padding="same",
+    shortcut = K.layers.Conv2D(filters=F12, kernel_size=(1, 1), strides=s, padding="same",
                                kernel_initializer=initializer)(A_prev)
     shortcut = K.layers.BatchNormalization(axis=3)(shortcut)
 
     # Add Skip Connection
     X = K.layers.Add()([X, shortcut])
-    X = K.layers.ReLU()(X)  # ✅ FIXED: Use ReLU() instead of Activation('relu')
+    X = K.layers.ReLU()(X)  # ✅ FIX: Use ReLU() instead of Activation('relu')
 
     return X
