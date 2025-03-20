@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Builds a projection block for ResNet as described in Deep Residual Learning for Image Recognition (2015).
+Builds a projection block for ResNet as described in
+Deep Residual Learning for Image Recognition (2015).
 """
 
 from tensorflow import keras as K
@@ -15,8 +16,10 @@ def projection_block(A_prev, filters, s=2):
     - filters: Tuple or list containing F11, F3, F12 respectively:
         - F11: Number of filters in the first 1x1 convolution.
         - F3: Number of filters in the 3x3 convolution.
-        - F12: Number of filters in the second 1x1 convolution (and shortcut connection).
-    - s: Stride of the first convolution in both the main path and shortcut connection.
+        - F12: Number of filters in the second 1x1 convolution
+        (and shortcut connection).
+    - s: Stride of the first convolution in both the
+    main path and shortcut connection.
 
     Returns:
     - Activated output of the projection block.
