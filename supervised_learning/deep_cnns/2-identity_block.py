@@ -11,7 +11,7 @@ def identity_block(A_prev, filters):
     Builds an identity block.
 
     Parameters:
-    - A_prev: The output from the previous layer.
+    - A_prev: The output of the previous layer.
     - filters: Tuple or list containing F11, F3, F12 respectively:
         - F11: Number of filters in the first 1x1 convolution.
         - F3: Number of filters in the 3x3 convolution.
