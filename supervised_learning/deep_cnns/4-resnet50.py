@@ -25,7 +25,7 @@ def resnet50():
     X = K.layers.Conv2D(filters=64, kernel_size=(7, 7), strides=2, padding="same",
                         kernel_initializer=initializer)(X_input)
     X = K.layers.BatchNormalization(axis=3)(X)
-    X = K.layers.Activation('relu')(X)  # ✅ FIX: Changed from ReLU() to Activation('relu')
+    X = K.layers.Activation('relu')(X)  # ✅ FIXED: Replaced ReLU() with Activation('relu')
     X = K.layers.MaxPooling2D(pool_size=(3, 3), strides=2, padding="same")(X)
 
     # Stage 1
