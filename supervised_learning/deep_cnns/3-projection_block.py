@@ -6,7 +6,6 @@ Deep Residual Learning for Image Recognition (2015).
 
 from tensorflow import keras as K
 
-
 def projection_block(A_prev, filters, s=2):
     """
     Builds a projection block.
@@ -22,43 +21,35 @@ def projection_block(A_prev, filters, s=2):
     Returns:
     - Activated output of the projection block.
     """
-
-    # Extract filter sizes
     F11, F3, F12 = filters
 
-    # Define HeNormal initializer with fixed seed
-    initializer = K.initializers.VarianceScaling(scale=2.0, mode='fan_avg',
-                                                 distribution='truncated_normal', seed=0)
+    # Define HeNormal initializer with mode="fan_in"
+    initializer = K.initializers.HeNormal(seed=0, mode="fan_in")
 
-    # **MAIN PATH**
-    # 1x1 Convolution (Reduce Dimension)
-    X = K.layers.Conv2D(filters=F11, kernel_size=(1, 1),
-                        strides=s, padding='same',
+    # First 1x1 Convolution (Reduce Dimension)
+    X = K.layers.Conv2D(F11, (1, 1), strides=s, padding="same",
                         kernel_initializer=initializer)(A_prev)
     X = K.layers.BatchNormalization(axis=3)(X)
-    X = K.layers.Activation('relu')(X)
+    X = K.layers.ReLU()(X)
 
     # 3x3 Convolution
-    X = K.layers.Conv2D(filters=F3, kernel_size=(3, 3),
-                        strides=1, padding='same',
+    X = K.layers.Conv2D(F3, (3, 3), padding="same",
                         kernel_initializer=initializer)(X)
     X = K.layers.BatchNormalization(axis=3)(X)
-    X = K.layers.Activation('relu')(X)
+    X = K.layers.ReLU()(X)
 
-    # 1x1 Convolution (Restore Dimension)
-    X = K.layers.Conv2D(filters=F12, kernel_size=(1, 1),
-                        strides=1, padding='same',
+    # Second 1x1 Convolution (Restore Dimension)
+    X = K.layers.Conv2D(F12, (1, 1), padding="same",
                         kernel_initializer=initializer)(X)
     X = K.layers.BatchNormalization(axis=3)(X)
 
-    # **SHORTCUT PATH (Projection Shortcut)**
-    shortcut = K.layers.Conv2D(filters=F12, kernel_size=(1, 1),
-                               strides=s, padding='same',
+    # Shortcut Path (Projection Shortcut)
+    shortcut = K.layers.Conv2D(F12, (1, 1), strides=s, padding="same",
                                kernel_initializer=initializer)(A_prev)
     shortcut = K.layers.BatchNormalization(axis=3)(shortcut)
 
-    # **Add Skip Connection**
+    # Add Skip Connection
     X = K.layers.Add()([X, shortcut])
-    X = K.layers.Activation('relu')(X)
+    X = K.layers.ReLU()(X)
 
     return X
