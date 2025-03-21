@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Builds a transition layer as described in Densely Connected Convolutional Networks.
+Builds a transition layer as described in
+Densely Connected Convolutional Networks.
 """
 
 from tensorflow import keras as K
