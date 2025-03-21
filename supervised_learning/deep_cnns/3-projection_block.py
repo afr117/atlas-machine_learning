@@ -34,13 +34,13 @@ def projection_block(A_prev, filters, s=2):
                         strides=s, padding="same",
                         kernel_initializer=initializer)(A_prev)
     X = K.layers.BatchNormalization(axis=3)(X)
-    X = K.layers.ReLU()(X)  # ✅ FIX: Use ReLU() instead of Activation('relu')
+    X = K.layers.ReLU()(X)
 
     # 3x3 Convolution
     X = K.layers.Conv2D(filters=F3, kernel_size=(3, 3), padding="same",
                         kernel_initializer=initializer)(X)
     X = K.layers.BatchNormalization(axis=3)(X)
-    X = K.layers.ReLU()(X)  # ✅ FIX: Use ReLU() instead of Activation('relu')
+    X = K.layers.ReLU()(X)
 
     # Second 1x1 Convolution (Restore Dimension)
     X = K.layers.Conv2D(filters=F12, kernel_size=(1, 1), padding="same",
@@ -55,6 +55,6 @@ def projection_block(A_prev, filters, s=2):
 
     # Add Skip Connection
     X = K.layers.Add()([X, shortcut])
-    X = K.layers.ReLU()(X)  # Use ReLU() instead of Activation('relu')
+    X = K.layers.ReLU()(X)
 
     return X
