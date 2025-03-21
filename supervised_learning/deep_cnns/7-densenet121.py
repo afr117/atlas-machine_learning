@@ -17,12 +17,11 @@ def densenet121(growth_rate=32, compression=1.0):
         The Keras model of DenseNet-121
     """
     initializer = K.initializers.he_normal(seed=0)
-
     inputs = K.Input(shape=(224, 224, 3))
 
     # Initial convolution and pooling
     X = K.layers.BatchNormalization()(inputs)
-    X = K.layers.Activation('relu')(X)
+    X = K.layers.ReLU()(X)
     X = K.layers.Conv2D(64, (7, 7), strides=(2, 2), padding='same',
                         kernel_initializer=initializer)(X)
     X = K.layers.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), padding='same')(X)
@@ -44,7 +43,7 @@ def densenet121(growth_rate=32, compression=1.0):
 
     # Final layers
     X = K.layers.BatchNormalization()(X)
-    X = K.layers.Activation('relu')(X)
+    X = K.layers.ReLU()(X)
     X = K.layers.GlobalAveragePooling2D()(X)
     outputs = K.layers.Dense(1000, activation='softmax',
                              kernel_initializer=initializer)(X)
