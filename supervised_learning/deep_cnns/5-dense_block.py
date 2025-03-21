@@ -11,7 +11,7 @@ def dense_block(X, nb_filters, growth_rate, layers):
     Builds a dense block using DenseNet-B bottleneck architecture.
 
     Parameters:
-    - X: Output from the previous layer.
+    - X: Output for the previous layer.
     - nb_filters: Number of filters in X.
     - growth_rate: Growth rate for the dense block.
     - layers: Number of layers in the dense block.
