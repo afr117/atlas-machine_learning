@@ -9,10 +9,14 @@ def preprocess_data(X, Y):
     """
     Pre-process the data for the model
     """
-    X_p = K.applications.mobilenet_v2.preprocess_input(
-        K.layers.Resizing(96, 96)(X.astype('float32')))
+    X = X.astype('float32')
+    X_resized = np.zeros((X.shape[0], 96, 96, 3), dtype='float32')
+    resize_layer = K.layers.Resizing(96, 96)
+    for i in range(0, X.shape[0], 1000):  # process in batches
+        X_resized[i:i+1000] = resize_layer(X[i:i+1000])
+    X_p = K.applications.mobilenet_v2.preprocess_input(X_resized)
     Y_p = K.utils.to_categorical(Y, 10)
-    return X_p.numpy(), Y_p
+    return X_p, Y_p
 
 if __name__ == '__main__':
     # Load CIFAR-10
@@ -20,30 +24,28 @@ if __name__ == '__main__':
     X_train, Y_train = preprocess_data(X_train, Y_train)
     X_test, Y_test = preprocess_data(X_test, Y_test)
 
-    # Load base model (frozen)
-    base_model = K.applications.MobileNetV2(include_top=False,
-                                            weights='imagenet',
-                                            input_shape=(96, 96, 3),
-                                            pooling='avg')
-    base_model.trainable = False
+    # Base model
+    base = K.applications.MobileNetV2(include_top=False,
+                                      input_shape=(96, 96, 3),
+                                      pooling='avg',
+                                      weights='imagenet')
+    base.trainable = False
 
-    # Build model
+    # Custom head
     inputs = K.Input(shape=(96, 96, 3))
-    x = base_model(inputs, training=False)
+    x = base(inputs, training=False)
+    x = K.layers.Dense(256, activation='relu')(x)
     outputs = K.layers.Dense(10, activation='softmax')(x)
     model = K.Model(inputs, outputs)
 
-    # Compile
     model.compile(optimizer=K.optimizers.Adam(),
                   loss='categorical_crossentropy',
                   metrics=['accuracy'])
 
-    # Train
     model.fit(X_train, Y_train,
+              epochs=5,
+              batch_size=64,  # smaller batch size = lower memory usage
               validation_data=(X_test, Y_test),
-              epochs=10,
-              batch_size=128,
               verbose=1)
 
-    # Save
-    model.save("cifar10.h5")
+    model.save('cifar10.h5')
