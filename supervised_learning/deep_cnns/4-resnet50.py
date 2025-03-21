@@ -1,44 +1,52 @@
 #!/usr/bin/env python3
+"""
+Builds the ResNet-50 architecture as described in
+"Deep Residual Learning for Image Recognition" (2015)
+"""
+import tensorflow.keras as K
 
-import tensorflow as tf
-from tensorflow.keras.layers import Conv2D, BatchNormalization, Activation, Concatenate
+identity_block = __import__('2-identity_block').identity_block
+projection_block = __import__('3-projection_block').projection_block
 
+def resnet50():
+    """Builds the ResNet-50 architecture"""
+    he_normal = K.initializers.he_normal(seed=0)
+    X_input = K.Input(shape=(224, 224, 3))
 
-def dense_block(X, nb_filters, growth_rate, layers):
-    """
-    Builds a dense block as described in DenseNet architecture.
-    
-    Parameters:
-    - X: output from the previous layer
-    - nb_filters: number of filters in X
-    - growth_rate: growth rate for the dense block
-    - layers: number of layers in the dense block
-    
-    Returns:
-    - The concatenated output of each layer within the Dense Block
-    - The number of filters within the concatenated outputs
-    """
-    he_init = tf.keras.initializers.HeNormal(seed=0)
-    
-    for _ in range(layers):
-        # Batch Normalization + ReLU Activation
-        bn1 = BatchNormalization()(X)
-        act1 = Activation('relu')(bn1)
-        
-        # 1x1 Convolution (Bottleneck layer)
-        conv1 = Conv2D(filters=4 * growth_rate, kernel_size=1, padding='same',
-                        kernel_initializer=he_init, use_bias=False)(act1)
-        
-        # Batch Normalization + ReLU Activation
-        bn2 = BatchNormalization()(conv1)
-        act2 = Activation('relu')(bn2)
-        
-        # 3x3 Convolution
-        conv2 = Conv2D(filters=growth_rate, kernel_size=3, padding='same',
-                        kernel_initializer=he_init, use_bias=False)(act2)
-        
-        # Concatenate the input with the new feature maps
-        X = Concatenate()([X, conv2])
-        nb_filters += growth_rate
-    
-    return X, nb_filters
+    # Initial Conv + MaxPooling
+    X = K.layers.Conv2D(64, (7, 7), strides=(2, 2), padding='same',
+                        kernel_initializer=he_normal)(X_input)
+    X = K.layers.BatchNormalization(axis=3)(X)
+    X = K.layers.Activation('relu')(X)
+    X = K.layers.MaxPooling2D((3, 3), strides=(2, 2), padding='same')(X)
+
+    # conv2_x
+    X = projection_block(X, [64, 64, 256], s=1)
+    X = identity_block(X, [64, 64, 256])
+    X = identity_block(X, [64, 64, 256])
+
+    # conv3_x
+    X = projection_block(X, [128, 128, 512])
+    X = identity_block(X, [128, 128, 512])
+    X = identity_block(X, [128, 128, 512])
+    X = identity_block(X, [128, 128, 512])
+
+    # conv4_x
+    X = projection_block(X, [256, 256, 1024])
+    X = identity_block(X, [256, 256, 1024])
+    X = identity_block(X, [256, 256, 1024])
+    X = identity_block(X, [256, 256, 1024])
+    X = identity_block(X, [256, 256, 1024])
+    X = identity_block(X, [256, 256, 1024])
+
+    # conv5_x
+    X = projection_block(X, [512, 512, 2048])
+    X = identity_block(X, [512, 512, 2048])
+    X = identity_block(X, [512, 512, 2048])
+
+    # Average Pooling + Dense layer
+    X = K.layers.AveragePooling2D((7, 7), padding='same')(X)
+    X = K.layers.Dense(1000, activation='softmax', kernel_initializer=he_normal)(X)
+
+    model = K.models.Model(inputs=X_input, outputs=X)
+    return model
