@@ -1,74 +1,65 @@
 #!/usr/bin/env python3
 """
-Trains a CNN on CIFAR-10 using transfer learning with MobileNetV2.
+Transfer learning with MobileNetV2 on CIFAR-10
 """
-from tensorflow import keras as K
-import tensorflow as tf
 
+from tensorflow import keras as K
+import numpy as np
 
 def preprocess_data(X, Y):
     """
-    Pre-processes CIFAR-10 data
-    Args:
-        X: numpy.ndarray (m, 32, 32, 3)
-        Y: numpy.ndarray (m,)
-    Returns:
-        X, Y as preprocessed tf tensors
+    Preprocess the data by normalizing and one-hot encoding
     """
-    X = tf.cast(X, tf.float32)
-    Y = tf.cast(Y, tf.int32)
+    X = X.astype('float32') / 255.0
+    Y = K.utils.to_categorical(Y, 10)
     return X, Y
 
 
-def prepare_dataset(X, Y, batch_size=32, training=True):
-    """
-    Builds a low-memory tf.data.Dataset for training or validation
-    """
-    X, Y = preprocess_data(X, Y)
-    dataset = tf.data.Dataset.from_tensor_slices((X, Y))
-
-    def process(x, y):
-        x = tf.image.resize(x, (96, 96))
-        x = K.applications.mobilenet_v2.preprocess_input(x)
-        return x, y
-
-    dataset = dataset.map(process, num_parallel_calls=1)  # No parallel threads
-    if training:
-        dataset = dataset.shuffle(1000)
-    dataset = dataset.batch(batch_size)
-    return dataset  # Removed prefetch and cache for low memory
-
-
 if __name__ == '__main__':
-    # Load CIFAR-10
-    (X_train, Y_train), (X_val, Y_val) = K.datasets.cifar10.load_data()
+    # Load CIFAR-10 dataset
+    (X_train, Y_train), (X_test, Y_test) = K.datasets.cifar10.load_data()
+    X_train, Y_train = preprocess_data(X_train, Y_train)
+    X_test, Y_test = preprocess_data(X_test, Y_test)
 
-    # Build datasets
-    train_ds = prepare_dataset(X_train, Y_train, batch_size=16, training=True)
-    val_ds = prepare_dataset(X_val, Y_val, batch_size=16, training=False)
+    # Resize on-the-fly using ImageDataGenerator
+    datagen = K.preprocessing.image.ImageDataGenerator(
+        preprocessing_function=K.applications.mobilenet_v2.preprocess_input,
+        validation_split=0.1
+    )
 
-    # Build MobileNetV2-based model
-    base_model = K.applications.MobileNetV2(include_top=False,
-                                            weights='imagenet',
-                                            input_shape=(96, 96, 3),
-                                            pooling='avg')
+    train_gen = datagen.flow(
+        X_train, Y_train, batch_size=64, subset='training', shuffle=True,
+        target_size=(96, 96)
+    )
+    val_gen = datagen.flow(
+        X_train, Y_train, batch_size=64, subset='validation', shuffle=False,
+        target_size=(96, 96)
+    )
+
+    base_model = K.applications.MobileNetV2(
+        input_shape=(96, 96, 3),
+        include_top=False,
+        weights='imagenet',
+        pooling='avg'
+    )
     base_model.trainable = False
 
-    inputs = K.Input(shape=(96, 96, 3))
-    x = base_model(inputs, training=False)
-    x = K.layers.Dense(128, activation='relu')(x)
-    outputs = K.layers.Dense(10, activation='softmax')(x)
-    model = K.Model(inputs, outputs)
+    model = K.models.Sequential([
+        base_model,
+        K.layers.Dense(128, activation='relu'),
+        K.layers.Dropout(0.3),
+        K.layers.Dense(10, activation='softmax')
+    ])
 
-    model.compile(optimizer=K.optimizers.Adam(),
-                  loss='sparse_categorical_crossentropy',
+    model.compile(optimizer='adam',
+                  loss='categorical_crossentropy',
                   metrics=['accuracy'])
 
-    # Train (reduce epochs for testing, increase when memory stable)
-    model.fit(train_ds,
-              validation_data=val_ds,
-              epochs=3,
-              verbose=1)
+    model.fit(
+        train_gen,
+        validation_data=val_gen,
+        epochs=5,
+        verbose=1
+    )
 
-    # Save model
     model.save('cifar10.h5')
