@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Improved transfer learning with MobileNetV2 on small CIFAR-10 subset.
+Transfer learning with MobileNetV2 on a small CIFAR-10 subset.
+Improved for better accuracy with limited memory.
 """
 from tensorflow import keras as K
 import tensorflow as tf
@@ -19,12 +20,13 @@ def preprocess_and_resize(image, label):
     """
     Resize and preprocess image
     """
-    image = tf.image.resize(image, (64, 64))
+    image = tf.image.resize(image, (64, 64))  # memory-conscious resize
     image = K.applications.mobilenet_v2.preprocess_input(image)
     return image, label
 
 
 if __name__ == '__main__':
+    # Load and preprocess smaller subset (10k train / 2k test)
     (X_train, Y_train), (X_test, Y_test) = K.datasets.cifar10.load_data()
     X_train, Y_train = X_train[:10000], Y_train[:10000]
     X_test, Y_test = X_test[:2000], Y_test[:2000]
@@ -40,42 +42,46 @@ if __name__ == '__main__':
     val_ds = tf.data.Dataset.from_tensor_slices((X_test, Y_test))
     val_ds = val_ds.map(preprocess_and_resize).batch(batch_size).prefetch(1)
 
+    # Load MobileNetV2 base
     base_model = K.applications.MobileNetV2(
         input_shape=(64, 64, 3),
         include_top=False,
         weights='imagenet',
-        alpha=0.35,  # reduce base model size
+        pooling='avg'
     )
-    base_model.trainable = False
+    
+    # Fine-tune top half of MobileNetV2
+    base_model.trainable = True
+    fine_tune_at = len(base_model.layers) // 2
+    for layer in base_model.layers[:fine_tune_at]:
+        layer.trainable = False
 
+    # Data augmentation
+    data_augmentation = K.Sequential([
+        K.layers.RandomFlip("horizontal"),
+        K.layers.RandomRotation(0.1),
+        K.layers.RandomZoom(0.1),
+    ])
+
+    # Build model
     inputs = K.Input(shape=(64, 64, 3))
-    x = base_model(inputs, training=False)
-    x = K.layers.GlobalAveragePooling2D()(x)
-    x = K.layers.BatchNormalization()(x)
+    x = data_augmentation(inputs)
+    x = base_model(x, training=True)
     x = K.layers.Dense(128, activation='relu')(x)
     x = K.layers.Dropout(0.3)(x)
-    x = K.layers.Dense(64, activation='relu')(x)
     outputs = K.layers.Dense(10, activation='softmax')(x)
 
     model = K.Model(inputs, outputs)
+
+    # Compile with lower learning rate and RMSprop
     model.compile(
-        optimizer=K.optimizers.Adam(learning_rate=0.001),
+        optimizer=K.optimizers.RMSprop(learning_rate=1e-4),
         loss='categorical_crossentropy',
         metrics=['accuracy']
     )
 
-    # Learning rate scheduler
-    callback = K.callbacks.ReduceLROnPlateau(
-        monitor='val_loss',
-        factor=0.5,
-        patience=2,
-        verbose=1,
-        min_lr=1e-5
-    )
+    # Train
+    model.fit(train_ds, validation_data=val_ds, epochs=30)
 
-    model.fit(train_ds,
-              validation_data=val_ds,
-              epochs=10,
-              callbacks=[callback])
-
+    # Save
     model.save('cifar10.h5')
