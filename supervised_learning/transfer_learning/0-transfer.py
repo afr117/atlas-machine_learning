@@ -20,7 +20,7 @@ def preprocess_and_resize(image, label):
     """
     Resize and preprocess image
     """
-    image = tf.image.resize(image, (64, 64))  # memory-conscious resize
+    image = tf.image.resize(image, (16, 16))  # memory-conscious resize
     image = K.applications.mobilenet_v2.preprocess_input(image)
     return image, label
 
@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     # Load MobileNetV2 base
     base_model = K.applications.MobileNetV2(
-        input_shape=(64, 64, 3),
+        input_shape=(16, 16, 3),
         include_top=False,
         weights='imagenet',
         pooling='avg'
