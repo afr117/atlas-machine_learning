@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Transfer learning with MobileNetV2 on a small CIFAR-10 subset.
-Improved for better accuracy with limited memory.
+Optimized for very low memory by using 32x32 input size.
 """
 from tensorflow import keras as K
 import tensorflow as tf
@@ -20,7 +20,7 @@ def preprocess_and_resize(image, label):
     """
     Resize and preprocess image
     """
-    image = tf.image.resize(image, (64, 64))  # memory-conscious resize
+    image = tf.image.resize(image, (32, 32))  # downsized for memory
     image = K.applications.mobilenet_v2.preprocess_input(image)
     return image, label
 
@@ -42,15 +42,15 @@ if __name__ == '__main__':
     val_ds = tf.data.Dataset.from_tensor_slices((X_test, Y_test))
     val_ds = val_ds.map(preprocess_and_resize).batch(batch_size).prefetch(1)
 
-    # Load MobileNetV2 base
+    # Load MobileNetV2 base with smaller input
     base_model = K.applications.MobileNetV2(
-        input_shape=(64, 64, 3),
+        input_shape=(32, 32, 3),
         include_top=False,
         weights='imagenet',
         pooling='avg'
     )
-    
-    # Fine-tune top half of MobileNetV2
+
+    # Fine-tune top half
     base_model.trainable = True
     fine_tune_at = len(base_model.layers) // 2
     for layer in base_model.layers[:fine_tune_at]:
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     ])
 
     # Build model
-    inputs = K.Input(shape=(64, 64, 3))
+    inputs = K.Input(shape=(32, 32, 3))
     x = data_augmentation(inputs)
     x = base_model(x, training=True)
     x = K.layers.Dense(128, activation='relu')(x)
@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
     model = K.Model(inputs, outputs)
 
-    # Compile with lower learning rate and RMSprop
+    # Compile
     model.compile(
         optimizer=K.optimizers.RMSprop(learning_rate=1e-4),
         loss='categorical_crossentropy',
