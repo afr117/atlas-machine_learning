@@ -1,24 +1,14 @@
 #!/usr/bin/env python3
-"""YOLO v3 Object Detection - Process Outputs"""
-
+"""YOLO v3 Object Detection"""
 import tensorflow as tf
 import numpy as np
 
 
 class Yolo:
-    """Uses the YOLO v3 algorithm to perform object detection"""
+    """Yolo class to perform object detection"""
 
     def __init__(self, model_path, classes_path, class_t, nms_t, anchors):
-        """
-        Initialize the YOLO object detector
-
-        Args:
-            model_path (str): path to a Darknet Keras model file (.h5)
-            classes_path (str): path to class names file
-            class_t (float): box score threshold
-            nms_t (float): IOU threshold
-            anchors (np.ndarray): anchor boxes (outputs, anchor_boxes, 2)
-        """
+        """Initialization method"""
         self.model = tf.keras.models.load_model(model_path, compile=False)
         with open(classes_path, 'r') as f:
             self.class_names = [line.strip() for line in f.readlines()]
@@ -26,65 +16,46 @@ class Yolo:
         self.nms_t = nms_t
         self.anchors = anchors
 
-    def sigmoid(self, x):
-        """Sigmoid activation"""
-        return 1 / (1 + np.exp(-x))
-
     def process_outputs(self, outputs, image_size):
-        """
-        Process YOLO outputs for one image
-
-        Args:
-            outputs: List of numpy.ndarrays with shape (gh, gw, anchors, 85)
-            image_size: numpy.ndarray [height, width]
-
-        Returns:
-            boxes, box_confidences, box_class_probs
-        """
-        image_h, image_w = image_size
-        input_h, input_w = self.model.input.shape[1:3].as_list()
-
+        """Process model outputs to get boxes, confidences and class probabilities"""
         boxes = []
         box_confidences = []
         box_class_probs = []
+        image_height, image_width = image_size
 
         for i, output in enumerate(outputs):
-            gh, gw, num_anchors, _ = output.shape
-
-            # Extract t_x, t_y, t_w, t_h
-            t_xy = output[..., 0:2]
+            grid_h, grid_w, anchor_boxes, _ = output.shape
+            t_xy = output[..., :2]
             t_wh = output[..., 2:4]
-            box_conf = self.sigmoid(output[..., 4:5])
-            class_probs = self.sigmoid(output[..., 5:])
+            box_confidence = tf.sigmoid(output[..., 4:5]).numpy()
+            class_probs = tf.sigmoid(output[..., 5:]).numpy()
 
-            # Generate grid for center offsets
-            grid_y = np.arange(gh).reshape(-1, 1, 1)
-            grid_x = np.arange(gw).reshape(1, -1, 1)
-            cx = np.tile(grid_x, (gh, 1, num_anchors))
-            cy = np.tile(grid_y, (1, gw, num_anchors))
+            # Create grid of cx and cy
+            col = np.tile(np.arange(0, grid_w), grid_h).reshape(grid_w, grid_h).T
+            row = np.tile(np.arange(0, grid_h), grid_w).reshape(grid_w, grid_h)
+            cx = col[..., np.newaxis]
+            cy = row[..., np.newaxis]
 
-            # Shape anchors for broadcasting
-            anchor_w = self.anchors[i][:, 0].reshape((1, 1, num_anchors))
-            anchor_h = self.anchors[i][:, 1].reshape((1, 1, num_anchors))
+            # Apply sigmoid to t_xy and compute bx, by
+            bx = (tf.sigmoid(t_xy[..., 0]) + cx) / grid_w
+            by = (tf.sigmoid(t_xy[..., 1]) + cy) / grid_h
 
-            # Compute center coordinates
-            bx = (self.sigmoid(t_xy[..., 0]) + cx) / gw
-            by = (self.sigmoid(t_xy[..., 1]) + cy) / gh
+            # Compute bw, bh using anchors and input model shape
+            pw = self.anchors[i, :, 0]
+            ph = self.anchors[i, :, 1]
+            bw = (np.exp(t_wh[..., 0]) * pw) / self.model.input.shape[1].value
+            bh = (np.exp(t_wh[..., 1]) * ph) / self.model.input.shape[2].value
 
-            # Compute box dimensions
-            bw = (np.exp(t_wh[..., 0]) * anchor_w) / input_w
-            bh = (np.exp(t_wh[..., 1]) * anchor_h) / input_h
-
-            # Convert center coords to corners (x1, y1, x2, y2)
-            x1 = (bx - bw / 2) * image_w
-            y1 = (by - bh / 2) * image_h
-            x2 = (bx + bw / 2) * image_w
-            y2 = (by + bh / 2) * image_h
+            # Calculate corners
+            x1 = (bx - bw / 2) * image_width
+            y1 = (by - bh / 2) * image_height
+            x2 = (bx + bw / 2) * image_width
+            y2 = (by + bh / 2) * image_height
 
             box = np.stack([x1, y1, x2, y2], axis=-1)
 
             boxes.append(box)
-            box_confidences.append(box_conf)
+            box_confidences.append(box_confidence)
             box_class_probs.append(class_probs)
 
         return boxes, box_confidences, box_class_probs
