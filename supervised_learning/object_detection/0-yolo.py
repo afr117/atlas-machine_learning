@@ -17,7 +17,8 @@ class Yolo:
             classes_path (str): path to where class names are stored
             class_t (float): box score threshold for the initial filtering step
             nms_t (float): IOU threshold for non-max suppression
-            anchors (np.ndarray): anchor boxes with shape (outputs, anchor_boxes, 2)
+            anchors (np.ndarray): anchor boxes with shape
+            (outputs, anchor_boxes, 2)
         """
         # Load the Darknet Keras model
         self.model = tf.keras.models.load_model(model_path)
