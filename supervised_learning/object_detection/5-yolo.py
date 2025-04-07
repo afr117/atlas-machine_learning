@@ -19,8 +19,7 @@ class Yolo:
         self.anchors = anchors
 
     def process_outputs(self, outputs, image_size):
-        """Process model outputs to get boxes,
-        confidences and class probabilities"""
+        """Process model outputs to get boxes, confidences and class probabilities"""
         boxes = []
         box_confidences = []
         box_class_probs = []
@@ -166,8 +165,8 @@ class Yolo:
 
         for img in images:
             resized = cv2.resize(img, (input_w, input_h), interpolation=cv2.INTER_CUBIC)
-            normalized = resized / 255.0
+            normalized = resized.astype(np.float32) / 255.0
             pimages.append(normalized)
 
-        pimages = np.array(pimages)
+        pimages = np.stack(pimages, axis=0)
         return pimages, image_shapes
