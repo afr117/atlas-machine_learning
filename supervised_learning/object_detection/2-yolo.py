@@ -17,8 +17,7 @@ class Yolo:
         self.anchors = anchors
 
     def process_outputs(self, outputs, image_size):
-        """Process model outputs to get boxes,
-        confidences and class probabilities"""
+        """Process model outputs to get boxes, confidences and class probabilities"""
         boxes = []
         box_confidences = []
         box_class_probs = []
@@ -78,15 +77,14 @@ class Yolo:
         box_scores = []
 
         for i in range(len(boxes)):
-            scores = box_confidences[i] * box_class_probs[i]
-            scores = scores.reshape((-1, scores.shape[-1]))
-            box = boxes[i].reshape((-1, 4))
-            class_indices = np.argmax(scores, axis=-1)
-            class_scores = np.max(scores, axis=-1)
+            box_score = box_confidences[i] * box_class_probs[i]
+            class_ids = np.argmax(box_score, axis=-1)
+            class_scores = np.max(box_score, axis=-1)
+
             mask = class_scores >= self.class_t
 
-            filtered_boxes.append(box[mask])
-            box_classes.append(class_indices[mask])
+            filtered_boxes.append(boxes[i][mask])
+            box_classes.append(class_ids[mask])
             box_scores.append(class_scores[mask])
 
         filtered_boxes = np.concatenate(filtered_boxes, axis=0)
