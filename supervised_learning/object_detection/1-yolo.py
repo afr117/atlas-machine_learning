@@ -23,34 +23,48 @@ class Yolo:
         box_class_probs = []
         image_height, image_width = image_size
 
+        input_h = self.model.input.shape[1]
+        input_w = self.model.input.shape[2]
+
         for i, output in enumerate(outputs):
             grid_h, grid_w, anchor_boxes, _ = output.shape
-            t_xy = output[..., :2]
+
+            t_xy = output[..., 0:2]
             t_wh = output[..., 2:4]
             box_confidence = tf.sigmoid(output[..., 4:5]).numpy()
             class_probs = tf.sigmoid(output[..., 5:]).numpy()
 
-            # Create grid of cx and cy
-            col = np.tile(np.arange(0, grid_w), grid_h).reshape(grid_w, grid_h).T
-            row = np.tile(np.arange(0, grid_h), grid_w).reshape(grid_w, grid_h)
-            cx = col[..., np.newaxis]
-            cy = row[..., np.newaxis]
+            # Grid offsets
+            cx = np.arange(grid_w).reshape(1, grid_w)
+            cy = np.arange(grid_h).reshape(grid_h, 1)
+            cx = np.tile(cx, (grid_h, 1))
+            cy = np.tile(cy, (1, grid_w))
 
-            # Apply sigmoid to t_xy and compute bx, by
-            bx = (tf.sigmoid(t_xy[..., 0]) + cx) / grid_w
-            by = (tf.sigmoid(t_xy[..., 1]) + cy) / grid_h
+            cx = cx[..., np.newaxis]
+            cy = cy[..., np.newaxis]
 
-            # Compute bw, bh using anchors and input model shape
+            tx = tf.sigmoid(t_xy[..., 0]) + cx
+            ty = tf.sigmoid(t_xy[..., 1]) + cy
+
+            tx /= grid_w
+            ty /= grid_h
+
+            tw = t_wh[..., 0]
+            th = t_wh[..., 1]
+
             pw = self.anchors[i, :, 0]
             ph = self.anchors[i, :, 1]
-            bw = (np.exp(t_wh[..., 0]) * pw) / self.model.input.shape[1].value
-            bh = (np.exp(t_wh[..., 1]) * ph) / self.model.input.shape[2].value
 
-            # Calculate corners
-            x1 = (bx - bw / 2) * image_width
-            y1 = (by - bh / 2) * image_height
-            x2 = (bx + bw / 2) * image_width
-            y2 = (by + bh / 2) * image_height
+            pw = pw.reshape(1, 1, anchor_boxes)
+            ph = ph.reshape(1, 1, anchor_boxes)
+
+            tw = np.exp(tw) * pw / input_w
+            th = np.exp(th) * ph / input_h
+
+            x1 = (tx - tw / 2) * image_width
+            y1 = (ty - th / 2) * image_height
+            x2 = (tx + tw / 2) * image_width
+            y2 = (ty + th / 2) * image_height
 
             box = np.stack([x1, y1, x2, y2], axis=-1)
 
