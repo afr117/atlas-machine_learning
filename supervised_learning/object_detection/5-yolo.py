@@ -19,7 +19,8 @@ class Yolo:
         self.anchors = anchors
 
     def process_outputs(self, outputs, image_size):
-        """Process model outputs to get boxes, confidences and class probabilities"""
+        """Process model outputs to get boxes,
+        confidences and class probabilities"""
         boxes = []
         box_confidences = []
         box_class_probs = []
@@ -95,7 +96,8 @@ class Yolo:
 
         return filtered_boxes, box_classes, box_scores
 
-    def non_max_suppression(self, filtered_boxes, box_classes, box_scores):
+    def non_max_suppression(self, filtered_boxes,
+                            box_classes, box_scores):
         """Apply Non-Max Suppression to filter overlapping boxes"""
         final_boxes = []
         final_classes = []
