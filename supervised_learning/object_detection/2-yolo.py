@@ -51,11 +51,8 @@ class Yolo:
             tw = t_wh[..., 0]
             th = t_wh[..., 1]
 
-            pw = self.anchors[i, :, 0]
-            ph = self.anchors[i, :, 1]
-
-            pw = pw.reshape(1, 1, anchor_boxes)
-            ph = ph.reshape(1, 1, anchor_boxes)
+            pw = self.anchors[i, :, 0].reshape(1, 1, anchor_boxes)
+            ph = self.anchors[i, :, 1].reshape(1, 1, anchor_boxes)
 
             tw = np.exp(tw) * pw / input_w
             th = np.exp(th) * ph / input_h
@@ -81,14 +78,15 @@ class Yolo:
 
         for i in range(len(boxes)):
             scores = box_confidences[i] * box_class_probs[i]
-            classes = np.argmax(scores, axis=-1)
-            max_scores = np.max(scores, axis=-1)
+            scores = scores.reshape((-1, scores.shape[-1]))
+            box = boxes[i].reshape((-1, 4))
+            class_indices = np.argmax(scores, axis=-1)
+            class_scores = np.max(scores, axis=-1)
+            mask = class_scores >= self.class_t
 
-            mask = max_scores >= self.class_t
-
-            filtered_boxes.append(boxes[i][mask])
-            box_classes.append(classes[mask])
-            box_scores.append(max_scores[mask])
+            filtered_boxes.append(box[mask])
+            box_classes.append(class_indices[mask])
+            box_scores.append(class_scores[mask])
 
         filtered_boxes = np.concatenate(filtered_boxes, axis=0)
         box_classes = np.concatenate(box_classes, axis=0)
