@@ -11,8 +11,15 @@ class Yolo:
     def __init__(self, model_path, classes_path, class_t, nms_t, anchors):
         """
         Initialize the YOLO object detector
+
+        Args:
+            model_path (str): path to a Darknet Keras model file (.h5)
+            classes_path (str): path to class names file
+            class_t (float): box score threshold
+            nms_t (float): IOU threshold
+            anchors (np.ndarray): anchor boxes (outputs, anchor_boxes, 2)
         """
-        self.model = tf.keras.models.load_model(model_path)
+        self.model = tf.keras.models.load_model(model_path, compile=False)
         with open(classes_path, 'r') as f:
             self.class_names = [line.strip() for line in f.readlines()]
         self.class_t = class_t
@@ -44,7 +51,7 @@ class Yolo:
         for i, output in enumerate(outputs):
             gh, gw, num_anchors, _ = output.shape
 
-            # Extract t_x, t_y, t_w, t_h, confidence and class probs
+            # Extract t_x, t_y, t_w, t_h
             t_xy = output[..., 0:2]
             t_wh = output[..., 2:4]
             box_conf = self.sigmoid(output[..., 4:5])
