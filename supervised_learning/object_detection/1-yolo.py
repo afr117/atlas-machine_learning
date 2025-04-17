@@ -25,65 +25,72 @@ class Yolo:
         self.nms_t = nms_t
         self.anchors = anchors
 
-    
     def process_outputs(self, outputs, image_size):
-    """
-    Process the outputs from the model.
+        """
+        Process model outputs to get boxes,
+        confidences and class probabilities
 
-    Parameters:
-    - outputs: list of numpy.ndarrays with shape
-               (grid_h, grid_w, anchor_boxes, 4 + 1 + classes)
-    - image_size: numpy.ndarray (image_height, image_width)
+        Args:
+            outputs: list of numpy.ndarrays of shape
+                     (grid_h, grid_w, anchor_boxes, 4 + 1 + classes)
+            image_size: numpy.ndarray with shape (2,) -> (image_height, image_width)
 
-    Returns:
-    - boxes: list of (grid_h, grid_w, anchor_boxes, 4) with (x1, y1, x2, y2)
-    - box_confidences: list of (grid_h, grid_w, anchor_boxes, 1)
-    - box_class_probs: list of (grid_h, grid_w, anchor_boxes, classes)
-    """
-    boxes = []
-    box_confidences = []
-    box_class_probs = []
+        Returns:
+            boxes: list of shape (grid_h, grid_w, anchor_boxes, 4)
+            box_confidences: list of shape (grid_h, grid_w, anchor_boxes, 1)
+            box_class_probs: list of shape (grid_h, grid_w, anchor_boxes, classes)
+        """
+        boxes = []
+        box_confidences = []
+        box_class_probs = []
 
-    image_h, image_w = image_size
-    input_h = self.model.input.shape[1]
-    input_w = self.model.input.shape[2]
+        image_height, image_width = image_size
+        input_h = int(self.model.input.shape[1])
+        input_w = int(self.model.input.shape[2])
 
-    for i, output in enumerate(outputs):
-        grid_h, grid_w, anchor_boxes, _ = output.shape
+        for i, output in enumerate(outputs):
+            grid_h, grid_w, anchor_boxes, _ = output.shape
+            t_xy = output[..., :2]
+            t_wh = output[..., 2:4]
+            box_confidence = tf.sigmoid(output[..., 4:5]).numpy()
+            class_probs = tf.sigmoid(output[..., 5:]).numpy()
 
-        # Split output
-        tx = output[..., 0]
-        ty = output[..., 1]
-        tw = output[..., 2]
-        th = output[..., 3]
+            # Create grid of cx, cy
+            cy = np.arange(grid_h).reshape(-1, 1, 1)
+            cx = np.arange(grid_w).reshape(1, -1, 1)
+            cy = np.tile(cy, (1, grid_w, anchor_boxes))
+            cx = np.tile(cx, (grid_h, 1, anchor_boxes))
 
-        box_confidence = tf.sigmoid(output[..., 4:5]).numpy()
-        box_class_prob = tf.sigmoid(output[..., 5:]).numpy()
+            # Compute center coordinates
+            tx = tf.sigmoid(t_xy[..., 0]) + cx
+            ty = tf.sigmoid(t_xy[..., 1]) + cy
 
-        # Create grid
-        grid_x = np.arange(grid_w).reshape(1, grid_w, 1)
-        grid_x = np.tile(grid_x, (grid_h, 1, anchor_boxes))
-        grid_y = np.arange(grid_h).reshape(grid_h, 1, 1)
-        grid_y = np.tile(grid_y, (1, grid_w, anchor_boxes))
+            tx = tx / grid_w
+            ty = ty / grid_h
 
-        bx = (tf.sigmoid(tx).numpy() + grid_x) / grid_w
-        by = (tf.sigmoid(ty).numpy() + grid_y) / grid_h
+            # Compute width and height with clipping to avoid overflow
+            tw = np.clip(t_wh[..., 0], -10, 10)
+            th = np.clip(t_wh[..., 1], -10, 10)
 
-        pw = self.anchors[i, :, 0].reshape(1, 1, anchor_boxes)
-        ph = self.anchors[i, :, 1].reshape(1, 1, anchor_boxes)
+            pw = self.anchors[i][:, 0]
+            ph = self.anchors[i][:, 1]
 
-        bw = (np.exp(np.clip(tw, -10, 10)) * pw) / input_w
-        bh = (np.exp(np.clip(th, -10, 10)) * ph) / input_h
+            pw = pw.reshape((1, 1, anchor_boxes))
+            ph = ph.reshape((1, 1, anchor_boxes))
 
-        # Scale to image size
-        x1 = (bx - bw / 2) * image_w
-        y1 = (by - bh / 2) * image_h
-        x2 = (bx + bw / 2) * image_w
-        y2 = (by + bh / 2) * image_h
+            bw = (np.exp(tw) * pw) / input_w
+            bh = (np.exp(th) * ph) / input_h
 
-        box = np.stack([x1, y1, x2, y2], axis=-1)
-        boxes.append(box)
-        box_confidences.append(box_confidence)
-        box_class_probs.append(box_class_prob)
+            # Convert to corner coordinates
+            x1 = (tx - (bw / 2)) * image_width
+            y1 = (ty - (bh / 2)) * image_height
+            x2 = (tx + (bw / 2)) * image_width
+            y2 = (ty + (bh / 2)) * image_height
 
-    return boxes, box_confidences, box_class_probs
+            box = np.stack([x1, y1, x2, y2], axis=-1)
+
+            boxes.append(box)
+            box_confidences.append(box_confidence)
+            box_class_probs.append(class_probs)
+
+        return boxes, box_confidences, box_class_probs
