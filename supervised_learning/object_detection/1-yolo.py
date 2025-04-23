@@ -42,20 +42,20 @@ class Yolo:
             box_confidence = self.sigmoid(output[..., 4, np.newaxis])
             box_class_prob = self.sigmoid(output[..., 5:])
 
-            # Create a grid of (cx, cy)
+            # Create grid of (cx, cy)
             cx = np.arange(grid_w).reshape(1, grid_w)
             cy = np.arange(grid_h).reshape(grid_h, 1)
             cx_grid, cy_grid = np.meshgrid(cx, cy)
             grid = np.stack((cx_grid, cy_grid), axis=-1)
             grid = grid.reshape(grid_h, grid_w, 1, 2)
 
-            # Calculate box center (bx, by)
+            # Box center
             bx_by = (t_xy + grid) / [grid_w, grid_h]
 
-            # Calculate box width and height (bw, bh)
-            bw_bh = (np.exp(t_wh) * anchors) / [input_w, input_h]
+            # Corrected division here
+            bw_bh = (np.exp(t_wh) * anchors) / [input_h, input_w]
 
-            # Convert to (x1, y1, x2, y2)
+            # (x1, y1, x2, y2)
             box = np.zeros(output[..., :4].shape)
             box[..., 0] = (bx_by[..., 0] - (bw_bh[..., 0] / 2)) * image_width
             box[..., 1] = (bx_by[..., 1] - (bw_bh[..., 1] / 2)) * image_height
