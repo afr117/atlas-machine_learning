@@ -30,6 +30,9 @@ class Yolo:
         box_class_probs = []
         image_height, image_width = image_size
 
+        input_h = self.model.input.shape[1]
+        input_w = self.model.input.shape[2]
+
         for i, output in enumerate(outputs):
             grid_h, grid_w, anchor_boxes, _ = output.shape
             anchors = self.anchors[i]
@@ -50,8 +53,7 @@ class Yolo:
             bx_by = (t_xy + grid) / [grid_w, grid_h]
 
             # Calculate box width and height (bw, bh)
-            bw_bh = (np.exp(t_wh) * anchors) / [self.model.input.shape[1].value,
-                                                self.model.input.shape[2].value]
+            bw_bh = (np.exp(t_wh) * anchors) / [input_w, input_h]
 
             # Convert to (x1, y1, x2, y2)
             box = np.zeros(output[..., :4].shape)
