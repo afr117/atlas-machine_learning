@@ -3,6 +3,7 @@
 
 import numpy as np
 import cv2
+import os
 
 
 class Yolo:
@@ -110,9 +111,33 @@ class Yolo:
         image_shapes = []
 
         for img in images:
-            image_shapes.append([img.shape[0], img.shape[1]])
+            image_shapes.append(img.shape[:2])
             resized = cv2.resize(img, (input_w, input_h), interpolation=cv2.INTER_CUBIC)
-            normalized = resized / 255.0
+            normalized = resized.astype(np.float32) / 255.0
             pimages.append(normalized)
 
         return np.array(pimages), np.array(image_shapes)
+
+    def load_images(self, folder_path):
+        """Loads all images from a folder
+
+        Args:
+            folder_path (str): directory path to load images from
+
+        Returns:
+            tuple: (images, image_paths)
+                - images: list of np.ndarray images
+                - image_paths: list of image file paths
+        """
+        images = []
+        image_paths = []
+
+        for file_name in os.listdir(folder_path):
+            if file_name.endswith(('.jpg', '.jpeg', '.png')):
+                img_path = os.path.join(folder_path, file_name)
+                img = cv2.imread(img_path)
+                if img is not None:
+                    images.append(img)
+                    image_paths.append(img_path)
+
+        return images, image_paths
