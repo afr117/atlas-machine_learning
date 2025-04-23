@@ -20,4 +20,4 @@ if __name__ == '__main__':
         if "dog.jpg" in name:
             ind = i
             break
-    yolo.show_boxes(images[i], boxes, box_classes, box_scores, "dog.jpg")
+    yolo.show_boxes(images[ind], boxes, box_classes, box_scores, "dog.jpg")
