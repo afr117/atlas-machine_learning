@@ -113,9 +113,8 @@ class Yolo:
         for img in images:
             image_shapes.append(img.shape[:2])
             resized = cv2.resize(img, (input_w, input_h), interpolation=cv2.INTER_CUBIC)
-            normalized = resized / 255.0
-            normalized = normalized.astype(np.float32)
-            pimages.append(normalized)
+            resized = resized.astype(np.float32) / 255.0
+            pimages.append(resized)
 
         return np.array(pimages), np.array(image_shapes)
 
@@ -138,6 +137,7 @@ class Yolo:
                 img_path = os.path.join(folder_path, file_name)
                 img = cv2.imread(img_path)
                 if img is not None:
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                     images.append(img)
                     image_paths.append(img_path)
 
