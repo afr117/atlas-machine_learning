@@ -113,7 +113,8 @@ class Yolo:
         for img in images:
             image_shapes.append(img.shape[:2])
             resized = cv2.resize(img, (input_w, input_h), interpolation=cv2.INTER_CUBIC)
-            normalized = resized.astype(np.float32) / 255.0
+            normalized = resized / 255.0
+            normalized = normalized.astype(np.float32)
             pimages.append(normalized)
 
         return np.array(pimages), np.array(image_shapes)
@@ -132,7 +133,7 @@ class Yolo:
         images = []
         image_paths = []
 
-        for file_name in os.listdir(folder_path):
+        for file_name in sorted(os.listdir(folder_path)):
             if file_name.endswith(('.jpg', '.jpeg', '.png')):
                 img_path = os.path.join(folder_path, file_name)
                 img = cv2.imread(img_path)
