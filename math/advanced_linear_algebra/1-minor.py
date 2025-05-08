@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """
-This module defines a function to calculate the minor matrix of a square matrix.
+This module defines a function to calculate
+the minor matrix of a square matrix.
 """
+
 
 def determinant(matrix):
     """
-    Helper function to calculate determinant of a matrix (copied from 0-determinant.py)
+    Helper function to calculate determinant of a
+    matrix (copied from 0-determinant.py)
     """
     if matrix == [[]]:
         return 1
@@ -26,6 +29,7 @@ def determinant(matrix):
         det += sign * matrix[0][col] * determinant(sub_matrix)
     return det
 
+
 def minor(matrix):
     """
     Calculates the minor matrix of a square matrix.
@@ -40,7 +44,8 @@ def minor(matrix):
         TypeError: If input is not a list of lists.
         ValueError: If input is not a non-empty square matrix.
     """
-    if not isinstance(matrix, list) or not all(isinstance(row, list) for row in matrix):
+    if not isinstance(matrix, list) or not all(isinstance(row, list)
+                                               for row in matrix):
         raise TypeError("matrix must be a list of lists")
 
     size = len(matrix)
