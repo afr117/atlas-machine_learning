@@ -41,5 +41,5 @@ def definiteness(matrix):
         return "Negative semi-definite"
     if np.any(eigvals > 0) and np.any(eigvals < 0):
         return "Indefinite"
-    
+
     return None
