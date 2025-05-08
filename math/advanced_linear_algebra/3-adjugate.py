@@ -28,6 +28,7 @@ def determinant(matrix):
         det += ((-1) ** col) * matrix[0][col] * determinant(sub_matrix)
     return det
 
+
 def cofactor(matrix):
     """
     Helper function to calculate the cofactor matrix.
@@ -51,6 +52,7 @@ def cofactor(matrix):
 
     return cof_matrix
 
+
 def adjugate(matrix):
     """
     Calculates the adjugate matrix of a square matrix.
@@ -65,8 +67,7 @@ def adjugate(matrix):
         TypeError: If input is not a list of lists.
         ValueError: If input is not a non-empty square matrix.
     """
-    if not isinstance(matrix, list) or not all(isinstance(row,
-                                                          list) for row in matrix):
+    if not isinstance(matrix, list) or not all(isinstance(row, list) for row in matrix):
         raise TypeError("matrix must be a list of lists")
 
     size = len(matrix)
