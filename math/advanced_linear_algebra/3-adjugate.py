@@ -67,7 +67,8 @@ def adjugate(matrix):
         TypeError: If input is not a list of lists.
         ValueError: If input is not a non-empty square matrix.
     """
-    if not isinstance(matrix, list) or not all(isinstance(row, list) for row in matrix):
+    if not isinstance(matrix, list) or not all(isinstance
+                                               (row, list) for row in matrix):
         raise TypeError("matrix must be a list of lists")
 
     size = len(matrix)
