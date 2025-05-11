@@ -22,12 +22,8 @@ class MultiNormal:
                 n: number of data points
 
         Sets:
-            self.mean (np.ndarray): shape (d, 1) - mean vector
-            self.cov (np.ndarray): shape (d, d) - covariance matrix
-
-        Raises:
-            TypeError: if data is not a 2D numpy.ndarray
-            ValueError: if data has fewer than 2 points
+            self.mean (np.ndarray): shape (d, 1)
+            self.cov (np.ndarray): shape (d, d)
         """
         if not isinstance(data, np.ndarray) or data.ndim != 2:
             raise TypeError("data must be a 2D numpy.ndarray")
@@ -36,11 +32,35 @@ class MultiNormal:
         if n < 2:
             raise ValueError("data must contain multiple data points")
 
-        # Mean vector: shape (d, 1)
         self.mean = np.mean(data, axis=1, keepdims=True)
-
-        # Center data
         data_centered = data - self.mean
-
-        # Covariance matrix: shape (d, d)
         self.cov = np.matmul(data_centered, data_centered.T) / (n - 1)
+        self.d = d
+
+    def pdf(self, x):
+        """
+        Calculates the PDF at a given data point x.
+
+        Args:
+            x (np.ndarray): shape (d, 1) point to evaluate PDF at
+
+        Returns:
+            float: value of the PDF
+
+        Raises:
+            TypeError: if x is not a numpy.ndarray
+            ValueError: if shape of x is not (d, 1)
+        """
+        if not isinstance(x, np.ndarray):
+            raise TypeError("x must be a numpy.ndarray")
+        if x.shape != (self.d, 1):
+            raise ValueError(f"x must have the shape ({self.d}, 1)")
+
+        det = np.linalg.det(self.cov)
+        inv = np.linalg.inv(self.cov)
+        diff = x - self.mean
+
+        exp_term = -0.5 * np.matmul(diff.T, np.matmul(inv, diff))
+        denom = np.sqrt(((2 * np.pi) ** self.d) * det)
+
+        return float(np.exp(exp_term) / denom)
