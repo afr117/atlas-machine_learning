@@ -28,7 +28,8 @@ def likelihood(x, n, P):
         raise ValueError("n must be a positive integer")
 
     if not isinstance(x, int) or x < 0:
-        raise ValueError("x must be an integer that is greater than or equal to 0")
+        raise ValueError("x must be an integer that
+        is greater than or equal to 0")
 
     if x > n:
         raise ValueError("x cannot be greater than n")
@@ -41,8 +42,8 @@ def likelihood(x, n, P):
 
     # Binomial likelihood formula:
     # L(P) = C(n, x) * P^x * (1 - P)^(n - x)
-    comb = np.math.factorial(n) / (np.math.factorial(x) * np.math.factorial(n - x))
+    comb = np.math.factorial(n) / (np.math.factorial(x)
+                                   * np.math.factorial(n - x))
     likelihoods = comb * (P ** x) * ((1 - P) ** (n - x))
 
     return likelihoods
-
