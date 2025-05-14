@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-This module performs K-means clustering on a dataset.
+Performs K-means clustering on a dataset.
 """
 
 import numpy as np
@@ -14,11 +14,9 @@ def initialize(X, k):
         return None
     if not isinstance(k, int) or k <= 0:
         return None
-
-    n, d = X.shape
     min_vals = np.min(X, axis=0)
     max_vals = np.max(X, axis=0)
-    return np.random.uniform(low=min_vals, high=max_vals, size=(k, d))
+    return np.random.uniform(low=min_vals, high=max_vals, size=(k, X.shape[1]))
 
 
 def kmeans(X, k, iterations=1000):
@@ -31,8 +29,8 @@ def kmeans(X, k, iterations=1000):
         iterations (int): max number of iterations
 
     Returns:
-        C (np.ndarray): shape (k, d), centroids
-        clss (np.ndarray): shape (n,), index of cluster each point belongs to
+        C (np.ndarray): (k, d), cluster centroids
+        clss (np.ndarray): (n,), index of the cluster each point belongs to
     """
     if (not isinstance(X, np.ndarray) or X.ndim != 2 or
         not isinstance(k, int) or k <= 0 or
@@ -45,23 +43,22 @@ def kmeans(X, k, iterations=1000):
         return None, None
 
     for _ in range(iterations):
-        # Assign points to closest centroid
-        distances = np.linalg.norm(X[:, np.newaxis] - C, axis=2)
-        clss = np.argmin(distances, axis=1)
+        # Compute distances and assign clusters
+        dist = np.linalg.norm(X[:, None] - C[None, :], axis=2)
+        clss = np.argmin(dist, axis=1)
 
-        # Save current centroids to check convergence
+        # Save previous centroids
         C_prev = C.copy()
 
         # Update centroids
         for i in range(k):
-            points = X[clss == i]
-            if points.size == 0:
+            if np.any(clss == i):
+                C[i] = np.mean(X[clss == i], axis=0)
+            else:
+                # Reinitialize empty cluster centroid
                 C[i] = np.random.uniform(np.min(X, axis=0),
                                          np.max(X, axis=0))
-            else:
-                C[i] = np.mean(points, axis=0)
 
-        # Check for convergence
         if np.allclose(C, C_prev):
             break
 
