@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Performs K-means clustering on a dataset."""
+"""
+Performs K-means clustering on a dataset.
+"""
+
 import numpy as np
 
 
@@ -40,22 +43,17 @@ def kmeans(X, k, iterations=1000):
         return None, None
 
     for _ in range(iterations):
-        # Assign each point to the closest centroid
         dist = np.linalg.norm(X[:, None] - C[None, :], axis=2)
         clss = np.argmin(dist, axis=1)
 
-        # Store previous centroids
         C_prev = C.copy()
 
-        # Update step
         for i in range(k):
             if np.any(clss == i):
                 C[i] = np.mean(X[clss == i], axis=0)
             else:
-                # Reinitialize empty cluster using same bounds
                 C[i] = np.random.uniform(min_vals, max_vals)
 
-        # Check for convergence
         if np.allclose(C, C_prev):
             break
 
