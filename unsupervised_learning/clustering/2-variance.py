@@ -18,8 +18,8 @@ def variance(X, C):
         float: total variance, or None on failure
     """
     if (not isinstance(X, np.ndarray) or X.ndim != 2 or
-        not isinstance(C, np.ndarray) or C.ndim != 2 or
-        X.shape[1] != C.shape[1]):
+            not isinstance(C, np.ndarray) or C.ndim != 2 or
+            X.shape[1] != C.shape[1]):
         return None
 
     # Compute distance from each point to each centroid
