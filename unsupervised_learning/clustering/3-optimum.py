@@ -7,25 +7,23 @@ import numpy as np
 kmeans = __import__('1-kmeans').kmeans
 variance = __import__('2-variance').variance
 
-
 def optimum_k(X, kmin=1, kmax=None, iterations=1000):
     """
     Finds the optimal number of clusters by variance.
 
     Args:
-        X (np.ndarray): shape (n, d), dataset
-        kmin (int): min number of clusters to check (inclusive)
-        kmax (int): max number of clusters to check (inclusive)
-        iterations (int): max iterations for K-means
+        X (np.ndarray): Dataset of shape (n, d)
+        kmin (int): Minimum number of clusters (inclusive)
+        kmax (int): Maximum number of clusters (inclusive)
+        iterations (int): Max number of iterations for K-means
 
     Returns:
-        results (list): outputs of K-means for each k
-        d_vars (list): delta variance from smallest k
+        results (list): Outputs of K-means for each k
+        d_vars (list): Difference in variance from smallest k
     """
     if (not isinstance(X, np.ndarray) or X.ndim != 2 or
         not isinstance(kmin, int) or kmin < 1 or
-        (kmax is not None and
-         (not isinstance(kmax, int) or kmax < kmin)) or
+        (kmax is not None and (not isinstance(kmax, int) or kmax < kmin)) or
         not isinstance(iterations, int) or iterations < 1):
         return None, None
 
@@ -34,16 +32,16 @@ def optimum_k(X, kmin=1, kmax=None, iterations=1000):
 
     results = []
     d_vars = []
-    base_var = None
+    variances = []
 
     for k in range(kmin, kmax + 1):
         C, clss = kmeans(X, k, iterations)
         if C is None or clss is None:
             return None, None
-        var = variance(X, C)
-        if base_var is None:
-            base_var = var
         results.append((C, clss))
-        d_vars.append(var - base_var)
+        variances.append(variance(X, C))
+
+    base_var = variances[0]
+    d_vars = [v - base_var for v in variances]
 
     return results, d_vars
