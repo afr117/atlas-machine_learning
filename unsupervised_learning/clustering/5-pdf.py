@@ -26,6 +26,8 @@ def pdf(X, m, S):
 
     try:
         det_S = np.linalg.det(S)
+        if det_S <= 0:
+            return None
         inv_S = np.linalg.inv(S)
         norm_const = 1.0 / np.sqrt(((2 * np.pi) ** d) * det_S)
         diff = X - m
