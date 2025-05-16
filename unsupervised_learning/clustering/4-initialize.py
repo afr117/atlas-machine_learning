@@ -22,7 +22,7 @@ def initialize(X, k):
     if not isinstance(k, int) or k <= 0 or k >= X.shape[0]:
         return None, None, None
 
-    _, m = kmeans(X, k)
+    m, _ = kmeans(X, k)
     d = X.shape[1]
     pi = np.full((k,), 1 / k)
     S = np.tile(np.identity(d), (k, 1, 1))
