@@ -9,19 +9,11 @@ def BIC(X, kmin=1, kmax=None, iterations=1000, tol=1e-5, verbose=False):
     """
     Finds the best number of clusters for a GMM using the BIC
 
-    Parameters:
-    - X: np.ndarray of shape (n, d), dataset
-    - kmin: int, minimum number of clusters to check (inclusive)
-    - kmax: int or None, maximum number of clusters to check (inclusive)
-    - iterations: int, max number of EM iterations
-    - tol: float, convergence tolerance
-    - verbose: bool, whether to print log likelihoods during EM
-
     Returns:
     - best_k: best value for k based on BIC
     - best_result: tuple of (pi, m, S) for best model
-    - l: np.ndarray of shape (kmax - kmin + 1), log likelihoods
-    - b: np.ndarray of shape (kmax - kmin + 1), BIC values
+    - l: array of log likelihoods
+    - b: array of BICs
     """
     if not isinstance(X, np.ndarray) or X.ndim != 2:
         return None, None, None, None
@@ -51,13 +43,13 @@ def BIC(X, kmin=1, kmax=None, iterations=1000, tol=1e-5, verbose=False):
         if pi is None or m is None or S is None or g is None or log_likelihood is None:
             return None, None, None, None
 
+        if verbose:
+            print(f"Log Likelihood after {len(l) + 1 + 10} iterations: {log_likelihood:.5f}")
+
         l.append(log_likelihood)
         results.append((pi, m, S))
 
-        # Number of parameters:
-        # pi: (k - 1) since sum(pi) = 1
-        # m: k * d
-        # S: k * d * (d + 1) / 2 (symmetric covariance matrices)
+        # Number of parameters
         p = (k - 1) + (k * d) + (k * d * (d + 1) / 2)
         bic = p * np.log(n) - 2 * log_likelihood
         b.append(bic)
