@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Performs the maximization step in the EM algorithm for a GMM"""
+"""Performs the maximization step in the EM algorithm to a GMM"""
 import numpy as np
 
 
 def maximization(X, g):
     """
-    Performs the maximization step in the EM algorithm for a GMM
+    Performs the maximization step in the EM algorithm to a GMM
 
     Parameters:
     - X: np.ndarray of shape (n, d), dataset
@@ -25,7 +25,7 @@ def maximization(X, g):
     if n != n_check:
         return None, None, None
 
-    # Sum of responsibilities for each cluster
+    # Sum of responsibilities on each cluster
     Nk = np.sum(g, axis=1)
 
     # Updated priors
