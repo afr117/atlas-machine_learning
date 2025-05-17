@@ -1,67 +1,43 @@
 #!/usr/bin/env python3
-"""Performs the EM algorithm for a Gaussian Mixture Model"""
+"""Performs the maximization step in the EM algorithm for a GMM"""
 import numpy as np
 
-initialize = __import__('4-initialize').initialize
-expectation = __import__('6-expectation').expectation
-maximization = __import__('7-maximization').maximization
 
-
-def expectation_maximization(X, k, iterations=1000, tol=1e-5, verbose=False):
+def maximization(X, g):
     """
-    Performs the EM algorithm for a GMM
+    Performs the maximization step in the EM algorithm for a GMM
 
     Parameters:
     - X: np.ndarray of shape (n, d), data set
-    - k: int, number of clusters
-    - iterations: int, maximum number of iterations
-    - tol: float, tolerance for log likelihood convergence
-    - verbose: bool, whether to print log likelihood info
+    - g: np.ndarray of shape (k, n), posterior probabilities
 
     Returns:
-    - pi: np.ndarray of shape (k,), priors
-    - m: np.ndarray of shape (k, d), means
-    - S: np.ndarray of shape (k, d, d), covariances
-    - g: np.ndarray of shape (k, n), responsibilities
-    - log_likelihood: final log likelihood
+    - pi: np.ndarray of shape (k,), updated priors
+    - m: np.ndarray of shape (k, d), updated means
+    - S: np.ndarray of shape (k, d, d), updated covariances
     """
     if not isinstance(X, np.ndarray) or X.ndim != 2:
-        return None, None, None, None, None
-    if not isinstance(k, int) or k <= 0:
-        return None, None, None, None, None
-    if not isinstance(iterations, int) or iterations <= 0:
-        return None, None, None, None, None
-    if not isinstance(tol, float) or tol < 0:
-        return None, None, None, None, None
-    if not isinstance(verbose, bool):
-        return None, None, None, None, None
+        return None, None, None
+    if not isinstance(g, np.ndarray) or g.ndim != 2:
+        return None, None, None
 
-    pi, m, S = initialize(X, k)
-    if pi is None or m is None or S is None:
-        return None, None, None, None, None
+    n, d = X.shape
+    k, n_check = g.shape
+    if n != n_check:
+        return None, None, None
 
-    g, log_likelihood = expectation(X, pi, m, S)
-    if g is None or log_likelihood is None:
-        return None, None, None, None, None
+    Nk = np.sum(g, axis=1)
+    if np.any(Nk == 0):
+        return None, None, None
 
-    for i in range(iterations):
-        pi, m, S = maximization(X, g)
-        if pi is None or m is None or S is None:
-            return None, None, None, None, None
+    pi = Nk / n
+    m = (g @ X) / Nk[:, None]
 
-        g, new_ll = expectation(X, pi, m, S)
-        if g is None or new_ll is None:
-            return None, None, None, None, None
+    # Vectorized covariance computation with einsum
+    X_exp = X[None, :, :]         # (1, n, d)
+    m_exp = m[:, None, :]         # (k, 1, d)
+    diff = X_exp - m_exp          # (k, n, d)
+    weighted_diff = diff * g[:, :, None]  # (k, n, d)
+    S = np.einsum('kni,knj->kij', weighted_diff, diff) / Nk[:, None, None]
 
-        if verbose and (i % 10 == 0 or i == iterations - 1):
-            print(f"Log Likelihood after {i} iterations: {log_likelihood:.5f}")
-
-        if abs(new_ll - log_likelihood) <= tol:
-            log_likelihood = new_ll
-            if verbose:
-                print(f"Log Likelihood after {i + 1} iterations: {log_likelihood:.5f}")
-            return pi, m, S, g, log_likelihood
-
-        log_likelihood = new_ll
-
-    return pi, m, S, g, log_likelihood
+    return pi, m, S
