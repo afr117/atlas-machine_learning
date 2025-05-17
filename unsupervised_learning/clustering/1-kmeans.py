@@ -8,13 +8,13 @@ def kmeans(X, k, iterations=1000):
     Performs K-means on a dataset
 
     Parameters:
-    - X: np.ndarray of shape (n, d), dataset
-    - k: int, number of clusters
-    - iterations: int, maximum number of iterations
+    - X: np.ndarray of shape (n, d)
+    - k: number of clusters
+    - iterations: max number of iterations
 
     Returns:
-    - C: np.ndarray of shape (k, d), centroid means
-    - clss: np.ndarray of shape (n,), index of cluster each data point belongs to
+    - C: np.ndarray of shape (k, d), centroids
+    - clss: np.ndarray of shape (n,), index of cluster for each data point
     """
     if (not isinstance(X, np.ndarray) or X.ndim != 2 or
         not isinstance(k, int) or k <= 0 or
@@ -22,30 +22,34 @@ def kmeans(X, k, iterations=1000):
         return None, None
 
     n, d = X.shape
-
-    # Initialize centroids with a uniform distribution between min and max of X
     min_vals = np.min(X, axis=0)
     max_vals = np.max(X, axis=0)
     C = np.random.uniform(min_vals, max_vals, (k, d))
 
-    for i in range(iterations):
-        # Compute distances and assign clusters
-        dists = np.linalg.norm(X[:, np.newaxis] - C, axis=2)
+    for _ in range(iterations):
+        # Compute distances and assign points
+        dists = np.linalg.norm(X[:, None] - C[None, :], axis=2)
         clss = np.argmin(dists, axis=1)
 
-        # Store previous centroids for convergence check
         C_prev = C.copy()
 
-        for j in range(k):
-            points = X[clss == j]
-            if points.shape[0] > 0:
-                C[j] = np.mean(points, axis=0)
-            else:
-                # Reinitialize empty cluster centroid
-                C[j] = np.random.uniform(min_vals, max_vals)
+        # Vectorized centroid update
+        mask = (clss[:, None] == np.arange(k)).astype(int)
+        counts = mask.sum(axis=0)
 
-        # Check for convergence
-        if np.allclose(C, C_prev):
+        # Avoid division by zero
+        counts[counts == 0] = 1
+
+        new_C = (mask.T @ X) / counts[:, None]
+
+        # Handle empty clusters by reinitializing
+        empty = (mask.sum(axis=0) == 0)
+        if np.any(empty):
+            new_C[empty] = np.random.uniform(min_vals, max_vals, (empty.sum(), d))
+
+        if np.allclose(C, new_C):
             break
+
+        C = new_C
 
     return C, clss
