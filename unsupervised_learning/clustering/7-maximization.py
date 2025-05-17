@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Performs the maximization step in the EM algorithm to a GMM"""
+"""Performs the maximization step in the EM algorithm for a GMM"""
 import numpy as np
 
 
 def maximization(X, g):
     """
-    Performs the maximization step in the EM algorithm to a GMM
+    Performs the maximization step in the EM algorithm for a GMM
 
     Parameters:
-    - X: np.ndarray of shape (n, d), dataset
+    - X: np.ndarray of shape (n, d), data set
     - g: np.ndarray of shape (k, n), posterior probabilities
 
     Returns:
@@ -20,25 +20,24 @@ def maximization(X, g):
         return None, None, None
     if not isinstance(g, np.ndarray) or g.ndim != 2:
         return None, None, None
+
     n, d = X.shape
     k, n_check = g.shape
     if n != n_check:
         return None, None, None
 
-    # Sum of responsibilities on each cluster
     Nk = np.sum(g, axis=1)
+    if np.any(Nk == 0):
+        return None, None, None
 
-    # Updated priors
     pi = Nk / n
+    m = (g @ X) / Nk[:, None]
 
-    # Updated means
-    m = (g @ X) / Nk[:, np.newaxis]
-
-    # Updated covariances
-    S = np.zeros((k, d, d))
-    for i in range(k):
-        diff = X - m[i]
-        weighted_diff = g[i][:, np.newaxis] * diff
-        S[i] = (weighted_diff.T @ diff) / Nk[i]
+    # Vectorized covariance computation with einsum
+    X_exp = X[None, :, :]         # (1, n, d)
+    m_exp = m[:, None, :]         # (k, 1, d)
+    diff = X_exp - m_exp          # (k, n, d)
+    weighted_diff = diff * g[:, :, None]  # (k, n, d)
+    S = np.einsum('kni,knj->kij', weighted_diff, diff) / Nk[:, None, None]
 
     return pi, m, S
