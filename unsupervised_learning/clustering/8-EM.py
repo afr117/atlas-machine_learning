@@ -4,19 +4,12 @@ import numpy as np
 
 initialize = __import__('4-initialize').initialize
 expectation = __import__('6-expectation').expectation
-maximization = __import__('maximization').maximization
+maximization = __import__('7-maximization').maximization
 
 
 def expectation_maximization(X, k, iterations=1000, tol=1e-5, verbose=False):
     """
     Performs the EM algorithm for a GMM
-
-    Parameters:
-    - X: np.ndarray of shape (n, d), data set
-    - k: int, number of clusters
-    - iterations: int, maximum number of iterations
-    - tol: float, tolerance for log likelihood convergence
-    - verbose: bool, whether to print log likelihood info
 
     Returns:
     - pi: np.ndarray of shape (k,), priors
@@ -57,10 +50,10 @@ def expectation_maximization(X, k, iterations=1000, tol=1e-5, verbose=False):
             print(f"Log Likelihood after {i} iterations: {log_likelihood:.5f}")
 
         if abs(new_ll - log_likelihood) <= tol:
-            if verbose:
-                print(f"Log Likelihood after {i + 1} iterations: {new_ll:.5f}")
             log_likelihood = new_ll
-            break
+            if verbose:
+                print(f"Log Likelihood after {i + 1} iterations: {log_likelihood:.5f}")
+            return pi, m, S, g, log_likelihood
 
         log_likelihood = new_ll
 
