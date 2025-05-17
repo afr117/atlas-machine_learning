@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Performs K-means clustering using sklearn"""
-import numpy as np
-from sklearn.cluster import KMeans
+import sklearn.cluster
 
 
 def kmeans(X, k):
@@ -16,9 +15,6 @@ def kmeans(X, k):
     - C: np.ndarray of shape (k, d), centroid coordinates
     - clss: np.ndarray of shape (n,), index of the cluster each point belongs to
     """
-    kmeans_model = KMeans(n_clusters=k, n_init='auto')
-    kmeans_model.fit(X)
-    C = kmeans_model.cluster_centers_
-    clss = kmeans_model.labels_
-
-    return C, clss
+    model = sklearn.cluster.KMeans(n_clusters=k, n_init='auto')
+    model.fit(X)
+    return model.cluster_centers_, model.labels_
