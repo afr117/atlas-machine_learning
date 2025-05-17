@@ -16,7 +16,7 @@ def expectation(X, pi, m, S):
 
     Returns:
     - g: np.ndarray of shape (k, n), posterior probabilities (responsibilities)
-    - l: total log likelihood
+    - log_likelihood: total log likelihood
     """
     if not isinstance(X, np.ndarray) or X.ndim != 2:
         return None, None
@@ -35,9 +35,9 @@ def expectation(X, pi, m, S):
             g[i] = pi[i] * pdf(X, m[i], S[i])
 
         total = np.sum(g, axis=0)
-        l = np.sum(np.log(total))
+        log_likelihood = np.sum(np.log(total))
         g /= total
 
-        return g, l
+        return g, log_likelihood
     except Exception:
         return None, None
