@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Performs the Baum-Welch algorithm for a hidden markov model"""
+"""Performs the Baum-Welch algorithm for a hidden Markov model"""
 import numpy as np
 
 
@@ -11,7 +11,8 @@ def forward(Observation, Emission, Transition, Initial):
 
     for t in range(1, T):
         for j in range(N):
-            F[j, t] = np.sum(F[:, t - 1] * Transition[:, j]) * Emission[j, Observation[t]]
+            F[j, t] = np.sum(F[:, t - 1] * Transition[:, j]) * \
+                      Emission[j, Observation[t]]
 
     P = np.sum(F[:, -1])
     return P, F
@@ -25,7 +26,8 @@ def backward(Observation, Emission, Transition, Initial):
 
     for t in range(T - 2, -1, -1):
         for i in range(N):
-            B[i, t] = np.sum(Transition[i] * Emission[:, Observation[t + 1]] * B[:, t + 1])
+            B[i, t] = np.sum(Transition[i] * Emission[:, Observation[t + 1]] *
+                             B[:, t + 1])
 
     P = np.sum(Initial.T * Emission[:, Observation[0]] * B[:, 0])
     return P, B
@@ -48,7 +50,9 @@ def baum_welch(Observations, Transition, Emission, Initial, iterations=1000):
 
         xi = np.zeros((N, N, T - 1))
         for t in range(T - 1):
-            denom = np.dot(F[:, t], np.dot(Transition, Emission[:, Observations[t + 1]] * B[:, t + 1]))
+            denom = np.dot(F[:, t],
+                          np.dot(Transition,
+                                 Emission[:, Observations[t + 1]] * B[:, t + 1]))
             for i in range(N):
                 numer = F[i, t] * Transition[i] * Emission[:, Observations[t + 1]] * B[:, t + 1]
                 xi[i, :, t] = numer / denom
