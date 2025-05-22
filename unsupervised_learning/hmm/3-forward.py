@@ -20,12 +20,12 @@ def forward(Observation, Emission, Transition, Initial):
     - F: np.ndarray of shape (N, T), forward path probabilities
     """
     if (not isinstance(Observation, np.ndarray) or Observation.ndim != 1 or
-        not isinstance(Emission, np.ndarray) or Emission.ndim != 2 or
-        not isinstance(Transition, np.ndarray) or Transition.ndim != 2 or
-        not isinstance(Initial, np.ndarray) or Initial.shape[1] != 1 or
-        Transition.shape[0] != Transition.shape[1] or
-        Emission.shape[0] != Transition.shape[0] or
-        Initial.shape[0] != Transition.shape[0]):
+            not isinstance(Emission, np.ndarray) or Emission.ndim != 2 or
+            not isinstance(Transition, np.ndarray) or Transition.ndim != 2 or
+            not isinstance(Initial, np.ndarray) or Initial.shape[1] != 1 or
+            Transition.shape[0] != Transition.shape[1] or
+            Emission.shape[0] != Transition.shape[0] or
+            Initial.shape[0] != Transition.shape[0]):
         return None, None
 
     N, T = Emission.shape[0], Observation.shape[0]
@@ -36,7 +36,7 @@ def forward(Observation, Emission, Transition, Initial):
     for t in range(1, T):
         for j in range(N):
             F[j, t] = np.sum(F[:, t - 1] * Transition[:, j]) * \
-                      Emission[j, Observation[t]]
+                Emission[j, Observation[t]]
 
     P = np.sum(F[:, -1])
     return P, F
