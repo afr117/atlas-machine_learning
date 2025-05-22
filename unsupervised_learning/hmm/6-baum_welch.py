@@ -38,7 +38,8 @@ def baum_welch(Observations, Transition, Emission, Initial, iterations=1000):
         not isinstance(Transition, np.ndarray) or
         not isinstance(Emission, np.ndarray) or
         not isinstance(Initial, np.ndarray) or
-        not isinstance(iterations, int) or iterations <= 0):
+        not isinstance(iterations, int) or
+        iterations <= 0):
         return None, None
 
     T = Observations.shape[0]
@@ -52,16 +53,19 @@ def baum_welch(Observations, Transition, Emission, Initial, iterations=1000):
         for t in range(T - 1):
             denom = np.dot(F[:, t],
                           np.dot(Transition,
-                                 Emission[:, Observations[t + 1]] * B[:, t + 1]))
+                                 Emission[:, Observations[t + 1]] *
+                                 B[:, t + 1]))
             for i in range(N):
-                numer = F[i, t] * Transition[i] * Emission[:, Observations[t + 1]] * B[:, t + 1]
+                numer = F[i, t] * Transition[i] * Emission[:,
+                Observations[t + 1]] * B[:, t + 1]
                 xi[i, :, t] = numer / denom
 
         gamma = np.sum(xi, axis=1)
         gamma_last = (F[:, -1] * B[:, -1]) / np.sum(F[:, -1] * B[:, -1])
         gamma = np.hstack((gamma, gamma_last[:, np.newaxis]))
 
-        Transition = np.sum(xi, axis=2) / np.sum(gamma[:, :-1], axis=1, keepdims=True)
+        Transition = np.sum(xi, axis=2) / np.sum(gamma[:, :-1],
+                                                 axis=1, keepdims=True)
 
         for i in range(N):
             for j in range(M):
