@@ -37,4 +37,3 @@ def markov_chain(P, s, t=1):
         s = np.matmul(s, P)
 
     return s
-
