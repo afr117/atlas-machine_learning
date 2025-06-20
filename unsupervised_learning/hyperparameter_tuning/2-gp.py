@@ -70,14 +70,14 @@ class GaussianProcess:
         return mu, sigma
 
     def update(self, X_new, Y_new):
-        """
-        Updates the Gaussian Process with a new sample point.
+    """
+    Updates the Gaussian Process with a new sample point.
 
-        Args:
-            X_new (np.ndarray): New input sample, shape (1,).
-            Y_new (np.ndarray): New output value, shape (1,).
-        """
-            self.X = np.vstack((self.X, X_new.reshape(-1, 1)))
-            self.Y = np.vstack((self.Y, Y_new.reshape(-1, 1)))
-            self.K = self.kernel(self.X, self.X)
-            self.K_inv = np.linalg.inv(self.K)
+    Args:
+        X_new (np.ndarray): New input sample, shape (1,).
+        Y_new (np.ndarray): New output value, shape (1,).
+    """
+    self.X = np.vstack((self.X, X_new.reshape(-1, 1)))
+    self.Y = np.vstack((self.Y, Y_new.reshape(-1, 1)))
+    self.K = self.kernel(self.X, self.X)
+    self.K_inv = np.linalg.inv(self.K)
