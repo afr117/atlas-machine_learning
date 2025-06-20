@@ -63,7 +63,6 @@ class BayesianOptimization:
         for _ in range(iterations):
             X_next, _ = self.acquisition()
 
-            # Check if X_next already in X
             if np.any(np.isclose(self.gp.X, X_next).all(axis=1)):
                 break
 
@@ -77,5 +76,4 @@ class BayesianOptimization:
 
         X_opt = self.gp.X[idx].reshape(1,)
         Y_opt = self.gp.Y[idx].reshape(1,)
-
         return X_opt, Y_opt
