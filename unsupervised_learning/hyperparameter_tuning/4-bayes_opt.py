@@ -47,7 +47,8 @@ class BayesianOptimization:
 
         Returns:
             X_next (np.ndarray of shape (1,)): Next best sample point.
-            EI (np.ndarray of shape (ac_samples,)): Expected improvement values.
+            EI (np.ndarray of shape (ac_samples,)): 
+            Expected improvement values.
         """
         mu, sigma = self.gp.predict(self.X_s)
         sigma = np.where(sigma == 0, 1e-10, sigma)
