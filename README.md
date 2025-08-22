@@ -2,7 +2,7 @@
 
 ![Composite plots](docs/screenshot-atlas-ml.png)
 
-A curated collection of ML coursework and labs: linear algebra utilities, probability & statistics, supervised/unsupervised learning, and deep learning experiments. Each module aims for clear, PEP8-compliant code with docstrings and runnable examples.
+A curated collection of ML coursework and labs: linear algebra utilities, probability & statistics, supervised/unsupervised learning, and deep learning experiments. Each module aims for clear, PEP8 compliant code with docstrings and runnable examples.
 
 ## Why this exists (the story)
 I built this repo to track my progression from math foundations to applied models. I focused on writing **readable, vectorized** NumPy solutions and small, testable scripts so I could iterate quickly and validate understanding—then captured plots and outputs to show learning milestones.
@@ -19,7 +19,7 @@ I built this repo to track my progression from math foundations to applied model
 - Unify helpers (I/O, plotting, metrics) in a `utils/` package
 - Add `pre-commit` hooks and lightweight CI (lint + tests)
 - Dockerfile for turnkey execution
-- Expand unit-style checks for regression safety
+- Expand unit style checks for regression safety
 - More experiment notebooks with hyperparameter sweeps
 
 ## Hardest challenges
