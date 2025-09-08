@@ -24,23 +24,23 @@ def play(env, Q, max_steps=100):
     Runs a greedy (exploit-only) episode using Q on the given env.
 
     Args:
-        env: FrozenLakeEnv instance (already created with render_mode='ansi').
+        env: FrozenLakeEnv instance (created with render_mode='ansi').
         Q: Trained Q-table (numpy.ndarray of shape (n_states, n_actions)).
         max_steps: Max steps per episode.
 
     Returns:
         total_reward: Sum of rewards obtained in the episode.
-        rendered_outputs: List of console-rendered states and
-            action labels between states (final state included).
+        rendered_outputs: List of board states and single action labels
+                          between states (final state included).
     """
     action_names = {0: "Left", 1: "Down", 2: "Right", 3: "Up"}
     rendered_outputs = []
     total_reward = 0.0
 
-    # Capture initial state rendering
+    # Show initial board
     rendered_outputs.append(_render_to_text(env))
 
-    # Get starting state from env internals if available
+    # Determine current state (env.reset() already called by the driver)
     if hasattr(env.unwrapped, "s"):
         state = int(env.unwrapped.s)
     else:
@@ -48,15 +48,19 @@ def play(env, Q, max_steps=100):
         rendered_outputs[-1] = _render_to_text(env)
 
     for _ in range(max_steps):
-        # Exploit: choose the action with the highest Q-value
+        # Exploit: pick best action from Q-table
         action = int(np.argmax(Q[state]))
 
-        # Step through environment
+        # Step the environment
         next_state, reward, terminated, truncated, _ = env.step(action)
         total_reward += float(reward)
 
-        # Append action + board rendering
-        rendered_outputs.append("  ({})".format(action_names.get(action, str(action))))
+        # Append a single action label, avoiding accidental duplicates
+        label = "  ({})".format(action_names.get(action, str(action)))
+        if not rendered_outputs or rendered_outputs[-1] != label:
+            rendered_outputs.append(label)
+
+        # Append the resulting board render
         rendered_outputs.append(_render_to_text(env))
 
         state = int(next_state)
