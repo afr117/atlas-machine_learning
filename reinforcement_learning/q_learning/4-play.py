@@ -34,37 +34,42 @@ def play(env, Q, max_steps=100):
                           between states (final state included).
     """
     action_names = {0: "Left", 1: "Down", 2: "Right", 3: "Up"}
-    rendered_outputs = []
+    outputs = []
     total_reward = 0.0
 
-    # Show initial board
-    rendered_outputs.append(_render_to_text(env))
+    # initial board
+    outputs.append(_render_to_text(env))
 
-    # Determine current state (env.reset() already called by the driver)
+    # get starting state (env.reset() already called by driver)
     if hasattr(env.unwrapped, "s"):
         state = int(env.unwrapped.s)
     else:
         state, _ = env.reset()
-        rendered_outputs[-1] = _render_to_text(env)
+        outputs[-1] = _render_to_text(env)
 
     for _ in range(max_steps):
-        # Exploit: pick best action from Q-table
+        # exploit only
         action = int(np.argmax(Q[state]))
 
-        # Step the environment
+        # step
         next_state, reward, terminated, truncated, _ = env.step(action)
         total_reward += float(reward)
 
-        # Append a single action label, avoiding accidental duplicates
-        label = "  ({})".format(action_names.get(action, str(action)))
-        if not rendered_outputs or rendered_outputs[-1] != label:
-            rendered_outputs.append(label)
-
-        # Append the resulting board render
-        rendered_outputs.append(_render_to_text(env))
+        # action label then board
+        outputs.append("  ({})".format(action_names.get(action, str(action))))
+        outputs.append(_render_to_text(env))
 
         state = int(next_state)
         if terminated or truncated:
             break
+
+    # ---- remove consecutive duplicate lines (fix double action labels) ----
+    rendered_outputs = []
+    last = None
+    for line in outputs:
+        if line != last:
+            rendered_outputs.append(line)
+        last = line
+    # ----------------------------------------------------------------------
 
     return total_reward, rendered_outputs
