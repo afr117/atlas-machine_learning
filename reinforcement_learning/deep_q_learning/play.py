@@ -15,7 +15,18 @@ import argparse
 import numpy as np
 import gymnasium as gym
 from gymnasium.wrappers import AtariPreprocessing, StepAPICompatibility
+import tensorflow as tf
 from tensorflow import keras
+
+# --- Compatibility shim for keras-rl2 with TF/Keras 2.15 ---
+try:
+    import keras as standalone_keras
+    if not hasattr(tf.keras, "__version__"):
+        tf.keras.__version__ = standalone_keras.__version__
+except Exception:
+    pass
+# -----------------------------------------------------------
+
 from rl.agents.dqn import DQNAgent
 from rl.memory import SequentialMemory
 from rl.policy import GreedyQPolicy
@@ -48,15 +59,12 @@ def make_env(render_mode="human"):
 def main():
     """CLI entrypoint for playing with a greedy policy."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--weights", type=str, default="policy.h5", help="Policy .h5 file."
-    )
-    parser.add_argument(
-        "--episodes", type=int, default=1, help="Number of episodes to play."
-    )
-    parser.add_argument(
-        "--max-steps", type=int, default=10000, help="Max steps per episode."
-    )
+    parser.add_argument("--weights", type=str, default="policy.h5",
+                        help="Policy .h5 file.")
+    parser.add_argument("--episodes", type=int, default=1,
+                        help="Number of episodes to play.")
+    parser.add_argument("--max-steps", type=int, default=10000,
+                        help="Max steps per episode.")
     args = parser.parse_args()
 
     env = make_env(render_mode="human")
@@ -80,34 +88,34 @@ def main():
         gamma=0.99,
         train_interval=1,
         delta_clip=1.0,
+        enable_double_dqn=True,
     )
     agent.compile(
-        optimizer=keras.optimizers.Adam(learning_rate=0.00025),
+        optimizer=keras.optimizers.Adam(learning_rate=2.5e-4),
         metrics=["mae"],
     )
 
     for _ in range(args.episodes):
         agent.reset_states()
+
         obs = env.reset()
-        # StepAPICompatibility returns classic Gym API: obs only from reset
+        # StepAPICompatibility may return obs or (obs, info); handle both
         if isinstance(obs, tuple):
             obs = obs[0]
+
         done = False
         steps = 0
         total_reward = 0.0
 
         while not done and steps < args.max_steps:
-            # Render the environment (display window)
-            env.render()
-
-            # Greedy action from the agent
-            action = agent.forward(obs)
+            env.render()  # show window (no-op on headless)
+            action = agent.forward(obs)            # greedy action
             obs, reward, done, info = env.step(action)
+            # maintain internal state for stacked frames (no learning during play)
+            agent.backward(0.0, terminal=done)
             total_reward += float(reward)
             steps += 1
 
-        # Clean up agent state at episode end
-        agent.backward(0.0, terminal=True)
         print("Episode reward:", total_reward)
 
     env.close()
@@ -115,4 +123,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
