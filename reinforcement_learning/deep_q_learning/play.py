@@ -33,9 +33,19 @@ except Exception:
     pass
 # ------------------------------------------------------------
 
-from rl.agents.dqn import DQNAgent
-from rl.memory import SequentialMemory
-from rl.policy import GreedyQPolicy
+
+class KerasRLCompat(gym.Wrapper):
+    """Same reset/step compatibility as in train.py."""
+    def reset(self, **kwargs):
+        out = self.env.reset(**kwargs)
+        return out[0] if isinstance(out, tuple) else out
+
+    def step(self, action):
+        out = self.env.step(action)
+        if isinstance(out, tuple) and len(out) == 5:
+            obs, reward, terminated, truncated, info = out
+            return obs, reward, (terminated or truncated), info
+        return out
 
 
 def make_env(render_mode="human"):
@@ -51,6 +61,7 @@ def make_env(render_mode="human"):
         scale_obs=False,
     )
     env = StepAPICompatibility(env, output_truncation_bool=False)
+    env = KerasRLCompat(env)
     return env
 
 
@@ -70,10 +81,14 @@ def main():
     obs_shape = env.observation_space.shape  # (84, 84)
     window_length = 4
 
-    # Load the saved policy network
+    # Load the saved policy network (no Lambda, so standard load is fine)
     model = keras.models.load_model(args.weights)
 
     # Build a DQNAgent shell using GreedyQPolicy for action selection.
+    from rl.agents.dqn import DQNAgent
+    from rl.memory import SequentialMemory
+    from rl.policy import GreedyQPolicy
+
     memory = SequentialMemory(limit=10_000, window_length=window_length)
     policy = GreedyQPolicy()
     agent = DQNAgent(
@@ -93,11 +108,7 @@ def main():
 
     for _ in range(args.episodes):
         agent.reset_states()
-
         obs = env.reset()
-        if isinstance(obs, tuple):  # StepAPICompatibility may return (obs, info)
-            obs = obs[0]
-
         done = False
         steps = 0
         total_reward = 0.0
