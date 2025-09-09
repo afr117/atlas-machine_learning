@@ -14,7 +14,20 @@ import argparse
 import numpy as np
 import gymnasium as gym
 from gymnasium.wrappers import AtariPreprocessing, StepAPICompatibility
+import tensorflow as tf
 from tensorflow import keras
+
+# --- Compatibility shim for keras-rl2 with TF/Keras 2.15 ---
+# keras-rl2 tries: `from tensorflow.keras import __version__ as KERAS_VERSION`
+# Add it if missing, using standalone keras' version.
+try:
+    import keras as standalone_keras  # standalone package
+    if not hasattr(tf.keras, "__version__"):
+        tf.keras.__version__ = standalone_keras.__version__
+except Exception:
+    pass
+# -----------------------------------------------------------
+
 from rl.agents.dqn import DQNAgent
 from rl.memory import SequentialMemory
 from rl.policy import EpsGreedyQPolicy, LinearAnnealedPolicy
@@ -38,9 +51,9 @@ def make_env(render_mode=None):
         frame_skip=4,
         noop_max=30,
         terminal_on_life_loss=False,
-        scale_obs=False,  # keep uint8 [0, 255]; DQN normalizes internally
+        scale_obs=False,  # keep uint8 [0, 255]; we normalize in the model
     )
-    # Make Gymnasium behave like classic Gym for keras-rl2
+    # Adapt Gymnasium (terminated, truncated) to classic (done) API
     env = StepAPICompatibility(env, output_truncation_bool=False)
     return env
 
@@ -58,21 +71,15 @@ def build_model(window_length, obs_shape, nb_actions):
         keras.Model: Keras model mapping states to Q-values.
     """
     wl = window_length
-    h, w = obs_shape
-    # Input to keras-rl2 is (window_length, H, W); permute to (H, W, window_len)
+    h, w = obs_shape  # (84, 84)
+    # keras-rl2 feeds (wl, H, W); we permute to channels_last for Conv2D
     inputs = keras.Input(shape=(wl, h, w))
     x = keras.layers.Permute((2, 3, 1))(inputs)  # (H, W, wl)
-    # Normalize to [0,1] (uint8 in, float out)
-    x = keras.layers.Lambda(lambda z: keras.ops.cast(z, "float32") / 255.0)(x)
-    x = keras.layers.Conv2D(
-        32, (8, 8), strides=(4, 4), activation="relu"
-    )(x)
-    x = keras.layers.Conv2D(
-        64, (4, 4), strides=(2, 2), activation="relu"
-    )(x)
-    x = keras.layers.Conv2D(
-        64, (3, 3), strides=(1, 1), activation="relu"
-    )(x)
+    # Normalize uint8 -> float32 [0,1] using TF 2.15 ops
+    x = keras.layers.Lambda(lambda z: tf.cast(z, tf.float32) / 255.0)(x)
+    x = keras.layers.Conv2D(32, (8, 8), strides=(4, 4), activation="relu")(x)
+    x = keras.layers.Conv2D(64, (4, 4), strides=(2, 2), activation="relu")(x)
+    x = keras.layers.Conv2D(64, (3, 3), strides=(1, 1), activation="relu")(x)
     x = keras.layers.Flatten()(x)
     x = keras.layers.Dense(512, activation="relu")(x)
     outputs = keras.layers.Dense(nb_actions, activation="linear")(x)
@@ -93,7 +100,6 @@ def make_agent(model, nb_actions, window_length):
         DQNAgent: Compiled DQN agent.
     """
     memory = SequentialMemory(limit=1_000_000, window_length=window_length)
-    # Epsilon-greedy with linear annealing
     policy = LinearAnnealedPolicy(
         EpsGreedyQPolicy(),
         attr="eps",
@@ -107,7 +113,7 @@ def make_agent(model, nb_actions, window_length):
         nb_actions=nb_actions,
         memory=memory,
         nb_steps_warmup=50_000,
-        target_model_update=10_000,  # hard updates every N steps works too
+        target_model_update=10_000,   # hard update every N steps
         policy=policy,
         gamma=0.99,
         train_interval=4,
@@ -115,7 +121,7 @@ def make_agent(model, nb_actions, window_length):
         enable_double_dqn=True,
     )
     dqn.compile(
-        optimizer=keras.optimizers.Adam(learning_rate=0.00025),
+        optimizer=keras.optimizers.Adam(learning_rate=2.5e-4),
         metrics=["mae"],
     )
     return dqn
@@ -124,18 +130,15 @@ def make_agent(model, nb_actions, window_length):
 def main():
     """CLI entrypoint for training."""
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--steps", type=int, default=500_000, help="Training steps."
-    )
-    parser.add_argument(
-        "--save", type=str, default="policy.h5", help="Model path to save."
-    )
+    parser.add_argument("--steps", type=int, default=500_000,
+                        help="Training steps.")
+    parser.add_argument("--save", type=str, default="policy.h5",
+                        help="Model path to save.")
     args = parser.parse_args()
 
     env = make_env(render_mode=None)
     nb_actions = env.action_space.n
-    # After AtariPreprocessing, observation is (84, 84)
-    obs_shape = env.observation_space.shape
+    obs_shape = env.observation_space.shape  # (84, 84)
     window_length = 4
 
     model = build_model(window_length, obs_shape, nb_actions)
@@ -143,10 +146,9 @@ def main():
 
     agent.fit(env, nb_steps=args.steps, visualize=False, verbose=2)
 
-    # Save the policy network (complete Keras model)
+    # Save the policy network (complete Keras model as required)
     model.save(args.save)
 
 
 if __name__ == "__main__":
     main()
-
