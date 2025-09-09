@@ -1,56 +1,106 @@
 #!/usr/bin/env python3
 """
-Play Atari Breakout using a trained DQN policy network (policy.h5).
-
-- Loads the saved policy network from `policy.h5`.
-- Uses GreedyQPolicy for action selection (pure exploitation).
-- Uses Gymnasium wrappers for Atari preprocessing and Step API compatibility.
-- Displays the game window (render_mode='human').
-
-Run:
-    python3 play.py --weights policy.h5 --episodes 3
+Evaluate a trained DQN agent (keras-rl2) on Atari Breakout.
 """
 
+import os
 import argparse
+import importlib
+import re
+from typing import Tuple
+
+os.environ.setdefault("TF_CPP_MIN_LOG_LEVEL", "2")
+
 import numpy as np
-import gymnasium as gym
-from gymnasium.wrappers import AtariPreprocessing, StepAPICompatibility
 import tensorflow as tf
 from tensorflow import keras
+from tensorflow.keras import layers
 
-# ---------- keras-rl2 / TF 2.15 compatibility shim ----------
-try:
-    import sys
-    import keras as standalone_keras
+
+def _patch_keras_rl2_for_keras3() -> None:
+    """Patch keras-rl2 so it doesn't import removed `tensorflow.keras.__version__`."""
     try:
-        import tensorflow.keras as tfk
+        import rl  # noqa
+        import rl.callbacks as cb  # noqa
+        return
     except Exception:
-        tfk = tf.keras
-    if not hasattr(tfk, "__version__"):
-        setattr(tfk, "__version__", getattr(standalone_keras, "__version__", "2.15.0"))
-    sys.modules["tensorflow.keras"] = tfk
-except Exception:
-    pass
-# ------------------------------------------------------------
+        try:
+            rl_pkg = importlib.import_module("rl")
+            base = os.path.dirname(rl_pkg.__file__)
+            path = os.path.join(base, "callbacks.py")
+            with open(path, "r", encoding="utf-8") as f:
+                txt = f.read()
+            new = re.sub(
+                r"from tensorflow\.keras import __version__ as KERAS_VERSION",
+                (
+                    "try:\n"
+                    "    import keras as _k\n"
+                    "    KERAS_VERSION = getattr(_k, '__version__', '3')\n"
+                    "except Exception:\n"
+                    "    KERAS_VERSION = '3'"
+                ),
+                txt,
+                count=1,
+            )
+            if new != txt:
+                with open(path, "w", encoding="utf-8") as f:
+                    f.write(new)
+                importlib.invalidate_caches()
+        except Exception:
+            pass
+        import rl  # noqa
+        import rl.callbacks as cb  # noqa
 
 
-class KerasRLCompat(gym.Wrapper):
-    """Same reset/step compatibility as in train.py."""
+# keras-rl2 expects TF1 graph mode
+tf.compat.v1.disable_eager_execution()
+_patch_keras_rl2_for_keras3()
+from rl.agents.dqn import DQNAgent  # noqa: E402
+from rl.policy import EpsGreedyQPolicy  # noqa: E402
+from rl.memory import SequentialMemory  # noqa: E402
+
+
+class KerasRLCompatWrapper:
+    """Adapter so Gymnasium env behaves like old Gym for keras-rl2."""
+    def __init__(self, env):
+        self.env = env
+
+    @property
+    def observation_space(self):
+        return self.env.observation_space
+
+    @property
+    def action_space(self):
+        return self.env.action_space
+
     def reset(self, **kwargs):
         out = self.env.reset(**kwargs)
-        return out[0] if isinstance(out, tuple) else out
+        if isinstance(out, tuple) and len(out) == 2:
+            obs, _info = out
+            return obs
+        return out
 
     def step(self, action):
         out = self.env.step(action)
         if isinstance(out, tuple) and len(out) == 5:
             obs, reward, terminated, truncated, info = out
-            return obs, reward, (terminated or truncated), info
+            done = bool(terminated or truncated)
+            return obs, reward, done, info
         return out
 
+    def render(self, *args, **kwargs):
+        return self.env.render(*args, **kwargs)
 
-def make_env(render_mode="human"):
-    """Create Breakout for human rendering and API compatibility."""
-    env = gym.make("ALE/Breakout-v5", frameskip=1, render_mode=render_mode)
+    def close(self):
+        return self.env.close()
+
+
+def make_env(render_mode: str = "none"):
+    import gymnasium as gym
+    from gymnasium.wrappers import AtariPreprocessing
+
+    mode = None if render_mode == "none" else render_mode  # 'human' or 'rgb_array'
+    env = gym.make("ALE/Breakout-v5", frameskip=1, render_mode=mode)
     env = AtariPreprocessing(
         env,
         screen_size=84,
@@ -60,71 +110,70 @@ def make_env(render_mode="human"):
         terminal_on_life_loss=False,
         scale_obs=False,
     )
-    env = StepAPICompatibility(env, output_truncation_bool=False)
-    env = KerasRLCompat(env)
-    return env
+    return KerasRLCompatWrapper(env)
 
 
-def main():
-    """CLI entrypoint for playing with a greedy policy."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--weights", type=str, default="policy.h5",
-                        help="Policy .h5 file.")
-    parser.add_argument("--episodes", type=int, default=1,
-                        help="Number of episodes to play.")
-    parser.add_argument("--max-steps", type=int, default=10000,
-                        help="Max steps per episode.")
-    args = parser.parse_args()
+def build_model(window_length: int, obs_shape: Tuple[int, int], nb_actions: int) -> keras.Model:
+    h, w = obs_shape
+    inp = keras.Input(shape=(window_length, h, w), name="frames_channels_first")
+    x = layers.Permute((2, 3, 1), name="to_channels_last")(inp)  # (H, W, window)
+    x = layers.Rescaling(1.0 / 255.0)(x)
+    x = layers.Conv2D(32, 8, strides=4, activation="relu")(x)
+    x = layers.Conv2D(64, 4, strides=2, activation="relu")(x)
+    x = layers.Conv2D(64, 3, strides=1, activation="relu")(x)
+    x = layers.Flatten()(x)
+    x = layers.Dense(512, activation="relu")(x)
+    out = layers.Dense(nb_actions, activation="linear", name="q_values")(x)
+    return keras.Model(inp, out, name="dqn_breakout")
 
-    env = make_env(render_mode="human")
+
+def parse_args() -> argparse.Namespace:
+    p = argparse.ArgumentParser(description="Play Breakout with a trained DQN")
+    p.add_argument("--weights", type=str, default="policy.h5", help="Path to weights (HDF5)")
+    p.add_argument("--episodes", type=int, default=5, help="Number of episodes to run")
+    p.add_argument("--max-steps", type=int, default=10_000, help="Max steps per episode")
+    p.add_argument("--render", choices=["none", "human", "rgb_array"], default="human",
+                   help="Render mode during play")
+    return p.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    env = make_env(render_mode=args.render)
     nb_actions = env.action_space.n
-    obs_shape = env.observation_space.shape  # (84, 84)
+    obs_shape = env.observation_space.shape
     window_length = 4
 
-    # Load the saved policy network (no Lambda, so standard load is fine)
-    model = keras.models.load_model(args.weights)
-
-    # Build a DQNAgent shell using GreedyQPolicy for action selection.
-    from rl.agents.dqn import DQNAgent
-    from rl.memory import SequentialMemory
-    from rl.policy import GreedyQPolicy
-
-    memory = SequentialMemory(limit=10_000, window_length=window_length)
-    policy = GreedyQPolicy()
-    agent = DQNAgent(
+    model = build_model(window_length, obs_shape, nb_actions)
+    memory = SequentialMemory(limit=1_000_000, window_length=window_length)
+    policy = EpsGreedyQPolicy()  # not used in test, but required by DQNAgent signature
+    dqn = DQNAgent(
         model=model,
         nb_actions=nb_actions,
+        policy=policy,
         memory=memory,
         nb_steps_warmup=0,
-        target_model_update=10_000,
-        policy=policy,
         gamma=0.99,
-        train_interval=1,
+        target_model_update=10_000,
+        train_interval=4,
         delta_clip=1.0,
-        enable_double_dqn=True,
     )
-    agent.compile(optimizer=keras.optimizers.Adam(learning_rate=2.5e-4),
-                  metrics=["mae"])
+    # compile with any optimizer; not used for .test but keras-rl2 expects it set
+    try:
+        opt = keras.optimizers.legacy.Adam(learning_rate=2.5e-4)
+    except Exception:
+        opt = keras.optimizers.Adam(learning_rate=2.5e-4)
+    dqn.compile(optimizer=opt, metrics=["mae"])
 
-    for _ in range(args.episodes):
-        agent.reset_states()
-        obs = env.reset()
-        done = False
-        steps = 0
-        total_reward = 0.0
+    # load weights
+    dqn.load_weights(args.weights)
 
-        while not done and steps < args.max_steps:
-            env.render()
-            action = agent.forward(obs)          # greedy action
-            obs, reward, done, info = env.step(action)
-            agent.backward(0.0, terminal=done)   # keep internal state updated
-            total_reward += float(reward)
-            steps += 1
-
-        print("Episode reward:", total_reward)
-
+    # evaluate
+    dqn.test(env, nb_episodes=args.episodes, visualize=(args.render == "human"),
+             nb_max_episode_steps=args.max_steps)
     env.close()
 
 
 if __name__ == "__main__":
     main()
+
