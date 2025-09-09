@@ -18,14 +18,20 @@ from gymnasium.wrappers import AtariPreprocessing, StepAPICompatibility
 import tensorflow as tf
 from tensorflow import keras
 
-# --- Compatibility shim for keras-rl2 with TF/Keras 2.15 ---
+# ---------- keras-rl2 / TF 2.15 compatibility shim ----------
 try:
+    import sys
     import keras as standalone_keras
-    if not hasattr(tf.keras, "__version__"):
-        tf.keras.__version__ = standalone_keras.__version__
+    try:
+        import tensorflow.keras as tfk
+    except Exception:
+        tfk = tf.keras
+    if not hasattr(tfk, "__version__"):
+        setattr(tfk, "__version__", getattr(standalone_keras, "__version__", "2.15.0"))
+    sys.modules["tensorflow.keras"] = tfk
 except Exception:
     pass
-# -----------------------------------------------------------
+# ------------------------------------------------------------
 
 from rl.agents.dqn import DQNAgent
 from rl.memory import SequentialMemory
@@ -33,15 +39,7 @@ from rl.policy import GreedyQPolicy
 
 
 def make_env(render_mode="human"):
-    """
-    Create the Breakout environment for human rendering and API compatibility.
-
-    Args:
-        render_mode (str): Use 'human' to display a window.
-
-    Returns:
-        gym.Env: Wrapped environment.
-    """
+    """Create Breakout for human rendering and API compatibility."""
     env = gym.make("ALE/Breakout-v5", render_mode=render_mode)
     env = AtariPreprocessing(
         env,
@@ -90,17 +88,14 @@ def main():
         delta_clip=1.0,
         enable_double_dqn=True,
     )
-    agent.compile(
-        optimizer=keras.optimizers.Adam(learning_rate=2.5e-4),
-        metrics=["mae"],
-    )
+    agent.compile(optimizer=keras.optimizers.Adam(learning_rate=2.5e-4),
+                  metrics=["mae"])
 
     for _ in range(args.episodes):
         agent.reset_states()
 
         obs = env.reset()
-        # StepAPICompatibility may return obs or (obs, info); handle both
-        if isinstance(obs, tuple):
+        if isinstance(obs, tuple):  # StepAPICompatibility may return (obs, info)
             obs = obs[0]
 
         done = False
@@ -108,11 +103,10 @@ def main():
         total_reward = 0.0
 
         while not done and steps < args.max_steps:
-            env.render()  # show window (no-op on headless)
-            action = agent.forward(obs)            # greedy action
+            env.render()
+            action = agent.forward(obs)          # greedy action
             obs, reward, done, info = env.step(action)
-            # maintain internal state for stacked frames (no learning during play)
-            agent.backward(0.0, terminal=done)
+            agent.backward(0.0, terminal=done)   # keep internal state updated
             total_reward += float(reward)
             steps += 1
 
