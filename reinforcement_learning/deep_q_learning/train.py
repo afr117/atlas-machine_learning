@@ -17,16 +17,23 @@ from gymnasium.wrappers import AtariPreprocessing, StepAPICompatibility
 import tensorflow as tf
 from tensorflow import keras
 
-# --- Compatibility shim for keras-rl2 with TF/Keras 2.15 ---
+# ---------- keras-rl2 / TF 2.15 compatibility shim ----------
 # keras-rl2 tries: `from tensorflow.keras import __version__ as KERAS_VERSION`
-# Add it if missing, using standalone keras' version.
+# Ensure the symbol exists on the *module* object 'tensorflow.keras'.
 try:
-    import keras as standalone_keras  # standalone package
-    if not hasattr(tf.keras, "__version__"):
-        tf.keras.__version__ = standalone_keras.__version__
+    import sys
+    import keras as standalone_keras  # standalone keras package
+    try:
+        import tensorflow.keras as tfk  # ensure module object is loaded
+    except Exception:
+        tfk = tf.keras
+    if not hasattr(tfk, "__version__"):
+        setattr(tfk, "__version__", getattr(standalone_keras, "__version__", "2.15.0"))
+    # make sure sys.modules points to the same module carrying __version__
+    sys.modules["tensorflow.keras"] = tfk
 except Exception:
     pass
-# -----------------------------------------------------------
+# ------------------------------------------------------------
 
 from rl.agents.dqn import DQNAgent
 from rl.memory import SequentialMemory
@@ -34,15 +41,7 @@ from rl.policy import EpsGreedyQPolicy, LinearAnnealedPolicy
 
 
 def make_env(render_mode=None):
-    """
-    Create the Breakout environment with preprocessing and API compatibility.
-
-    Args:
-        render_mode (str | None): 'human' for on-screen rendering, else None.
-
-    Returns:
-        gym.Env: Wrapped, API-compatible environment.
-    """
+    """Create Breakout with preprocessing and API compatibility."""
     env = gym.make("ALE/Breakout-v5", render_mode=render_mode)
     env = AtariPreprocessing(
         env,
@@ -51,31 +50,18 @@ def make_env(render_mode=None):
         frame_skip=4,
         noop_max=30,
         terminal_on_life_loss=False,
-        scale_obs=False,  # keep uint8 [0, 255]; we normalize in the model
+        scale_obs=False,
     )
-    # Adapt Gymnasium (terminated, truncated) to classic (done) API
     env = StepAPICompatibility(env, output_truncation_bool=False)
     return env
 
 
 def build_model(window_length, obs_shape, nb_actions):
-    """
-    Build a convolutional Q-network (DQN Nature architecture).
-
-    Args:
-        window_length (int): Frames stacked by memory (typically 4).
-        obs_shape (tuple): Observation shape from env (84, 84).
-        nb_actions (int): Number of discrete actions.
-
-    Returns:
-        keras.Model: Keras model mapping states to Q-values.
-    """
+    """DQN (Nature) conv net: input (wl, 84, 84) → (84,84,wl) → Conv → Dense."""
     wl = window_length
-    h, w = obs_shape  # (84, 84)
-    # keras-rl2 feeds (wl, H, W); we permute to channels_last for Conv2D
+    h, w = obs_shape
     inputs = keras.Input(shape=(wl, h, w))
     x = keras.layers.Permute((2, 3, 1))(inputs)  # (H, W, wl)
-    # Normalize uint8 -> float32 [0,1] using TF 2.15 ops
     x = keras.layers.Lambda(lambda z: tf.cast(z, tf.float32) / 255.0)(x)
     x = keras.layers.Conv2D(32, (8, 8), strides=(4, 4), activation="relu")(x)
     x = keras.layers.Conv2D(64, (4, 4), strides=(2, 2), activation="relu")(x)
@@ -83,22 +69,11 @@ def build_model(window_length, obs_shape, nb_actions):
     x = keras.layers.Flatten()(x)
     x = keras.layers.Dense(512, activation="relu")(x)
     outputs = keras.layers.Dense(nb_actions, activation="linear")(x)
-    model = keras.Model(inputs=inputs, outputs=outputs)
-    return model
+    return keras.Model(inputs=inputs, outputs=outputs)
 
 
 def make_agent(model, nb_actions, window_length):
-    """
-    Create a keras-rl2 DQN agent with replay memory and epsilon policy.
-
-    Args:
-        model (keras.Model): Policy network.
-        nb_actions (int): Number of actions.
-        window_length (int): Memory stack length (e.g., 4).
-
-    Returns:
-        DQNAgent: Compiled DQN agent.
-    """
+    """Create and compile a DQNAgent with replay memory and eps-greedy policy."""
     memory = SequentialMemory(limit=1_000_000, window_length=window_length)
     policy = LinearAnnealedPolicy(
         EpsGreedyQPolicy(),
@@ -113,17 +88,15 @@ def make_agent(model, nb_actions, window_length):
         nb_actions=nb_actions,
         memory=memory,
         nb_steps_warmup=50_000,
-        target_model_update=10_000,   # hard update every N steps
+        target_model_update=10_000,  # hard updates
         policy=policy,
         gamma=0.99,
         train_interval=4,
         delta_clip=1.0,
         enable_double_dqn=True,
     )
-    dqn.compile(
-        optimizer=keras.optimizers.Adam(learning_rate=2.5e-4),
-        metrics=["mae"],
-    )
+    dqn.compile(optimizer=keras.optimizers.Adam(learning_rate=2.5e-4),
+                metrics=["mae"])
     return dqn
 
 
@@ -146,7 +119,7 @@ def main():
 
     agent.fit(env, nb_steps=args.steps, visualize=False, verbose=2)
 
-    # Save the policy network (complete Keras model as required)
+    # Save the policy network (complete Keras model)
     model.save(args.save)
 
 
