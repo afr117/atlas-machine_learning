@@ -40,7 +40,7 @@ from rl.policy import GreedyQPolicy
 
 def make_env(render_mode="human"):
     """Create Breakout for human rendering and API compatibility."""
-    env = gym.make("ALE/Breakout-v5", render_mode=render_mode)
+    env = gym.make("ALE/Breakout-v5", frameskip=1, render_mode=render_mode)
     env = AtariPreprocessing(
         env,
         screen_size=84,
