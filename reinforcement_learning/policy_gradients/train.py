@@ -19,8 +19,8 @@ def train(env, nb_episodes, alpha=0.000045, gamma=0.98, show_result=False):
     Trains a softmax policy with REINFORCE on a Gymnasium environment.
 
     Args:
-        env: initial environment (e.g., gym.make('CartPole-v1',
-        render_mode="human")).
+        env: initial environment
+        (e.g., gym.make('CartPole-v1', render_mode="human")).
         nb_episodes (int): number of training episodes.
         alpha (float): learning rate.
         gamma (float): discount factor.
