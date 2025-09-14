@@ -19,11 +19,13 @@ def train(env, nb_episodes, alpha=0.000045, gamma=0.98, show_result=False):
     Trains a softmax policy with REINFORCE on a Gymnasium environment.
 
     Args:
-        env: initial environment (e.g., gym.make('CartPole-v1', render_mode="human")).
+        env: initial environment (e.g., gym.make('CartPole-v1',
+        render_mode="human")).
         nb_episodes (int): number of training episodes.
         alpha (float): learning rate.
         gamma (float): discount factor.
-        show_result (bool): if True, render the environment every 1000 episodes.
+        show_result (bool): if True,
+        render the environment every 1000 episodes.
 
     Returns:
         list[float]: scores per episode (sum of rewards).
@@ -34,7 +36,8 @@ def train(env, nb_episodes, alpha=0.000045, gamma=0.98, show_result=False):
     state_dim = int(np.prod(getattr(obs_space, "shape", (1,))))
     n_actions = getattr(act_space, "n", None)
     if n_actions is None:
-        raise ValueError("This trainer expects a discrete action space with 'n'.")
+        raise ValueError("This trainer expects a
+        discrete action space with 'n'.")
 
     # Initialize policy parameters (weights): (state_dim, n_actions)
     W = np.random.rand(state_dim, n_actions)
