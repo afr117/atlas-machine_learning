@@ -26,7 +26,8 @@ def policy(matrix, weight):
         softmax probabilities over actions for each state.
     """
     logits = matrix @ weight
-    logits = logits - np.max(logits, axis=-1, keepdims=True)  # numeric stability
+    logits = logits - np.max(logits, axis=-1,
+                             keepdims=True)  # numeric stability
     exp_logits = np.exp(logits)
     return exp_logits / np.sum(exp_logits, axis=-1, keepdims=True)
 
