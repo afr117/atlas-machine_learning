@@ -2,8 +2,9 @@
 """
 Monte Carlo state-value prediction (first-visit) for discrete environments.
 
-- Only dependency: numpy as np
-- Compatible with Gymnasium 0.29.1 APIs (reset, step returning terminated/truncated)
+Only dependency: numpy as np.
+Compatible with Gymnasium 0.29.1 APIs (reset returns (obs, info),
+step returns (obs, reward, terminated, truncated, info)).
 """
 
 import numpy as np
