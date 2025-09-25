@@ -1,43 +1,57 @@
 #!/usr/bin/env python3
+"""
+Monte Carlo state-value prediction (first-visit) for discrete environments.
 
-import gymnasium as gym
+- Only dependency: numpy as np
+- Compatible with Gymnasium 0.29.1 APIs (reset, step returning terminated/truncated)
+"""
+
 import numpy as np
-import random
-monte_carlo = __import__('0-monte_carlo').monte_carlo
 
 
-def set_seed(env, seed=0):
-    env.reset(seed=seed)
-    np.random.seed(seed)
-    random.seed(seed)
+def monte_carlo(env, V, policy, episodes=5000, max_steps=100,
+                alpha=0.1, gamma=0.99):
+    """
+    Perform incremental first-visit Monte Carlo prediction to update V.
 
-env = gym.make('FrozenLake8x8-v1', is_slippery=False)
-set_seed(env, 0)
+    Args:
+        env: environment instance with reset() and step() like Gymnasium.
+        V (np.ndarray): shape (s,), current value estimates for each state.
+        policy (callable): maps state (int) -> action (int).
+        episodes (int): total number of episodes to sample.
+        max_steps (int): maximum steps per episode.
+        alpha (float): learning rate for incremental MC.
+        gamma (float): discount factor in [0, 1].
 
-LEFT, DOWN, RIGHT, UP = 0, 1, 2, 3
+    Returns:
+        np.ndarray: the updated value estimates V (shape (s,)).
+    """
+    for _ in range(episodes):
+        # ----- Generate one episode -----
+        states = []
+        rewards = []
 
-def policy(s):
-    p = np.random.uniform()
-    if p > 0.5:
-        if s % 8 != 7 and env.unwrapped.desc[s // 8, s % 8 + 1] != b'H':
-            return RIGHT
-        elif s // 8 != 7 and env.unwrapped.desc[s // 8 + 1, s % 8] != b'H':
-            return DOWN
-        elif s // 8 != 0 and env.unwrapped.desc[s // 8 - 1, s % 8] != b'H':
-            return UP
-        else:
-            return LEFT
-    else:
-        if s // 8 != 7 and env.unwrapped.desc[s // 8 + 1, s % 8] != b'H':
-            return DOWN
-        elif s % 8 != 7 and env.unwrapped.desc[s // 8, s % 8 + 1] != b'H':
-            return RIGHT
-        elif s % 8 != 0 and env.unwrapped.desc[s // 8, s % 8 - 1] != b'H':
-            return LEFT
-        else:
-            return UP
+        obs, _ = env.reset()
+        s = int(obs)
 
-V = np.where(env.unwrapped.desc == b'H', -1, 1).reshape(64).astype('float64')
-np.set_printoptions(precision=4)
+        for _t in range(max_steps):
+            states.append(s)
+            a = policy(s)
+            obs, r, terminated, truncated, _ = env.step(a)
+            rewards.append(float(r))
+            s = int(obs)
+            if terminated or truncated:
+                break
 
-print(monte_carlo(env, V, policy).reshape((8, 8)))
+        # ----- First-visit returns with incremental update -----
+        G = 0.0
+        seen = set()
+        for t in range(len(states) - 1, -1, -1):
+            G = rewards[t] + gamma * G
+            st = states[t]
+            if st in seen:
+                continue
+            seen.add(st)
+            V[st] += alpha * (G - V[st])
+
+    return V
