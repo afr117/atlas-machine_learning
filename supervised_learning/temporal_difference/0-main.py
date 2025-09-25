@@ -7,12 +7,13 @@ monte_carlo = __import__('0-monte_carlo').monte_carlo
 
 
 def set_seed(env, seed=0):
+    """Seed env, numpy, and random for reproducibility."""
     env.reset(seed=seed)
     np.random.seed(seed)
     random.seed(seed)
 
 
-# Make the environment deterministic to match the expected values
+# Deterministic map to match expected powers of 0.9
 env = gym.make('FrozenLake8x8-v1', is_slippery=False)
 set_seed(env, 0)
 
@@ -20,6 +21,7 @@ LEFT, DOWN, RIGHT, UP = 0, 1, 2, 3
 
 
 def policy(s):
+    """Simple stochastic, but avoids stepping into holes when possible."""
     p = np.random.uniform()
     if p > 0.5:
         if s % 8 != 7 and env.unwrapped.desc[s // 8, s % 8 + 1] != b'H':
@@ -41,6 +43,7 @@ def policy(s):
             return UP
 
 
+# Initialize V: holes -1, everything else +1
 V = np.where(env.unwrapped.desc == b'H', -1, 1).reshape(64).astype('float64')
 np.set_printoptions(precision=4)
 
