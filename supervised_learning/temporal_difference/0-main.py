@@ -11,7 +11,7 @@ def set_seed(env, seed=0):
     np.random.seed(seed)
     random.seed(seed)
 
-env = gym.make('FrozenLake8x8-v1')
+env = gym.make('FrozenLake8x8-v1', is_slippery=False)
 set_seed(env, 0)
 
 LEFT, DOWN, RIGHT, UP = 0, 1, 2, 3
