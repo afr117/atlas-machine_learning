@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Gaussian Process module for 1D noiseless case using RBF kernel"""
+"""Gaussian Process module for 1D noiseless case using an RBF kernel."""
 
 import numpy as np
 
@@ -21,10 +21,10 @@ class GaussianProcess:
         Class constructor.
 
         Args:
-            X_init (np.ndarray): Inputs sampled with the black-box function,
-                                 shape (t, 1).
+            X_init (np.ndarray): Inputs sampled from the black-box function,
+                shape (t, 1).
             Y_init (np.ndarray): Outputs from the black-box function,
-                                 shape (t, 1).
+                shape (t, 1).
             l (float): Length parameter for the RBF kernel.
             sigma_f (float): Standard deviation of the output.
         """
@@ -37,7 +37,7 @@ class GaussianProcess:
 
     def kernel(self, X1, X2):
         """
-        Calculates the covariance kernel matrix using RBF.
+        Calculates the covariance kernel matrix using an RBF kernel.
 
         Args:
             X1 (np.ndarray): First input matrix of shape (m, 1).
@@ -46,25 +46,29 @@ class GaussianProcess:
         Returns:
             np.ndarray: Covariance kernel matrix of shape (m, n).
         """
-        sqdist = np.sum(X1**2, 1).reshape(-1, 1) \
-               + np.sum(X2**2, 1) - 2 * np.dot(X1, X2.T)
-        return self.sigma_f**2 * np.exp(-0.5 / self.l**2 * sqdist)
+        # Use broadcasting to compute pairwise squared distances
+        a = np.sum(X1 ** 2, axis=1)[:, None]
+        b = np.sum(X2 ** 2, axis=1)[None, :]
+        sqdist = a + b - 2.0 * np.dot(X1, X2.T)
+        return (self.sigma_f ** 2) * np.exp(-0.5 * sqdist / (self.l ** 2))
 
     def predict(self, X_s):
         """
-        Predicts the mean and variance of points in a Gaussian process.
+        Predict the mean and variance at points X_s.
 
         Args:
             X_s (np.ndarray): Points of shape (s, 1) to predict.
 
         Returns:
-            tuple: mu, sigma
-                - mu (np.ndarray of shape (s,)): Mean for each point in X_s
-                - sigma (np.ndarray of shape (s,)): Variance for each point in X_s
+            tuple:
+                mu (np.ndarray): Mean for each point in X_s; shape (s,).
+                sigma (np.ndarray): Variance for each point; shape (s,).
         """
         K_s = self.kernel(self.X, X_s)
         K_ss = self.kernel(X_s, X_s)
-        mu = K_s.T.dot(self.K_inv).dot(self.Y).reshape(-1)
-        cov = K_ss - K_s.T.dot(self.K_inv).dot(K_s)
+
+        mu = (K_s.T @ self.K_inv @ self.Y).reshape(-1)
+        cov = K_ss - (K_s.T @ self.K_inv @ K_s)
         sigma = np.diag(cov)
+
         return mu, sigma
