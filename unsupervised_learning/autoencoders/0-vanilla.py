@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 """Vanilla autoencoder builder.
 
-Creates an autoencoder made of an encoder and a mirrored decoder.
+Creates an autoencoder with an encoder and a mirrored decoder.
 All hidden layers (including the latent layer) use ReLU; the decoder's
 final layer uses Sigmoid. The full model is compiled with Adam and
 binary cross-entropy.
-
-Allowed import: `import tensorflow.keras as keras`.
 """
 
 import tensorflow.keras as keras
@@ -18,14 +16,14 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
 
     Args:
         input_dims (int): Dimensionality of the input.
-        hidden_layers (list of int): Units for each encoder hidden layer,
+        hidden_layers (list[int]): Units for each encoder hidden layer,
             in order (the decoder will mirror these in reverse).
         latent_dims (int): Size of the latent space (bottleneck).
 
     Returns:
-        (encoder, decoder, auto):
-            encoder (keras.Model): Maps inputs -> latent representation.
-            decoder (keras.Model): Maps latent -> reconstructed input.
+        tuple:
+            encoder (keras.Model): Maps inputs to latent representation.
+            decoder (keras.Model): Maps latent to reconstructed input.
             auto (keras.Model): Full autoencoder (input -> reconstruction),
                 compiled with Adam and binary cross-entropy.
     """
@@ -34,14 +32,17 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
     x = enc_in
     for i, units in enumerate(hidden_layers):
         x = keras.layers.Dense(
-            units, activation="relu", name=f"enc_dense_{i}"
+            units,
+            activation="relu",
+            name="enc_dense_{}".format(i)
         )(x)
 
     # Latent (bottleneck)
     z = keras.layers.Dense(
-        latent_dims, activation="relu", name="latent"
+        latent_dims,
+        activation="relu",
+        name="latent"
     )(x)
-
     encoder = keras.Model(enc_in, z, name="encoder")
 
     # ----- Decoder -----
@@ -49,13 +50,16 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
     y = dec_in
     for i, units in enumerate(reversed(hidden_layers)):
         y = keras.layers.Dense(
-            units, activation="relu", name=f"dec_dense_{i}"
+            units,
+            activation="relu",
+            name="dec_dense_{}".format(i)
         )(y)
 
     dec_out = keras.layers.Dense(
-        input_dims, activation="sigmoid", name="reconstruction"
+        input_dims,
+        activation="sigmoid",
+        name="reconstruction"
     )(y)
-
     decoder = keras.Model(dec_in, dec_out, name="decoder")
 
     # ----- Autoencoder (encoder + decoder) -----
@@ -64,4 +68,3 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
     auto.compile(optimizer="adam", loss="binary_crossentropy")
 
     return encoder, decoder, auto
-
