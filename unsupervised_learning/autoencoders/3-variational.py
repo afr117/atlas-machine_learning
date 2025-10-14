@@ -1,24 +1,38 @@
 #!/usr/bin/env python3
-"""Variational autoencoder (VAE).
+"""Variational autoencoder (VAE) with graph-attached KL loss.
 
-Encoder:
-- Dense hidden layers (ReLU), then mean (mu) and log-variance (log_var)
-  with linear activation (None).
-- Reparameterization: z = mu + exp(0.5 * log_var) * epsilon.
-
-Decoder:
-- Hidden layers mirrored (ReLU), final layer Sigmoid to reconstruct.
-
-The full model is compiled with Adam + binary cross-entropy
-(reconstruction). The KL divergence is added to the full model via
-`auto.add_loss(...)` so tests see it in `auto.losses`.
+- Encoder: hidden Dense layers (ReLU), then mean (mu) and log-variance
+  (log_var) with linear activation (None). Latent z sampled via
+  reparameterization.
+- Decoder: hidden layers mirrored (ReLU), final Dense(sigmoid).
+- KL divergence is added through a custom Layer that lives in the graph,
+  so `auto.losses` is populated immediately after model creation.
 """
 
 import tensorflow.keras as keras
 
 
-def _sample_z(args):
-    """Reparameterization trick: sample z ~ N(mu, sigma^2)."""
+class KLLoss(keras.layers.Layer):
+    """Adds KL divergence to the model via `add_loss`.
+
+    KL = -0.5 * sum(1 + log_var - mu^2 - exp(log_var)) per sample
+    """
+
+    def call(self, inputs):
+        mu, log_var = inputs
+        kl = -0.5 * keras.backend.sum(
+            1.0 + log_var
+            - keras.backend.square(mu)
+            - keras.backend.exp(log_var),
+            axis=1
+        )
+        self.add_loss(keras.backend.mean(kl))
+        # Pass-through (unused); returning mu keeps shape sane if needed
+        return mu
+
+
+def _reparameterize(args):
+    """z = mu + exp(0.5*log_var) * eps."""
     mu, log_var = args
     eps = keras.backend.random_normal(shape=keras.backend.shape(mu))
     return mu + keras.backend.exp(0.5 * log_var) * eps
@@ -29,16 +43,15 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
     Create a variational autoencoder (VAE).
 
     Args:
-        input_dims (int): Dimensionality of the input.
-        hidden_layers (list[int]): Units for encoder hidden layers
-            (decoder mirrors in reverse).
-        latent_dims (int): Size of the latent space.
+        input_dims (int): Input dimensionality.
+        hidden_layers (list[int]): Encoder hidden units (decoder mirrors).
+        latent_dims (int): Latent dimensionality.
 
     Returns:
         tuple:
             encoder (keras.Model): input -> (z, mu, log_var).
             decoder (keras.Model): z -> reconstruction.
-            auto (keras.Model): full VAE (compiled).
+            auto (keras.Model): full VAE, compiled (Adam + BCE).
     """
     # ----- Encoder -----
     enc_in = keras.Input(shape=(input_dims,), name="encoder_input")
@@ -53,7 +66,10 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
         latent_dims, activation=None, name="log_var"
     )(x)
 
-    z = keras.layers.Lambda(_sample_z, name="z")([mu, log_var])
+    # Attach KL via a graph layer so model.losses is populated
+    _ = KLLoss(name="kl_loss")([mu, log_var])
+
+    z = keras.layers.Lambda(_reparameterize, name="z")([mu, log_var])
 
     encoder = keras.Model(enc_in, [z, mu, log_var], name="encoder")
 
@@ -71,20 +87,12 @@ def autoencoder(input_dims, hidden_layers, latent_dims):
 
     decoder = keras.Model(dec_in, dec_out, name="decoder")
 
-    # ----- Full VAE (attach KL at model level) -----
+    # ----- Full VAE -----
     z_out, mu_out, log_var_out = encoder(enc_in)
     recon = decoder(z_out)
     auto = keras.Model(enc_in, recon, name="variational_autoencoder")
 
-    # KL divergence: -0.5 * sum(1 + log_var - mu^2 - exp(log_var))
-    kl = -0.5 * keras.backend.sum(
-        1.0 + log_var_out
-        - keras.backend.square(mu_out)
-        - keras.backend.exp(log_var_out),
-        axis=1
-    )
-    auto.add_loss(keras.backend.mean(kl))
-
+    # Reconstruction loss only; KL is already in `auto.losses` via KLLoss
     auto.compile(optimizer="adam", loss="binary_crossentropy")
 
     return encoder, decoder, auto
