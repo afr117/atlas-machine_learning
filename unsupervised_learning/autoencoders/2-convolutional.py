@@ -2,15 +2,19 @@
 """Convolutional autoencoder builder.
 
 Encoder:
-- Repeated blocks: Conv2D(filters[i], 3x3, padding='same', relu)
-  then MaxPooling2D(2x2, padding='same').
+- For each filter f in `filters`:
+  Conv2D(f, 3x3, padding='same', activation='relu')
+  MaxPooling2D(2x2, padding='same')
 
 Decoder:
-- For all but the last two convs: Conv2D(3x3, padding='same', relu)
-  then UpSampling2D(2x2).
-- Second-to-last conv: Conv2D(3x3, padding='valid', relu) (followed by
-  an upsampling to align spatial dims).
-- Last conv: Conv2D(channels, 3x3, padding='same', sigmoid), no upsample.
+- Mirror filters in reverse.
+- For all but the final output conv:
+  * If not the last conv in this loop: Conv2D(3x3, padding='same', relu)
+    then UpSampling2D(2x2).
+  * If it is the last conv in this loop (penultimate overall):
+    Conv2D(3x3, padding='valid', relu) then UpSampling2D(2x2).
+- Final output conv: Conv2D(channels, 3x3, padding='same', sigmoid),
+  no upsampling.
 
 Full model compiled with Adam and binary cross-entropy.
 """
@@ -23,15 +27,15 @@ def autoencoder(input_dims, filters, latent_dims):
     Create a convolutional autoencoder.
 
     Args:
-        input_dims (tuple[int]): Input H, W, C.
-        filters (list[int]): Conv filters for encoder (per block).
-        latent_dims (tuple[int]): Latent H, W, C representation.
+        input_dims (tuple[int]): Input (H, W, C).
+        filters (list[int]): Filters for encoder conv blocks.
+        latent_dims (tuple[int]): Latent (H, W, C).
 
     Returns:
         tuple:
             encoder (keras.Model): Inputs -> latent feature map.
             decoder (keras.Model): Latent -> reconstructed image.
-            auto (keras.Model): Full autoencoder, compiled.
+            auto (keras.Model): Full autoencoder (compiled).
     """
     # ----- Encoder -----
     enc_in = keras.Input(shape=input_dims, name="encoder_input")
@@ -44,8 +48,6 @@ def autoencoder(input_dims, filters, latent_dims):
         x = keras.layers.MaxPooling2D(
             (2, 2), padding="same", name="enc_pool_{}".format(i)
         )(x)
-
-    # Latent output
     encoder = keras.Model(enc_in, x, name="encoder")
 
     # ----- Decoder -----
@@ -55,9 +57,8 @@ def autoencoder(input_dims, filters, latent_dims):
     n = len(rev)
 
     for i, f in enumerate(rev):
-        # Index within decoder conv stack (excluding final output conv)
-        is_last_two = (i >= n - 2)
-        if not is_last_two:
+        is_last_in_loop = (i == n - 1)
+        if not is_last_in_loop:
             # Conv (same) + UpSampling
             y = keras.layers.Conv2D(
                 f, (3, 3), activation="relu", padding="same",
@@ -66,9 +67,8 @@ def autoencoder(input_dims, filters, latent_dims):
             y = keras.layers.UpSampling2D(
                 (2, 2), name="dec_ups_{}".format(i)
             )(y)
-        elif i == n - 2:
-            # Second-to-last conv: valid padding to adjust dims,
-            # then upsample to align with target spatial size.
+        else:
+            # Penultimate overall conv: valid padding, then upsample
             y = keras.layers.Conv2D(
                 f, (3, 3), activation="relu", padding="valid",
                 name="dec_conv_{}".format(i)
@@ -76,16 +76,12 @@ def autoencoder(input_dims, filters, latent_dims):
             y = keras.layers.UpSampling2D(
                 (2, 2), name="dec_ups_{}".format(i)
             )(y)
-        else:
-            # 'i == n - 1' handled after loop by final output conv
-            pass
 
     # Final output conv: match input channels, sigmoid, no upsample
     out = keras.layers.Conv2D(
         input_dims[-1], (3, 3), activation="sigmoid", padding="same",
         name="decoder_output"
     )(y)
-
     decoder = keras.Model(dec_in, out, name="decoder")
 
     # ----- Autoencoder (encoder + decoder) -----
