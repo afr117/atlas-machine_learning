@@ -32,7 +32,7 @@ def rnn(rnn_cell, X, h_0):
 
     # Initialize arrays to store hidden states (H) and outputs (Y)
 
-    # H must include the initial hidden state h_0, so its shape is (t + 1, m, h)
+    # H must include initial hidden state h_0, so its shape is (t + 1, m, h)
     # The first slice (H[0]) will hold h_0.
     H = np.zeros((t + 1, m, h))
     H[0] = h_0
@@ -60,3 +60,4 @@ def rnn(rnn_cell, X, h_0):
         h_prev = h_next
 
     return H, Y
+
