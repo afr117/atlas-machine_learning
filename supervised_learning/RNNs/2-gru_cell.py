@@ -1,4 +1,4 @@
- #!/usr/bin/env python3
+#!/usr/bin/env python3
 
 import numpy as np
 
@@ -129,4 +129,5 @@ class GRUCell:
         y = self.softmax(h_next @ self.Wy + self.by)
 
         return h_next, y
+
 
