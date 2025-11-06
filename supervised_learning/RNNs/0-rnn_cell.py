@@ -20,7 +20,8 @@ class RNNCell:
         """
         # Weights for the hidden state calculation (Wh) and output (Wy)
         # Weights must be initialized using a random normal distribution.
-        # Wh is for the concatenated hidden state (h) and input data (i), so its shape is (i + h, h)
+        # Wh is for the concatenated hidden state (h) and input data (i),
+        # so its shape is (i + h, h)
         self.Wh = np.random.randn(i + h, h)
 
         # Wy is for the output, shape (h, o)
@@ -41,8 +42,10 @@ class RNNCell:
         The activation function for the output is softmax.
 
         Args:
-            h_prev (np.ndarray): shape (m, h) containing the previous hidden state.
-            x_t (np.ndarray): shape (m, i) containing the data input for the cell.
+            h_prev (np.ndarray): shape (m, h) containing the previous
+                                 hidden state.
+            x_t (np.ndarray): shape (m, i) containing the data input
+                              for the cell.
                               m is the batche size for the data.
 
         Returns:
