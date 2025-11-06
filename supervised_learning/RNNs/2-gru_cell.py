@@ -1,42 +1,27 @@
 #!/usr/bin/env python3
-"""
-GRUCell module: defines a single GRU (Gated Recurrent Unit) cell
-implemented with NumPy only.
-
-Specifications:
-- Only import numpy as np
-- Weights initialized from a standard normal distribution
-  in this strict order: Wz, Wr, Wh, Wy
-- Biases initialized to zeros in this order: bz, br, bh, by
-- Right-side matrix multiplication usage
-- Forward pass returns (h_next, y) with softmax output
-"""
+"""Defines a single GRU (Gated Recurrent Unit) cell using NumPy only."""
 
 import numpy as np
 
 
 class GRUCell:
     """
-    Represents a GRU cell.
+    GRU cell.
 
     Args:
-        i (int): dimensionality of the data (input size)
-        h (int): dimensionality of the hidden state
-        o (int): dimensionality of the outputs
+        i (int): input size
+        h (int): hidden size
+        o (int): output size
 
-    Public attributes:
-        Wz (np.ndarray): update gate weights, shape (i + h, h)
-        Wr (np.ndarray): reset gate weights,  shape (i + h, h)
-        Wh (np.ndarray): candidate hidden weights, shape (i + h, h)
-        Wy (np.ndarray): output weights, shape (h, o)
-        bz (np.ndarray): update gate bias, shape (1, h)
-        br (np.ndarray): reset gate bias,  shape (1, h)
-        bh (np.ndarray): candidate hidden bias, shape (1, h)
-        by (np.ndarray): output bias, shape (1, o)
+    Public attrs:
+        Wz, Wr, Wh (i+h, h): gate/candidate weights
+        Wy (h, o): output weights
+        bz, br, bh (1, h): gate/candidate biases
+        by (1, o): output bias
     """
 
     def __init__(self, i, h, o):
-        """Initialize parameters."""
+        """Initialize weights (std normal) and biases (zeros)."""
         self.Wz = np.random.randn(i + h, h)
         self.Wr = np.random.randn(i + h, h)
         self.Wh = np.random.randn(i + h, h)
@@ -50,46 +35,43 @@ class GRUCell:
     @staticmethod
     def _sigmoid(x):
         """Numerically stable sigmoid."""
-        # clip for numerical stability
-        x_clip = np.clip(x, -709, 709)  # exp(-709) ~ 1e-308
-        return 1.0 / (1.0 + np.exp(-x_clip))
+        x = np.clip(x, -709, 709)
+        return 1.0 / (1.0 + np.exp(-x))
 
     @staticmethod
     def _softmax(z):
-        """Row-wise numerically stable softmax."""
-        z_shift = z - np.max(z, axis=1, keepdims=True)
-        exp_z = np.exp(z_shift)
-        return exp_z / np.sum(exp_z, axis=1, keepdims=True)
+        """Row-wise softmax."""
+        z = z - np.max(z, axis=1, keepdims=True)
+        ez = np.exp(z)
+        return ez / np.sum(ez, axis=1, keepdims=True)
 
     def forward(self, h_prev, x_t):
         """
-        Perform forward propagation for one time step.
+        One time-step forward.
 
         Args:
-            h_prev (np.ndarray): previous hidden state, shape (m, h)
-            x_t (np.ndarray): input at time t, shape (m, i)
+            h_prev (m, h): previous hidden state
+            x_t   (m, i): input at time t
 
         Returns:
-            h_next (np.ndarray): next hidden state, shape (m, h)
-            y (np.ndarray): output at time t (softmax), shape (m, o)
+            h_next (m, h): next hidden state
+            y      (m, o): softmax output
         """
-        # Concatenate [h_prev, x_t] along feature dimension
-        concat = np.concatenate((h_prev, x_t), axis=1)  # shape (m, h + i)
+        # concat = [h_prev, x_t]
+        concat = np.concatenate((h_prev, x_t), axis=1)
 
-        # Gates
-        z_t = self._sigmoid(np.matmul(concat, self.Wz) + self.bz)  # (m, h)
-        r_t = self._sigmoid(np.matmul(concat, self.Wr) + self.br)  # (m, h)
+        # gates
+        z_t = self._sigmoid(np.matmul(concat, self.Wz) + self.bz)
+        r_t = self._sigmoid(np.matmul(concat, self.Wr) + self.br)
 
-        # Candidate hidden state uses reset gate on h_prev
-        concat_candidate = np.concatenate((r_t * h_prev, x_t), axis=1)
-        h_tilde = np.tanh(np.matmul(concat_candidate, self.Wh) + self.bh)  # (m, h)
+        # candidate uses reset on h_prev
+        cand_in = np.concatenate((r_t * h_prev, x_t), axis=1)
+        h_tilde = np.tanh(np.matmul(cand_in, self.Wh) + self.bh)
 
-        # GRU update (note/correction in prompt):
-        # h_next = (1 - z) * h_prev + z * h_tilde
+        # GRU update: (1 - z)*h_prev + z*h_tilde
         h_next = (1.0 - z_t) * h_prev + z_t * h_tilde
 
-        # Output
-        y_linear = np.matmul(h_next, self.Wy) + self.by  # (m, o)
-        y = self._softmax(y_linear)
-
+        # output
+        logits = np.matmul(h_next, self.Wy) + self.by
+        y = self._softmax(logits)
         return h_next, y
