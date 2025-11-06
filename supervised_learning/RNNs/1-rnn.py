@@ -60,4 +60,3 @@ def rnn(rnn_cell, X, h_0):
         h_prev = h_next
 
     return H, Y
-
