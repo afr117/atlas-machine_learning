@@ -1,67 +1,56 @@
-#!/usr/bin/env python3
-"""
-Train a Word2Vec model using gensim
-"""
+from gensim.models import Word2Vec
 
-import gensim
-
-
-def word2vec_model(
-    sentences,
-    vector_size=100,
-    min_count=5,
-    window=5,
-    negative=5,
-    cbow=True,
-    epochs=5,
-    seed=0,
-    workers=1
-):
+def word2vec_model(sentences, vector_size=100, min_count=5, window=5, negative=5, cbow=True, epochs=5, seed=0, workers=1):
     """
     Creates, builds, and trains a gensim Word2Vec model.
 
     Args:
-        sentences (list): list of sentences to train on.
-            - If a list of strings is provided, they will be split into words.
-            - If a list of lists is provided, each inner list is treated as
-              a tokenized sentence.
-        vector_size (int): dimensionality of the embedding vectors.
-        min_count (int): minimum number of occurrences to include a word.
-        window (int): maximum distance between predicted word and context.
-        negative (int): number of negative samples for training.
-        cbow (bool): True = CBOW (sg=0); False = Skip-gram (sg=1).
-        epochs (int): number of training iterations.
-        seed (int): random seed for reproducibility.
-        workers (int): number of worker threads.
+        sentences (list): A list of sentences (list of lists of strings) 
+                          to be trained on.
+        vector_size (int): The dimensionality of the embedding layer.
+        min_count (int): The minimum number of occurrences of a word 
+                         for use in training.
+        window (int): The maximum distance between the current and 
+                      predicted word within a sentence.
+        negative (int): The size of negative sampling.
+        cbow (bool): A boolean to determine the training type. 
+                     True is for CBOW, False is for Skip-gram.
+        epochs (int): The number of iterations to train over.
+        seed (int): The seed for the random number generator.
+        workers (int): The number of worker threads to train the model.
 
     Returns:
-        gensim.models.Word2Vec: trained Word2Vec model.
+        gensim.models.word2vec.Word2Vec: The trained Word2Vec model.
     """
-    # If input sentences are raw strings, tokenize them on whitespace
-    if len(sentences) > 0 and isinstance(sentences[0], str):
-        sentences = [s.split() for s in sentences]
-
-    # sg=0 -> CBOW, sg=1 -> Skip-gram
-    sg = 0 if cbow else 1
-
-    # Create model WITHOUT initial training
-    model = gensim.models.Word2Vec(
+    
+    # 1. Create the Word2Vec model instance
+    # The 'sg' parameter controls the training algorithm: 
+    # sg=0 for CBOW (default), sg=1 for Skip-gram.
+    # We use 1 - cbow because if cbow is True (1), sg should be 0, and if 
+    # cbow is False (0), sg should be 1.
+    model = Word2Vec(
+        sentences=None,  # Pass None initially as we will build/train in two steps
         vector_size=vector_size,
         min_count=min_count,
         window=window,
         negative=negative,
-        sg=sg,
-        workers=workers,
-        seed=seed
+        sg=0 if cbow else 1,
+        seed=seed,
+        workers=workers
     )
 
-    # Build vocabulary from sentences
-    model.build_vocab(corpus_iterable=sentences)
+    # 2. Build the vocabulary
+    # The vocabulary needs to be built before training can start.
+    model.build_vocab(sentences=sentences)
 
-    # Train the model for the specified number of epochs (ONLY ONCE)
+    # 3. Train the model
+    # We pass the sentences and explicitly specify the total_examples and epochs.
+    # total_examples should be the size of the corpus.
+    total_examples = model.corpus_count
+    
     model.train(
         corpus_iterable=sentences,
-        total_examples=model.corpus_count,
+        total_examples=total_examples,
         epochs=epochs
     )
 
