@@ -22,12 +22,12 @@ def word2vec_model(
 
     Args:
         sentences (list): list of sentences to train on.
-            - Can be list of strings OR list of token lists.
+            Can be a list of strings or a list of token lists.
         vector_size (int): dimensionality of embedding vectors.
-        min_count (int): minimum word occurrences.
+        min_count (int): minimum word occurrences to keep.
         window (int): context window size.
         negative (int): negative sampling size.
-        cbow (bool): True = CBOW (sg=0); False = Skip-gram (sg=1).
+        cbow (bool): True = CBOW (sg=0), False = Skip-gram (sg=1).
         epochs (int): number of training iterations.
         seed (int): random seed.
         workers (int): number of worker threads.
@@ -35,13 +35,14 @@ def word2vec_model(
     Returns:
         gensim.models.Word2Vec: trained Word2Vec model.
     """
-    # If sentences are raw strings, split into tokens
+    # If input is a list of raw strings, split into tokens
     if len(sentences) > 0 and isinstance(sentences[0], str):
         sentences = [s.split() for s in sentences]
 
+    # sg = 0 for CBOW, 1 for Skip-gram
     sg = 0 if cbow else 1
 
-    # Let gensim handle vocab building + training internally
+    # Let gensim handle vocabulary building + training internally
     model = gensim.models.Word2Vec(
         sentences=sentences,
         vector_size=vector_size,
@@ -49,8 +50,8 @@ def word2vec_model(
         window=window,
         negative=negative,
         sg=sg,
-        seed=seed,
         workers=workers,
+        seed=seed,
         epochs=epochs
     )
 
