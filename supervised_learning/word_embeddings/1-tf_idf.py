@@ -45,9 +45,10 @@ def tf_idf(sentences, vocab=None):
                 word = preprocess(tok)
                 if word:
                     vocab_set.add(word)
+        # sort so order matches the project’s expected output
         features_list = sorted(vocab_set)
     else:
-        # keep the provided order
+        # keep the provided vocab order
         features_list = list(vocab)
 
     features = np.array(features_list)
@@ -72,17 +73,19 @@ def tf_idf(sentences, vocab=None):
     df = np.count_nonzero(tf > 0, axis=0)
 
     # ----- Inverse Document Frequency (IDF) -----
-    # sklearn-like: idf = log((1 + N) / (1 + df)) + 1
+    # sklearn-like formula:
+    #   idf = log((1 + N) / (1 + df)) + 1
+    # where N is number of sentences
     N = float(s)
     idf = np.log((1.0 + N) / (1.0 + df)) + 1.0
 
-    # terms that never appear will have df=0 but tf=0, so column stays 0
+    # terms that never appear (df = 0) keep tf = 0, so column stays 0
     tf_idf_matrix = tf * idf
 
-    # ----- L2 normalization per sentence -----
-    norms = np.linalg.norm(tf_idf_matrix, axis=1, keepdims=True)
-    # avoid division by zero: only normalize non-zero rows
-    nonzero = norms != 0
-    tf_idf_matrix[nonzero] = tf_idf_matrix[nonzero] / norms[nonzero]
+    # ----- L2 normalization per sentence (row-wise) -----
+    for i in range(s):
+        norm = np.linalg.norm(tf_idf_matrix[i])
+        if norm > 0:
+            tf_idf_matrix[i] = tf_idf_matrix[i] / norm
 
     return tf_idf_matrix, features
