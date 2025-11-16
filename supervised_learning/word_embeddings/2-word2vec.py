@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-
-from gensim.models import Word2Vec
+import gensim
 
 def word2vec_model(sentences, vector_size=100, min_count=5, window=5, negative=5, cbow=True, epochs=5, seed=0, workers=1):
     """
     Creates, builds, and trains a gensim Word2Vec model.
-
+    
     Args:
         sentences (list): A list of sentences (list of lists of strings) 
                           to be trained on.
@@ -20,18 +19,15 @@ def word2vec_model(sentences, vector_size=100, min_count=5, window=5, negative=5
         epochs (int): The number of iterations to train over.
         seed (int): The seed for the random number generator.
         workers (int): The number of worker threads to train the model.
-
+        
     Returns:
         gensim.models.word2vec.Word2Vec: The trained Word2Vec model.
     """
     
-    # 1. Create the Word2Vec model instance
-    # The 'sg' parameter controls the training algorithm: 
+    # 1. Create the Word2Vec model instance using the full namespace.
     # sg=0 for CBOW (default), sg=1 for Skip-gram.
-    # We use 1 - cbow because if cbow is True (1), sg should be 0, and if 
-    # cbow is False (0), sg should be 1.
-    model = Word2Vec(
-        sentences=None,  # Pass None initially as we will build/train in two steps
+    model = gensim.models.Word2Vec(
+        sentences=None,  # Pass None initially
         vector_size=vector_size,
         min_count=min_count,
         window=window,
@@ -42,12 +38,9 @@ def word2vec_model(sentences, vector_size=100, min_count=5, window=5, negative=5
     )
 
     # 2. Build the vocabulary
-    # The vocabulary needs to be built before training can start.
     model.build_vocab(sentences=sentences)
 
     # 3. Train the model
-    # We pass the sentences and explicitly specify the total_examples and epochs.
-    # total_examples should be the size of the corpus.
     total_examples = model.corpus_count
     
     model.train(
