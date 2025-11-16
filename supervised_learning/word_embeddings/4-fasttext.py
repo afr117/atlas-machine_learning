@@ -24,15 +24,15 @@ def fasttext_model(
         sentences (list): list of sentences to train on.
             Can be a list of strings or a list of token lists.
         vector_size (int): dimensionality of the embedding vectors.
-        min_count (int): minimum number of occurrences of a word
-            to be included in the vocabulary.
+        min_count (int): minimum number of occurrences of a word to
+            be included in the vocabulary.
         negative (int): number of negative samples.
         window (int): maximum distance between the current and
             predicted word within a sentence.
         cbow (bool): True = CBOW (sg=0); False = Skip-gram (sg=1).
         epochs (int): number of training iterations.
         seed (int): random seed for reproducibility.
-        workers (int): number of worker threads used during training.
+        workers (int): number of worker threads.
 
     Returns:
         gensim.models.FastText: trained FastText model.
@@ -44,16 +44,24 @@ def fasttext_model(
     # sg = 0 for CBOW, 1 for Skip-gram
     sg = 0 if cbow else 1
 
-    # Let gensim handle vocabulary building + training internally
+    # 1. Create the FastText model (no auto-training)
     model = gensim.models.FastText(
-        sentences=sentences,
         vector_size=vector_size,
         min_count=min_count,
         window=window,
         negative=negative,
         sg=sg,
         workers=workers,
-        seed=seed,
+        seed=seed
+    )
+
+    # 2. Build vocabulary
+    model.build_vocab(corpus_iterable=sentences)
+
+    # 3. Train the model
+    model.train(
+        corpus_iterable=sentences,
+        total_examples=model.corpus_count,
         epochs=epochs
     )
 
