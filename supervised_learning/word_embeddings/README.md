@@ -1,222 +1,74 @@
-Word Embeddings Project
+# Word Embeddings
 
+This project focuses on Natural Language Processing (NLP) techniques for converting text into numerical vector representations (embeddings). These embeddings allow machine learning models to process and understand language data.
 
+---
 
-This project explores Natural Language Processing (NLP) with a focus on word embeddings, ranging from simple techniques like Bag of Words and TF-IDF, to distributed vector representations such as Word2Vec, GloVe, FastText, and ELMo.
+## 📌 Learning Objectives
 
+By completing this project, you should be able to explain:
 
+- What **natural language processing (NLP)** is
+- What **word embedding** represents
+- What **Bag of Words (BoW)** is
+- What **TF-IDF** is and why it improves over BoW
+- What **CBOW** (Continuous Bag of Words) is
+- What **Skip-gram** is and how it differs from CBOW
+- What **Word2Vec**, **GloVe**, **fastText**, and **ELMo** are
+- What **negative sampling** is
+- What **n-grams** are
 
-The primary goal is to learn how computers represent and understand human language and implement foundational embedding techniques using Python.
+---
 
+## 📂 Project Structure
 
+| File | Description |
+|------|-------------|
+| `0-bag_of_words.py` | Creates a Bag of Words embedding matrix |
+| `1-tf_idf.py` | Computes TF-IDF embedding matrix |
+| `2-word2vec.py` | Trains a Word2Vec model using gensim |
+| `3-gensim_to_keras.py` | Converts a gensim model to a Keras Embedding layer |
+| `4-fasttext.py` | Trains a fastText model using gensim |
+| `5-elmo` | Contains the written multiple-choice answer for ELMo |
 
-📌 Learning Objectives
+---
 
+## 🧪 Dependencies
 
+- Python 3.9
+- numpy 1.25.2
+- tensorflow 2.15
+- gensim 4.3.3
 
-By the end of this project, you should be able to explain the following concepts clearly:
+Install gensim (as required):
+```bash
+pip install --user gensim==4.3.3
+Check TensorFlow/Keras version:
 
+python
+Copy code
+import keras; print(keras.__version__)
+# Expected: 2.15.0
+🧠 Summary of Methods
+Method	What It Captures	Pros	Cons
+BoW	Word frequency	Simple	Ignores meaning & order
+TF-IDF	Word importance across documents	More semantic relevance	Still ignores order
+Word2Vec	Context-based embeddings	Semantic relationships	Requires training
+fastText	Subword information	Handles rare/unknown words	Slower training
+ELMo	Contextual + deep embeddings	Strong performance	Computationally heavy
 
+📝 Requirements (as enforced by checker)
+Files are executable
 
-🔹 General NLP Concepts
+First line: #!/usr/bin/env python3
 
+Code follows pycodestyle (2.11.1)
 
+All modules, classes, and functions include documented docstrings
 
-What is natural language processing?
-
-
-
-What is a word embedding?
-
-
-
-What is Bag of Words (BoW)?
-
-
-
-What is TF-IDF?
-
-
-
-What is CBOW (Continuous Bag of Words)?
-
-
-
-What is a Skip-Gram?
-
-
-
-What is an n-gram?
-
-
-
-What is negative sampling?
-
-
-
-What are Word2Vec, GloVe, FastText, and ELMo?
-
-
-
-🛠️ Technical Requirements
-
-
-
-Editors Allowed: vi, vim, emacs
-
-
-
-OS \& Python: Ubuntu 20.04 LTS · Python 3.9
-
-
-
-Libraries:
-
-
-
-numpy 1.25.2
-
-
-
-tensorflow 2.15
-
-
-
-gensim 4.3.3 (when allowed by tasks)
-
-
-
-Each file must:
-
-
-
-end with a new line
-
-
-
-start with the line:
-
-
-
-\#!/usr/bin/env python3
-
-
-
-
-
-be executable
-
-
-
-follow pycodestyle rules (version 2.11.1)
-
-
-
-All modules, functions, and classes must include proper documentation
-
-
-
-📂 Repository Structure
-
-atlas-machine\_learning/
-
-└── supervised\_learning/
-
-&nbsp;   └── word\_embeddings/
-
-&nbsp;       ├── 0-bag\_of\_words.py
-
-&nbsp;       ├── 1-tf\_idf.py
-
-&nbsp;       ├── 2-word2vec.py
-
-&nbsp;       ├── 3-get\_embs.py
-
-&nbsp;       ├── 4-fasttext\_model.py
-
-&nbsp;       ├── 5-elmo.py
-
-&nbsp;       ├── ...
-
-&nbsp;       ├── README.md
-
-&nbsp;       └── ...
-
-
-
-
-
-Note: Future task files will be added as required.
-
-
-
-🧠 Task Summaries
-
-Task	File	Description
-
-0	0-bag\_of\_words.py	Implement Bag-of-Words embedding matrix (no Gensim allowed)
-
-1	1-tf\_idf.py	Compute TF-IDF matrix
-
-2	2-word2vec.py	Train Word2Vec model using Gensim
-
-3	3-get\_embs.py	Retrieve Word2Vec embeddings
-
-4	4-fasttext\_model.py	Build FastText word embeddings
-
-5	5-elmo.py	Extract contextual embeddings using ELMo
-
-…	…	Additional embeddings and evaluations
-
-▶️ How to Run
-
-
-
-Example for Task 0:
-
-
-
-./0-main.py
-
-
-
-
-
-Make sure scripts are executable:
-
-
-
-chmod +x 0-main.py
-
-
-
-📚 References
-
-
-
-Mikolov et al. Word2Vec papers (2013)
-
-
-
-Pennington et al. GloVe (2014)
-
-
-
-Facebook AI Research — fastText
-
-
-
-Deep Contextualized Word Representations — ELMo (2018)
-
-
+No external NLP libraries besides gensim and tensorflow
 
 👤 Author
-
-
-
 Alfredo Figueroa
-
-Atlas School — Machine Learning Track
-
+Student — Atlas School
 GitHub: https://github.com/afr117
-
