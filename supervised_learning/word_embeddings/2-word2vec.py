@@ -3,7 +3,7 @@
 Train a Word2Vec model using gensim
 """
 
-from gensim.models import Word2Vec
+import gensim
 
 
 def word2vec_model(
@@ -21,36 +21,40 @@ def word2vec_model(
     Creates, builds, and trains a gensim Word2Vec model.
 
     Args:
-        sentences (list): Sentences to be trained on.
-            - Expected: list of list of tokens (e.g. [["hello", "world"], ...])
-            - If a list of strings is provided, they will be split on whitespace.
-        vector_size (int): Dimensionality of the embedding vectors.
-        min_count (int): Minimum number of occurrences of a word to be kept.
-        window (int): Maximum distance between the current and predicted word.
-        negative (int): Number of negative samples.
-        cbow (bool): If True, train using CBOW (sg=0); if False, use Skip-gram (sg=1).
-        epochs (int): Number of training iterations.
-        seed (int): Random seed for reproducibility.
-        workers (int): Number of worker threads to train the model.
+        sentences (list): list of sentences to train on
+            - If a list of strings is provided, they will be split into words.
+        vector_size (int): dimensionality of the embedding vectors
+        min_count (int): minimum number of occurrences to include a word
+        window (int): maximum distance between predicted word and context
+        negative (int): number of negative samples for training
+        cbow (bool): True = CBOW; False = Skip-gram
+        epochs (int): number of training iterations
+        seed (int): random seed for reproducibility
+        workers (int): number of worker threads
 
     Returns:
-        gensim.models.Word2Vec: The trained Word2Vec model.
+        gensim.models.Word2Vec: trained Word2Vec model
     """
-    # If sentences are given as list of raw strings, tokenize by simple split
+    # If input sentences are raw strings, tokenize
     if len(sentences) > 0 and isinstance(sentences[0], str):
         sentences = [s.split() for s in sentences]
 
     sg = 0 if cbow else 1
 
-    model = Word2Vec(
+    model = gensim.models.Word2Vec(
         sentences=sentences,
         vector_size=vector_size,
         min_count=min_count,
         window=window,
         negative=negative,
         sg=sg,
-        workers=workers,
         seed=seed,
+        workers=workers
+    )
+
+    model.train(
+        corpus_iterable=sentences,
+        total_examples=len(sentences),
         epochs=epochs
     )
 
