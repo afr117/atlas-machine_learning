@@ -4,7 +4,6 @@ Module defining the Dataset class for machine translation.
 """
 import tensorflow_datasets as tfds
 import transformers
-import tensorflow as tf
 # Removed: import numpy as np
 
 
