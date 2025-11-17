@@ -3,7 +3,8 @@
 Module defining the Dataset class for machine translation.
 """
 import tensorflow_datasets as tfds
-from transformers import BertTokenizerFast
+import transformers
+
 
 class Dataset:
     """
@@ -27,6 +28,7 @@ class Dataset:
             as_supervised=True,
             with_info=True
         )
+        # data_splits[0] is 'train', data_splits[1] is 'validation'
         self.data_train = data_splits[0]
         self.data_valid = data_splits[1]
 
@@ -48,15 +50,15 @@ class Dataset:
         """
         # Portuguese Tokenizer: neuralmind/bert-base-portuguese-cased
         # Instantiate the tokenizer (fast version is used by default)
-        tokenizer_pt = BertTokenizerFast.from_pretrained(
+        tokenizer_pt = transformers.BertTokenizerFast.from_pretrained(
             'neuralmind/bert-base-portuguese-cased',
-            max_model_input_sizes=512 # Default value
+            max_model_input_sizes=512  # Default value
         )
-        
+
         # English Tokenizer: bert-base-uncased
-        tokenizer_en = BertTokenizerFast.from_pretrained(
+        tokenizer_en = transformers.BertTokenizerFast.from_pretrained(
             'bert-base-uncased',
-            max_model_input_sizes=512 # Default value
+            max_model_input_sizes=512  # Default value
         )
 
         # Generator function for the Portuguese text
@@ -72,7 +74,6 @@ class Dataset:
                 yield en.numpy().decode('utf-8')
 
         # Train the Portuguese tokenizer
-        # The training set is used to determine the vocabulary of the tokenizer.
         # We use the train_new_from_iterator method to build the vocab.
         tokenizer_pt = tokenizer_pt.train_new_from_iterator(
             text_iterator=pt_generator(),
