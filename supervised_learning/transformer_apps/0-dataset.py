@@ -21,11 +21,11 @@ class Dataset:
         - tokenizer_pt: the Portuguese tokenizer created from the training set.
         - tokenizer_en: the English tokenizer created from the training set.
         """
-        # Load the dataset using the specified splits: 'train' and 'validate'
+        # Load the dataset using the actual TFDS split names: 'train' and 'validation'
         data_splits, info = tfds.load(
             'ted_hrlr_translate/pt_to_en',
-            # CHANGED: Using 'validate' instead of 'validation' as per requirement
-            split=['train', 'validate'],
+            # FIXED: Using 'validation' as required by the TFDS dataset
+            split=['train', 'validation'], 
             as_supervised=True,
             with_info=True
         )
@@ -61,7 +61,6 @@ class Dataset:
         # Generator function for the Portuguese text
         def pt_generator():
             """Yields Portuguese sentences from the dataset."""
-            # Use data.as_numpy_iterator() for potentially better performance/memory handling
             for pt, _ in data.as_numpy_iterator():
                 yield pt.decode('utf-8')
 
