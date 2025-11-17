@@ -48,13 +48,13 @@ def question_answer(question, reference):
     input_type_ids = encoded['token_type_ids']
 
     # --- 2. Model Inference ---
-    # FIX: Pass inputs as a tuple/list AND explicitly set training=False 
-    # to match the SavedModel's expected signature for inference (Option 2).
-    # The order must be: input_word_ids, input_mask, input_type_ids.
-    result = model(
-        (input_word_ids, input_mask, input_type_ids),
-        training=False
-    )
+    # The SavedModel requires named dictionary inputs corresponding to the
+    # input names defined in the model (Options 3 & 4 of the error message).
+    result = model({
+        'input_word_ids': input_word_ids,
+        'input_mask': input_mask,
+        'input_type_ids': input_type_ids
+    })
     
     start_logits = result[0]
     end_logits = result[1]
