@@ -21,14 +21,14 @@ class Dataset:
         - tokenizer_pt: the Portuguese tokenizer created from the training set.
         - tokenizer_en: the English tokenizer created from the training set.
         """
-        # Load the dataset
+        # Load the dataset using the specified splits: 'train' and 'validate'
         data_splits, info = tfds.load(
             'ted_hrlr_translate/pt_to_en',
-            split=['train', 'validation'],
+            # CHANGED: Using 'validate' instead of 'validation' as per requirement
+            split=['train', 'validate'],
             as_supervised=True,
             with_info=True
         )
-        # data_splits[0] is 'train', data_splits[1] is 'validation'
         self.data_train = data_splits[0]
         self.data_valid = data_splits[1]
 
@@ -49,32 +49,29 @@ class Dataset:
             tokenizer_en: The English tokenizer (BertTokenizerFast).
         """
         # Portuguese Tokenizer: neuralmind/bert-base-portuguese-cased
-        # Instantiate the tokenizer (fast version is used by default)
         tokenizer_pt = transformers.BertTokenizerFast.from_pretrained(
-            'neuralmind/bert-base-portuguese-cased',
-            max_model_input_sizes=512  # Default value
+            'neuralmind/bert-base-portuguese-cased'
         )
 
         # English Tokenizer: bert-base-uncased
         tokenizer_en = transformers.BertTokenizerFast.from_pretrained(
-            'bert-base-uncased',
-            max_model_input_sizes=512  # Default value
+            'bert-base-uncased'
         )
 
         # Generator function for the Portuguese text
         def pt_generator():
             """Yields Portuguese sentences from the dataset."""
-            for pt, _ in data:
-                yield pt.numpy().decode('utf-8')
+            # Use data.as_numpy_iterator() for potentially better performance/memory handling
+            for pt, _ in data.as_numpy_iterator():
+                yield pt.decode('utf-8')
 
         # Generator function for the English text
         def en_generator():
             """Yields English sentences from the dataset."""
-            for _, en in data:
-                yield en.numpy().decode('utf-8')
+            for _, en in data.as_numpy_iterator():
+                yield en.decode('utf-8')
 
         # Train the Portuguese tokenizer
-        # We use the train_new_from_iterator method to build the vocab.
         tokenizer_pt = tokenizer_pt.train_new_from_iterator(
             text_iterator=pt_generator(),
             vocab_size=2**13,
