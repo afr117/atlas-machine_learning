@@ -24,7 +24,6 @@ class Dataset:
         # Load the dataset using the actual TFDS split names: 'train' and 'validation'
         data_splits, info = tfds.load(
             'ted_hrlr_translate/pt_to_en',
-            # FIXED: Using 'validation' as required by the TFDS dataset
             split=['train', 'validation'], 
             as_supervised=True,
             with_info=True
@@ -71,17 +70,19 @@ class Dataset:
                 yield en.decode('utf-8')
 
         # Train the Portuguese tokenizer
+        # Convert dict_keys to list() to satisfy the required Sequence type
         tokenizer_pt = tokenizer_pt.train_new_from_iterator(
             text_iterator=pt_generator(),
             vocab_size=2**13,
-            initial_alphabet=tokenizer_pt.get_vocab().keys()
+            initial_alphabet=list(tokenizer_pt.get_vocab().keys()) # FIXED HERE
         )
 
         # Train the English tokenizer
+        # Convert dict_keys to list() to satisfy the required Sequence type
         tokenizer_en = tokenizer_en.train_new_from_iterator(
             text_iterator=en_generator(),
             vocab_size=2**13,
-            initial_alphabet=tokenizer_en.get_vocab().keys()
+            initial_alphabet=list(tokenizer_en.get_vocab().keys()) # FIXED HERE
         )
 
         return tokenizer_pt, tokenizer_en
