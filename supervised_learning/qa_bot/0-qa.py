@@ -34,8 +34,6 @@ def question_answer(question, reference):
 
     # --- 1. Prepare Input ---
     # Tokenize the question and reference together.
-    # The tokenizer handles the [CLS], [SEP], and truncation required for BERT.
-    # The `return_tensors='tf'` ensures we get TensorFlow tensors needed by the Hub model.
     encoded = tokenizer.encode_plus(
         question,
         reference,
@@ -50,13 +48,11 @@ def question_answer(question, reference):
     input_type_ids = encoded['token_type_ids']
 
     # --- 2. Model Inference ---
-    # The Hub QA model expects a dictionary with three specific keys (as described in its documentation).
-    # The output is a tuple (start_logits, end_logits).
-    result = model({
-        'input_word_ids': input_word_ids,
-        'input_mask': input_mask,
-        'input_type_ids': input_type_ids
-    })
+    # FIX: Pass inputs as a tuple/list to match the SavedModel's expected signature,
+    # which is [input_word_ids, input_mask, input_type_ids], not a dictionary.
+    result = model(
+        (input_word_ids, input_mask, input_type_ids)
+    )
     
     start_logits = result[0]
     end_logits = result[1]
@@ -71,11 +67,9 @@ def question_answer(question, reference):
     # The actual tokens corresponding to the input indices
     tokens = tokenizer.convert_ids_to_tokens(input_word_ids.numpy()[0])
     
-    # Check for a valid answer span
+    # Check for a valid answer span:
     # 1. Start index must be before or at the end index.
-    # 2. Both indices must be within the reference text tokens (i.e., not pointing to the question).
-    #    The `input_type_ids` tells us if a token belongs to sentence A (question, type 0) 
-    #    or sentence B (reference, type 1).
+    # 2. Start index must point to a token in the reference document (type ID 1).
     if start_index > end_index or input_type_ids.numpy()[0][start_index] != 1:
         return None
 
@@ -85,9 +79,7 @@ def question_answer(question, reference):
     # Join the tokens and clean up the BERT specific '##' subword notation
     answer = tokenizer.convert_tokens_to_string(answer_tokens)
     
-    # The Hub QA model can return a start index that points to the [CLS] token (index 0) 
-    # or the first token of the question, leading to a meaningless answer.
-    # A simple and effective heuristic is to return None if the span is invalid or empty after cleaning.
+    # Final check for empty result (e.g., if span was just [CLS] or padding)
     if not answer.strip():
         return None
         
