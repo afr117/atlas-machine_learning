@@ -50,12 +50,11 @@ def question_answer(question, reference):
     # --- 2. Model Inference ---
     # The SavedModel requires named dictionary inputs corresponding to the
     # input names defined in the model (Options 3 & 4 of the error message).
-    result = model({
-        'input_word_ids': input_word_ids,
-        'input_mask': input_mask,
-        'input_type_ids': input_type_ids
-    })
-    
+    result = model(
+    (input_word_ids, input_mask, input_type_ids),
+    training=False
+)
+
     start_logits = result[0]
     end_logits = result[1]
 
