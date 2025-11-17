@@ -5,7 +5,7 @@ Module defining the Dataset class for machine translation.
 import tensorflow_datasets as tfds
 import transformers
 import tensorflow as tf
-import numpy as np
+# Removed: import numpy as np
 
 
 class Dataset:
@@ -81,6 +81,7 @@ class Dataset:
         # Generator function for the Portuguese text
         def pt_generator():
             """Yields Portuguese sentences from the dataset."""
+            # .as_numpy_iterator() is necessary here for yielding data from tf.data
             for pt, _ in data.as_numpy_iterator():
                 yield pt.decode('utf-8')
 
