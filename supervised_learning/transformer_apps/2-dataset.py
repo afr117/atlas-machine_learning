@@ -121,21 +121,27 @@ class Dataset:
         pt_string = pt.numpy().decode('utf-8')
         en_string = en.numpy().decode('utf-8')
 
-        # Encode Portuguese sentence using its tokenizer
-        pt_tokens = self.tokenizer_pt.encode(
-            pt_string, 
-            max_length=None, 
+        # FIX: Use the callable tokenizer method with return_tensors='np' to guarantee 
+        # a NumPy array is returned, which prevents the AttributeError.
+        pt_encoded = self.tokenizer_pt(
+            pt_string,
+            max_length=None,
             truncation=False,
-            padding=False
-        ).as_numpy_array()
+            padding=False,
+            return_tensors='np'
+        )['input_ids'][0]
         
-        # Encode English sentence using its tokenizer
-        en_tokens = self.tokenizer_en.encode(
-            en_string, 
-            max_length=None, 
+        # FIX: Same for English tokenizer.
+        en_encoded = self.tokenizer_en(
+            en_string,
+            max_length=None,
             truncation=False,
-            padding=False
-        ).as_numpy_array()
+            padding=False,
+            return_tensors='np'
+        )['input_ids'][0]
+
+        pt_tokens = pt_encoded
+        en_tokens = en_encoded
 
         # Replace the first token ([CLS]) with the SOS token (vocab_size)
         pt_tokens[0] = self.vocab_size
