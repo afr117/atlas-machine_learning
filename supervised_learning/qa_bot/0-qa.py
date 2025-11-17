@@ -48,10 +48,12 @@ def question_answer(question, reference):
     input_type_ids = encoded['token_type_ids']
 
     # --- 2. Model Inference ---
-    # FIX: Pass inputs as a tuple/list to match the SavedModel's expected signature,
-    # which is [input_word_ids, input_mask, input_type_ids], not a dictionary.
+    # FIX: Pass inputs as a tuple/list AND explicitly set training=False 
+    # to match the SavedModel's expected signature for inference (Option 2).
+    # The order must be: input_word_ids, input_mask, input_type_ids.
     result = model(
-        (input_word_ids, input_mask, input_type_ids)
+        (input_word_ids, input_mask, input_type_ids),
+        training=False
     )
     
     start_logits = result[0]
@@ -79,7 +81,7 @@ def question_answer(question, reference):
     # Join the tokens and clean up the BERT specific '##' subword notation
     answer = tokenizer.convert_tokens_to_string(answer_tokens)
     
-    # Final check for empty result (e.g., if span was just [CLS] or padding)
+    # Final check for empty result 
     if not answer.strip():
         return None
         
