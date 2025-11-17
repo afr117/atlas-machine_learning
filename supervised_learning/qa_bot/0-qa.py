@@ -47,13 +47,19 @@ def question_answer(question, reference):
     input_mask = encoded['attention_mask']
     input_type_ids = encoded['token_type_ids']
 
-    # --- 2. Model Inference ---
-    # The SavedModel requires named dictionary inputs corresponding to the
-    # input names defined in the model (Options 3 & 4 of the error message).
+   # --- 2. Model Inference ---
+    # The SavedModel requires named dictionary inputs and explicit training=False 
+    # (matching Option 4).
     result = model(
-    (input_word_ids, input_mask, input_type_ids),
-    training=False
-)
+        {
+            'input_word_ids': input_word_ids,
+            'input_mask': input_mask,
+            'input_type_ids': input_type_ids
+        },
+        training=False  # Explicitly set training to False for inference
+    )
+
+    start_logits = result[0]
 
     start_logits = result[0]
     end_logits = result[1]
