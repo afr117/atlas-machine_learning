@@ -54,27 +54,58 @@ def question_answer(question, reference):
         [input_word_ids, input_mask, input_type_ids]
     )
     
-    start_logits = result[0]
-    end_logits = result[1]
+    # Squeeze to remove batch dimension (1, seq_len) -> (seq_len)
+    start_logits = tf.squeeze(result[0])
+    end_logits = tf.squeeze(result[1])
 
     # --- 3. Post-processing and Answer Extraction ---
     
-    # Get the predicted start and end index by finding the max logit
-    # Squeeze to remove the batch dimension (shape is 1, seq_len)
-    start_index = tf.argmax(start_logits, axis=-1).numpy()[0]
-    end_index = tf.argmax(end_logits, axis=-1).numpy()[0]
+    # Get numpy arrays for easier manipulation
+    start_probs = start_logits.numpy()
+    end_probs = end_logits.numpy()
+    type_ids = input_type_ids.numpy()[0]
+    
+    # Initialize best score and indices
+    best_score = -1e10 # Very low number
+    best_start = -1
+    best_end = -1
+    
+    # Search for the best span (i, j) where i <= j and i is in the context (type_ids[i] == 1)
+    max_answer_length = 30 # Standard limit, preventing excessively long/nonsensical answers
+    
+    # We start searching from the beginning of the context (type_id 1)
+    context_start_index = np.where(type_ids == 1)[0][0]
+
+    for i in range(context_start_index, len(start_probs)):
+        # Stop if we hit the padding tokens or exceed max_answer_length from the end
+        if tokens[i] == '[SEP]' or i > best_start + max_answer_length:
+             break
+        
+        # Ensure the start token is in the context
+        if type_ids[i] != 1:
+            continue
+            
+        for j in range(i, len(end_probs)):
+            # Ensure the end token is still in the context and limit length
+            if type_ids[j] != 1 or (j - i + 1) > max_answer_length:
+                 break
+                 
+            score = start_probs[i] + end_probs[j]
+            
+            if score > best_score:
+                best_score = score
+                best_start = i
+                best_end = j
+
+    # Check for a valid answer span based on the search
+    if best_start == -1 or best_end == -1:
+        return None
 
     # The actual tokens corresponding to the input indices
     tokens = tokenizer.convert_ids_to_tokens(input_word_ids.numpy()[0])
     
-    # Check for a valid answer span:
-    # 1. Start index must be before or at the end index.
-    # 2. Start index must point to a token in the reference document (type ID 1).
-    if start_index > end_index or input_type_ids.numpy()[0][start_index] != 1:
-        return None
-
     # Extract the answer tokens and convert back to a string
-    answer_tokens = tokens[start_index:end_index + 1]
+    answer_tokens = tokens[best_start:best_end + 1]
 
     # Join the tokens and clean up the BERT specific '##' subword notation
     answer = tokenizer.convert_tokens_to_string(answer_tokens)
