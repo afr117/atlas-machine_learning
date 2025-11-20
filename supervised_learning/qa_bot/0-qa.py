@@ -47,20 +47,13 @@ def question_answer(question, reference):
     input_mask = encoded['attention_mask']
     input_type_ids = encoded['token_type_ids']
 
-   # --- 2. Model Inference ---
-    # The SavedModel requires named dictionary inputs and explicit training=False 
-    # (matching Option 4).
+    # --- 2. Model Inference ---
+    # Final Fix: Use a simple tuple of inputs. The hub.KerasLayer wrapper 
+    # handles the implicit training=False argument for inference.
     result = model(
-        {
-            'input_word_ids': input_word_ids,
-            'input_mask': input_mask,
-            'input_type_ids': input_type_ids
-        },
-        training=False  # Explicitly set training to False for inference
+        (input_word_ids, input_mask, input_type_ids)
     )
-
-    start_logits = result[0]
-
+    
     start_logits = result[0]
     end_logits = result[1]
 
@@ -72,7 +65,7 @@ def question_answer(question, reference):
     end_index = tf.argmax(end_logits, axis=-1).numpy()[0]
 
     # The actual tokens corresponding to the input indices
-    tokens = tokenizer.convert_ids_to_tokens(input_word_ids.numpy()[0])
+    tokens = tokenizer.convert_ids-to_tokens(input_word_ids.numpy()[0])
     
     # Check for a valid answer span:
     # 1. Start index must be before or at the end index.
