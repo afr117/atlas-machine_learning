@@ -48,8 +48,7 @@ def question_answer(question, reference):
     input_type_ids = encoded['token_type_ids']
 
     # --- 2. Model Inference ---
-    # Final Fix: Use a list of inputs, not a tuple, to match the positional 
-    # arguments (inputs/0, inputs/1, inputs/2) explicitly as a list structure.
+    # Use a list of inputs for positional arguments to satisfy the SavedModel signature.
     result = model(
         [input_word_ids, input_mask, input_type_ids]
     )
@@ -59,6 +58,9 @@ def question_answer(question, reference):
     end_logits = tf.squeeze(result[1])
 
     # --- 3. Post-processing and Answer Extraction ---
+    
+    # DEFINE TOKENS FIRST to avoid UnboundLocalError
+    tokens = tokenizer.convert_ids_to_tokens(input_word_ids.numpy()[0])
     
     # Get numpy arrays for easier manipulation
     start_probs = start_logits.numpy()
@@ -70,15 +72,19 @@ def question_answer(question, reference):
     best_start = -1
     best_end = -1
     
-    # Search for the best span (i, j) where i <= j and i is in the context (type_ids[i] == 1)
-    max_answer_length = 30 # Standard limit, preventing excessively long/nonsensical answers
+    # Standard limit, preventing excessively long/nonsensical answers
+    max_answer_length = 30 
     
-    # We start searching from the beginning of the context (type_id 1)
-    context_start_index = np.where(type_ids == 1)[0][0]
+    # Find the index where the context (type_id 1) begins
+    try:
+        context_start_index = np.where(type_ids == 1)[0][0]
+    except IndexError:
+        # Should not happen if reference is non-empty, but handles edge case
+        return None
 
     for i in range(context_start_index, len(start_probs)):
-        # Stop if we hit the padding tokens or exceed max_answer_length from the end
-        if tokens[i] == '[SEP]' or i > best_start + max_answer_length:
+        # Stop searching if we hit padding or go far past the best start index
+        if tokens[i] == '[SEP]':
              break
         
         # Ensure the start token is in the context
@@ -86,9 +92,13 @@ def question_answer(question, reference):
             continue
             
         for j in range(i, len(end_probs)):
-            # Ensure the end token is still in the context and limit length
-            if type_ids[j] != 1 or (j - i + 1) > max_answer_length:
+            # Stop if we hit a separator, token limit, or exceeded max answer length
+            if tokens[j] == '[SEP]' or (j - i + 1) > max_answer_length:
                  break
+            
+            # Ensure the end token is still in the context 
+            if type_ids[j] != 1:
+                continue
                  
             score = start_probs[i] + end_probs[j]
             
@@ -97,13 +107,10 @@ def question_answer(question, reference):
                 best_start = i
                 best_end = j
 
-    # Check for a valid answer span based on the search
+    # Check for a valid answer span
     if best_start == -1 or best_end == -1:
         return None
 
-    # The actual tokens corresponding to the input indices
-    tokens = tokenizer.convert_ids_to_tokens(input_word_ids.numpy()[0])
-    
     # Extract the answer tokens and convert back to a string
     answer_tokens = tokens[best_start:best_end + 1]
 
