@@ -10,41 +10,30 @@ import tensorflow_hub as hub
 def semantic_search(corpus_path, sentence):
     """
     Performs semantic search on a corpus of documents
-
-    Args:
-        corpus_path (str): Path to the folder of reference documents
-        sentence (str): The query sentence to search for
-
-    Returns:
-        str: The text of the document most similar to the sentence
     """
-    # Load the Universal Sentence Encoder (USE)
-    model_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
-    model = hub.load(model_url)
+    model = hub.load("https://tfhub.dev/google/universal-sentence-encoder/4")
 
     articles = []
-    
-    # Sort the filenames to ensure consistent indexing
     filenames = sorted(os.listdir(corpus_path))
 
     for filename in filenames:
         if filename.endswith('.md'):
             path = os.path.join(corpus_path, filename)
-            # Use utf-8 to handle any special characters in markdown
             with open(path, 'r', encoding='utf-8') as f:
                 articles.append(f.read())
 
-    # Generate embeddings for the documents and the query
-    # model() expects a list of strings
-    doc_embeddings = model(articles)
-    query_embedding = model([sentence])
+    # We embed the query and all documents
+    embeddings = model([sentence] + articles)
+    
+    # query_vec is index 0, doc_vecs are index 1 onwards
+    query_vec = embeddings[0:1]
+    doc_vecs = embeddings[1:]
 
-    # Calculate cosine similarity using inner product (dot product)
-    # USE vectors are already normalized (length = 1)
-    similarities = np.inner(query_embedding, doc_embeddings)
+    # Calculate dot product
+    # We use np.inner and then flatten to get a 1D array of scores
+    similarities = np.inner(query_vec, doc_vecs).flatten()
 
-    # argmax returns the index of the highest score
-    # similarities is shape (1, num_articles), so we take [0]
-    closest_idx = np.argmax(similarities[0])
+    # Find the index of the best match
+    best_match_idx = np.argmax(similarities)
 
-    return articles[closest_idx]
+    return articles[best_match_idx]
