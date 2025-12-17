@@ -18,33 +18,33 @@ def semantic_search(corpus_path, sentence):
     Returns:
         str: The text of the document most similar to the sentence
     """
-    # Load the Universal Sentence Encoder from TF Hub
+    # Load the Universal Sentence Encoder (USE)
     model_url = "https://tfhub.dev/google/universal-sentence-encoder/4"
     model = hub.load(model_url)
 
-    # Prepare list to hold document texts and titles
     articles = []
+    
+    # Sort the filenames to ensure consistent indexing
+    filenames = sorted(os.listdir(corpus_path))
 
-    # Iterate through the files in the corpus directory
-    for filename in os.listdir(corpus_path):
-        if not filename.endswith('.md'):
-            continue
-        
-        path = os.path.join(corpus_path, filename)
-        with open(path, 'r', encoding='utf-8') as f:
-            articles.append(f.read())
+    for filename in filenames:
+        if filename.endswith('.md'):
+            path = os.path.join(corpus_path, filename)
+            # Use utf-8 to handle any special characters in markdown
+            with open(path, 'r', encoding='utf-8') as f:
+                articles.append(f.read())
 
-    # Add the query sentence to the list to embed everything at once
-    # Or embed separately:
-    documents_embeddings = model(articles)
+    # Generate embeddings for the documents and the query
+    # model() expects a list of strings
+    doc_embeddings = model(articles)
     query_embedding = model([sentence])
 
-    # Calculate Cosine Similarity
-    # Similarity = (A dot B) / (||A|| * ||B||)
-    # Since USE outputs normalized vectors, we can just use dot product
-    similarities = np.inner(query_embedding, documents_embeddings)
+    # Calculate cosine similarity using inner product (dot product)
+    # USE vectors are already normalized (length = 1)
+    similarities = np.inner(query_embedding, doc_embeddings)
 
-    # Find the index of the highest similarity score
-    closest_idx = np.argmax(similarities)
+    # argmax returns the index of the highest score
+    # similarities is shape (1, num_articles), so we take [0]
+    closest_idx = np.argmax(similarities[0])
 
     return articles[closest_idx]
