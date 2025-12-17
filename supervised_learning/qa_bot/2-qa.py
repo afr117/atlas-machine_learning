@@ -34,4 +34,3 @@ def answer_loop(reference):
         else:
             print("A: {}".format(answer))
 
-
