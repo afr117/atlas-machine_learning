@@ -6,4 +6,3 @@ with open('ZendeskArticles/PeerLearningDays.md') as f:
     reference = f.read()
 
 print(question_answer('When are PLDs?', reference))
-$ ./0-main.py
