@@ -1,26 +1,27 @@
 #!/usr/bin/env python3
 """
-Script to create a simple interactive loop for a QA bot.
+Module for a simple interactive loop
 """
 
-def main():
+
+def question_loop():
     """
-    Runs the interactive Q&A loop.
+    Continually prompts the user for input and handles exit commands
     """
     exit_commands = ['exit', 'quit', 'goodbye', 'bye']
 
     while True:
-        # Prompt the user for input
+        # Prompt the user
         user_input = input("Q: ")
-        
-        # Convert input to lowercase for case-insensitive check
+
+        # Check for exit commands (case-insensitive)
         if user_input.lower() in exit_commands:
             print("A: Goodbye")
             break
-        
-        # In this task, we just print A: and wait for the next input
-        # In a later task, the answer generation function will go here.
-        print("A:")
 
-if __name__ == '__main__':
-    main()
+        # For Task 1, we just print "A: " and continue
+        print("A: ")
+
+
+if __name__ == "__main__":
+    question_loop()
