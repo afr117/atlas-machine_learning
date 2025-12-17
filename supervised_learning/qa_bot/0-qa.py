@@ -23,7 +23,8 @@ def question_answer(question, reference):
     tokenizer = BertTokenizer.from_pretrained(model_name)
 
     # Load the QA model from TensorFlow Hub
-    model = hub.load('https://tfhub.dev/see--/bert-uncased-tf2-qa/1')
+    model_url = 'https://tfhub.dev/see--/bert-uncased-tf2-qa/1'
+    model = hub.load(model_url)
 
     # Tokenize the input
     inputs = tokenizer.encode_plus(question, reference, return_tensors='tf')
@@ -38,7 +39,7 @@ def question_answer(question, reference):
     end_logits = outputs[1]
 
     # Find start and end indices, ignoring the [CLS] token at index 0
-    # We add 1 to the result because argmax on [1:] returns indices starting at 0
+    # We add 1 because argmax on [1:] returns indices starting at 0
     short_start = tf.argmax(start_logits[:, 1:], axis=1).numpy()[0] + 1
     short_end = tf.argmax(end_logits[:, 1:], axis=1).numpy()[0] + 1
 
