@@ -1,58 +1,60 @@
 #!/usr/bin/env python3
 """
-Monte Carlo state-value prediction (first-visit) for discrete environments.
-
-Only dependency: numpy as np.
-Compatible with Gymnasium 0.29.1 (reset -> (obs, info),
-step -> (obs, reward, terminated, truncated, info)).
+Module for Monte Carlo algorithm.
 """
-
 import numpy as np
 
 
 def monte_carlo(env, V, policy, episodes=5000, max_steps=100,
                 alpha=0.1, gamma=0.99):
     """
-    Perform incremental first-visit Monte Carlo prediction to update V.
+    Performs the Monte Carlo algorithm to estimate the value function.
 
     Args:
-        env: environment with reset() and step() like Gymnasium.
-        V (np.ndarray): shape (s,), current value estimates per state.
-        policy (callable): maps state (int) -> action (int).
-        episodes (int): number of episodes to sample.
-        max_steps (int): maximum steps per episode.
-        alpha (float): learning rate for incremental MC updates.
-        gamma (float): discount factor in [0, 1].
+        env: gymnasium environment instance.
+        V: numpy.ndarray of shape (s,) containing the value estimate.
+        policy: function that takes in a state and returns the next action.
+        episodes: total number of episodes to train over.
+        max_steps: maximum number of steps per episode.
+        alpha: learning rate.
+        gamma: discount rate.
 
     Returns:
-        np.ndarray: updated value estimates V (shape (s,)).
+        V: updated value estimate.
     """
+    n = V.shape[0]
     for _ in range(episodes):
-        # ----- Generate one episode -----
-        states = []
-        rewards = []
-
-        obs, _ = env.reset()
-        s = int(obs)
-
-        for _t in range(max_steps):
-            states.append(s)
-            a = policy(s)
-            obs, r, terminated, truncated, _ = env.step(a)
-            rewards.append(float(r))
-            s = int(obs)
+        state, _ = env.reset()
+        episode = []
+        
+        # 1. Generate an episode
+        for _ in range(max_steps):
+            action = policy(state)
+            next_state, reward, terminated, truncated, _ = env.step(action)
+            episode.append((state, reward))
             if terminated or truncated:
                 break
-
-        # ----- First-visit returns with incremental update -----
-        G = 0.0
-        seen = set()
-        for t in range(len(states) - 1, -1, -1):
-            G = rewards[t] + gamma * G
-            st = states[t]
-            if st in seen:
-                continue
-            seen.add(st)
-            V[st] += alpha * (G - V[st])
-
+            state = next_state
+            
+        # 2. Process the episode
+        episode = np.array(episode, dtype=object)
+        states = episode[:, 0]
+        rewards = episode[:, 1]
+        
+        G = 0
+        discounts = np.array([gamma**i for i in range(len(rewards) + 1)])
+        
+        # Track visited states in this episode for first-visit MC
+        visited_states = set()
+        
+        # Traverse backward to calculate returns efficiently
+        for t in range(len(episode) - 1, -1, -1):
+            s_t = episode[t, 0]
+            r_t = episode[t, 1]
+            G = gamma * G + r_t
+            
+            # Check if this is the first visit to the state in this episode
+            if s_t not in states[:t]:
+                V[s_t] = V[s_t] + alpha * (G - V[s_t])
+                
     return V
