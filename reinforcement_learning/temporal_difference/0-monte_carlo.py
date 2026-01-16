@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Module for Monte Carlo algorithm.
+Module for Monte Carlo algorithm implementation.
 """
 import numpy as np
 
@@ -22,12 +22,11 @@ def monte_carlo(env, V, policy, episodes=5000, max_steps=100,
     Returns:
         V: updated value estimate.
     """
-    n = V.shape[0]
     for _ in range(episodes):
         state, _ = env.reset()
         episode = []
         
-        # 1. Generate an episode
+        # 1. Generate an episode following the policy
         for _ in range(max_steps):
             action = policy(state)
             next_state, reward, terminated, truncated, _ = env.step(action)
@@ -36,24 +35,26 @@ def monte_carlo(env, V, policy, episodes=5000, max_steps=100,
                 break
             state = next_state
             
-        # 2. Process the episode
+        # Convert episode to a list for easier indexing
         episode = np.array(episode, dtype=object)
+        
+        # 2. Calculate Returns (G) and Update V
+        G = 0
+        # Set to track first visits within this specific episode
+        visited_states = set()
+        
+        # Process the episode in reverse to compute G efficiently
+        # G_t = R_{t+1} + gamma * G_{t+1}
         states = episode[:, 0]
         rewards = episode[:, 1]
         
-        G = 0
-        discounts = np.array([gamma**i for i in range(len(rewards) + 1)])
-        
-        # Track visited states in this episode for first-visit MC
-        visited_states = set()
-        
-        # Traverse backward to calculate returns efficiently
         for t in range(len(episode) - 1, -1, -1):
-            s_t = episode[t, 0]
-            r_t = episode[t, 1]
+            s_t = states[t]
+            r_t = rewards[t]
             G = gamma * G + r_t
             
-            # Check if this is the first visit to the state in this episode
+            # First-visit check: only update if s_t was not visited earlier
+            # in the episode (which, in a reverse loop, means later indices)
             if s_t not in states[:t]:
                 V[s_t] = V[s_t] + alpha * (G - V[s_t])
                 
