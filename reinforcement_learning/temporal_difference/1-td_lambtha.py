@@ -1,57 +1,38 @@
 #!/usr/bin/env python3
 """
-TD(lambda) state-value prediction with accumulating eligibility traces (on-policy).
-
-Works with Gymnasium (0.29.1) discrete environments like FrozenLake.
+Module for Temporal Difference TD(0) algorithm.
 """
-
 import numpy as np
 
 
-def td_lambtha(env, V, policy, lambtha, episodes=5000, max_steps=100,
-               alpha=0.1, gamma=0.99):
+def td_zero(env, V, policy, episodes=5000, max_steps=100, alpha=0.1, gamma=0.99):
     """
-    Performs the TD(lambda) algorithm to update the state-value function V.
+    Performs the TD(0) algorithm.
 
     Args:
-        env: Gymnasium-like environment instance.
-        V: np.ndarray of shape (s,), current value estimates.
-        policy: function mapping state (int) -> action (int).
-        lambtha: eligibility trace decay parameter in [0, 1].
-        episodes: number of episodes to run.
-        max_steps: cap on steps per episode.
+        env: gymnasium environment instance.
+        V: numpy.ndarray of shape (s,) containing the value estimate.
+        policy: function that takes in a state and returns the next action.
+        episodes: total number of episodes to train over.
+        max_steps: maximum number of steps per episode.
         alpha: learning rate.
-        gamma: discount factor.
+        gamma: discount rate.
 
     Returns:
-        np.ndarray: updated value estimates V with shape (s,).
+        V: updated value estimate.
     """
-    n_states = V.shape[0]
-
     for _ in range(episodes):
-        # Reset eligibility traces each episode
-        E = np.zeros(n_states, dtype=float)
+        state, _ = env.reset()
+        for _ in range(max_steps):
+            action = policy(state)
+            next_state, reward, terminated, truncated, _ = env.step(action)
 
-        obs, _ = env.reset()
-        s = int(obs)
+            # TD Update Rule (Bootstrapping)
+            # V(s) = V(s) + alpha * [R + gamma * V(s') - V(s)]
+            V[state] = V[state] + alpha * (reward + gamma * V[next_state] - V[state])
 
-        for _t in range(max_steps):
-            a = policy(s)
-            obs_next, r, terminated, truncated, _ = env.step(a)
-            s_next = int(obs_next)
-
-            # TD error δ_t
-            v_next = 0.0 if (terminated or truncated) else V[s_next]
-            delta = r + gamma * v_next - V[s]
-
-            # Accumulating traces: increment current state's trace,
-            # then update V and decay all traces.
-            E[s] += 1.0
-            V += alpha * delta * E
-            E *= gamma * lambtha
-
-            s = s_next
             if terminated or truncated:
                 break
+            state = next_state
 
     return V
