@@ -36,16 +36,20 @@ def monte_carlo(env, V, policy, episodes=5000, max_steps=100,
                 break
             state = next_state
 
+        # Convert episode to states and rewards for easier indexing
+        states = [step[0] for step in episode]
+        rewards = [step[1] for step in episode]
+
         # Calculate returns and update V
         G = 0
         # Iterate backwards through the episode
         for i in range(len(episode) - 1, -1, -1):
-            s, r = episode[i]
+            s = states[i]
+            r = rewards[i]
             G = gamma * G + r
 
             # First-visit check: verify if state 's' appeared before index 'i'
-            # in the current episode
-            if s not in [x[0] for x in episode[:i]]:
+            if s not in states[:i]:
                 V[s] = V[s] + alpha * (G - V[s])
 
     return V
