@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Module that creates a hierarchical concatenation of two DataFrames."""
+"""Module creates hierarchical concatenation of two DataFrames."""
 
 import pandas as pd
 
@@ -12,7 +12,7 @@ def hierarchy(df1, df2):
         df2 (pd.DataFrame): Bitstamp DataFrame.
 
     Returns:
-        pd.DataFrame: Concatenated DataFrame with MultiIndex (Timestamp, source).
+        pd.DataFrame: Concatenated DataFrame MultiIndex (Timestamp, source).
     """
     index = __import__('10-index').index
     df1 = index(df1)
