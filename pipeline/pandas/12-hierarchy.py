@@ -3,6 +3,7 @@
 
 import pandas as pd
 
+
 def hierarchy(df1, df2):
     """
     Concatenate df2 and df1 in a timestamp range with a hierarchical index.
@@ -29,3 +30,4 @@ def hierarchy(df1, df2):
     concatenated = concatenated.swaplevel(0, 1).sort_index()
 
     return concatenated
+
