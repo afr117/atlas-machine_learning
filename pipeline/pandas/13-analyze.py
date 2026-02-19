@@ -10,8 +10,9 @@ def analyze(df):
         df (pd.DataFrame): Input DataFrame containing a Timestamp column.
 
     Returns:
-        pd.DataFrame: DataFrame containing descriptive statistics numeric columns.
+        pd.DataFrame: DataFrame with descriptive statistics numeric columns.
     """
     if "Timestamp" in df.columns:
         return df.drop("Timestamp", axis=1).describe()
     return df.describe()
+
