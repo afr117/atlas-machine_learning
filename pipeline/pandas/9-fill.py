@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Module that fills missing values in a DataFrame according to specified rules."""
+"""Module that fills missing values in DataFrame according to rules."""
 
 
 def fill(df):
