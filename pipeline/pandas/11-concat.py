@@ -25,4 +25,3 @@ def concat(df1, df2):
     concatenated = pd.concat([df2_selected, df1],
                              keys=["bitstamp", "coinbase"])
     return concatenated
-
