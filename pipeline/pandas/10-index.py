@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Module that sets the Timestamp column as the index of a DataFrame."""
+"""Module that sets Timestamp column as index of DataFrame."""
 
 
 def index(df):
@@ -13,3 +13,4 @@ def index(df):
         pd.DataFrame: The DataFrame with Timestamp as the index.
     """
     return df.set_index("Timestamp")
+
