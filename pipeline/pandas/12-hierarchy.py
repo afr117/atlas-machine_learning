@@ -30,4 +30,3 @@ def hierarchy(df1, df2):
     concatenated = concatenated.swaplevel(0, 1).sort_index()
 
     return concatenated
-
