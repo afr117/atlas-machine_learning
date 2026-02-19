@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-"""Module compute descriptive statistics for DataFrame."""
-
-import pandas as pd
+"""Module computes descriptive statistics for DataFrame without importing."""
 
 
 def analyze(df):
@@ -12,7 +10,7 @@ def analyze(df):
         df (pd.DataFrame): Input DataFrame containing Timestamp column.
 
     Returns:
-        pd.DataFrame: DataFrame descriptive statistics of numeric columns.
+        pd.DataFrame: DataFrame containing descriptive statistics numeric columns.
     """
     if "Timestamp" in df.columns:
         return df.drop(columns=["Timestamp"]).describe()
