@@ -13,4 +13,3 @@ def index(df):
         pd.DataFrame: The DataFrame with Timestamp as the index.
     """
     return df.set_index("Timestamp")
-
