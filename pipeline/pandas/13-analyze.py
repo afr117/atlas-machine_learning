@@ -15,4 +15,3 @@ def analyze(df):
     if "Timestamp" in df.columns:
         return df.drop("Timestamp", axis=1).describe()
     return df.describe()
-
