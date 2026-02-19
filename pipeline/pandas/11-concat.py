@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Module concatenates two DataFrames with keys after indexing."""
 
+import pandas as pd
 
 def concat(df1, df2):
     """
@@ -20,5 +21,5 @@ def concat(df1, df2):
 
     df2_selected = df2[df2.index <= 1417411920]
 
-    concatenated = df2_selected.append(df1, keys=["bitstamp", "coinbase"])
+    concatenated = pd.concat([df2_selected, df1], keys=["bitstamp", "coinbase"])
     return concatenated
