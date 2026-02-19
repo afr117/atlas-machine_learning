@@ -3,6 +3,7 @@
 
 import pandas as pd
 
+
 def concat(df1, df2):
     """
     Index df1 and df2 on Timestamp, select df2 rows up to 1417411920,
@@ -13,7 +14,7 @@ def concat(df1, df2):
         df2 (pd.DataFrame): Bitstamp DataFrame.
 
     Returns:
-        pd.DataFrame: Concatenated DataFrame with keys 'bitstamp' and 'coinbase'.
+        pd.DataFrame: Concatenated DataFrame keys 'bitstamp' and 'coinbase'.
     """
     index = __import__('10-index').index
     df1 = index(df1)
@@ -21,5 +22,7 @@ def concat(df1, df2):
 
     df2_selected = df2[df2.index <= 1417411920]
 
-    concatenated = pd.concat([df2_selected, df1], keys=["bitstamp", "coinbase"])
+    concatenated = pd.concat([df2_selected, df1],
+                             keys=["bitstamp", "coinbase"])
     return concatenated
+
