@@ -19,18 +19,18 @@ def get_first_launch():
     launches = response.json()
     # Sort by date_unix to get the nearest upcoming launch
     launches.sort(key=lambda x: x.get('date_unix'))
-    
+
     # Grab the first upcoming launch (should be Galaxy 33 in this context)
     launch = launches[0]
-    
+
     name = launch.get('name')
     date = launch.get('date_local')
-    
+
     # Fetch Rocket Name
     r_id = launch.get('rocket')
     r_res = requests.get(f"https://api.spacexdata.com/v4/rockets/{r_id}")
     rocket_name = r_res.json().get('name') if r_res.status_code == 200 else ""
-    
+
     # Fetch Launchpad Name and Locality
     p_id = launch.get('launchpad')
     p_res = requests.get(f"https://api.spacexdata.com/v4/launchpads/{p_id}")
@@ -41,7 +41,7 @@ def get_first_launch():
     else:
         p_name, p_loc = "", ""
 
-    # Correct Format: <launch name> (<date>) <rocket name> - <launchpad name> (<launchpad locality>)
+    # Format: <name> (<date>) <rocket> - <pad> (<locality>)
     print(f"{name} ({date}) {rocket_name} - {p_name} ({p_loc})")
 
 
