@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 Script to display the first SpaceX launch with specific details
