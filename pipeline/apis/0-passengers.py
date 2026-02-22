@@ -36,3 +36,4 @@ def availableShips(passengerCount):
         url = data.get('next')
 
     return ships
+    
