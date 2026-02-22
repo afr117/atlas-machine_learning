@@ -37,7 +37,7 @@ def get_user_location():
             location = user_data.get('location')
             if location:
                 print(location)
-            # If location is null/empty, usually nothing is printed 
+            # If location is null/empty, usually nothing is printed
             # or the requirement expects specific output.
 
     except Exception:
