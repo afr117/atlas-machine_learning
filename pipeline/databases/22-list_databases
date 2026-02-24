@@ -1,2 +1,2 @@
 // Lists all databases in MongoDB
-show dbs
+db.adminCommand({ listDatabases: 1, nameOnly: true }).databases.forEach(db => print(db.name));
